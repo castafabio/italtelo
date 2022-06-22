@@ -1,0 +1,20 @@
+{
+  "production": [
+    {
+      "email": "admin@widegest.com",
+      "first_name": "Admin",
+      "last_name": "Widegest",
+      "password": "S0lt3ch!"
+    },
+    {
+      "email": "admin@printing.it",
+      "first_name": "Admin",
+      "last_name": "Printing",
+      "password": "printing"
+    }
+  ],
+
+  "development": [
+
+  ]
+}

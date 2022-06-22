@@ -1,0 +1,34 @@
+.devise-box {
+  color: white;
+  background-color: black;
+  @include border-radius(6px);
+  margin: auto;
+  margin-bottom: 20px;
+  padding: 48px;
+  width: 450px;
+  span.fa-stack {
+    color: #ccc;
+  }
+  a {
+    color: white;
+  }
+  .btn-primary {
+    background-color: white;
+    border-color: black;
+    color: black;
+  }
+  .btn-primary:hover {
+    background-color: grey;
+    color: black;
+  }
+}
+
+body.devise_bg {
+  background-color: #eeeeee;
+}
+
+.session-logo {
+  background-color: white;
+  @include border-radius(6px);
+  padding: 10px;
+}

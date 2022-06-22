@@ -1,0 +1,31 @@
+h1.pb-2.mt-4.mb-2.border-bottom
+
+  .float-left
+    = link_to "#", class: :'btn btn-sm btn-secondary', data: { target: "##{@user.to_id}", toggle: :collapse }
+      = fa_icon "#{collapsed ? 'caret-square-down' : 'caret-square-up'}"
+      =< "#{User.model_name.human} #{@user}"
+
+  .float-right
+    = link_to :users, class: :'btn btn-sm btn-secondary', data: {spinner: true}
+      = fa_icon 'angle-left'
+      =< t('actions.back')
+
+  .clearfix
+
+.collapse id="#{@user.to_id}" class=(collapsed ? '' : 'show')
+
+  .card.bg-light.text-center
+    h5.card-header = @user.to_s
+    .card-body
+      p.card-text = "#{User.human_attribute_name(:first_name)}: #{@user.first_name}"
+      p.card-text = "#{User.human_attribute_name(:last_name)}: #{@user.last_name}"
+      p.card-text = "#{User.human_attribute_name(:email)}: #{@user.email}"
+
+      - if can? :update, @user
+        - Role.all.each do |role|
+          - if current_user.roles.pluck(:value).first > role.value
+            .toggle = role.name
+            .toggle = boolean @user.has_role?(role.code)
+          - else
+            .toggle = role.name
+            .toggle = toggle toggle_role_user_path(@user, role.code), @user.has_role?(role.code)

@@ -1,0 +1,8 @@
+tr
+  td
+    =< link_to [user], class: :'btn btn-info btn-sm'
+      = fa_icon 'search-plus'
+  td = user.first_name
+  td = user.last_name
+  td = user.email
+  td = user.roles&.pluck(:name)&.join(', ')

@@ -1,0 +1,9 @@
+it:
+  application:
+    copyright_holder: "Soltech Service SAS"
+    copyright_url: "https://www.soltechservice.it/"
+    footer: "Version %{version} - Copyright © %{year} %{copyright_holder} - P. I.V.A. IT02456260039 - Tutti i diritti riservati. "
+    name: "Printing Solutions v2"
+    short_name: "Printing Solutions v2"
+    title: "Printing Solutions v2"
+    version: "%{link} %{version}"

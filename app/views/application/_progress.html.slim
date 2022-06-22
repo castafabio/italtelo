@@ -1,0 +1,2 @@
+.progress.status
+  .progress-bar class="progress-bar bg-#{progress <= 25 ? :danger : progress <= 50 ? :warning : progress <= 75 ? :info : :success}" role="progressbar" style="width: #{progress < 5 ? 5 : progress}%;" #{progress.to_i}%

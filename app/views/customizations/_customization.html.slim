@@ -1,0 +1,14 @@
+tr
+  td
+    .action-btns
+      - if can? :update, customization
+        = link_to [:edit, customization], class: :'btn btn-sm btn-primary', remote: true
+          = fa_icon('edit')
+      - if can? :destroy, customization
+        =< link_to [customization], class: :'btn btn-sm btn-danger', data: { confirm: t('confirm.generic'), method: :delete }
+          = fa_icon('trash')
+  - if current_user.has_role?('super_admin')
+    td = customization.parameter
+  td = customization.value
+  td = customization.um
+  td = customization.notes

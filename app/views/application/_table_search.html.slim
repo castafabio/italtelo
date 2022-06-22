@@ -1,0 +1,11 @@
+nav.navbar.navbar-light.search
+  form.form-inline
+    - [:per_page, :sort].each do |param|
+      - next unless params[param].present?
+      = hidden_field_tag param, params[param]
+    input.form-control.mr-sm-2 name="search" type="search" placeholder="#{t('strings.Search')}" aria-label="Search" value="#{params[:search]}"
+    = hidden_field_tag 'kind', params[:kind]
+    = hidden_field_tag 'tag', params[:tag]
+    button.btn.btn-outline-success.my-2.my-sm-0 type="submit"
+      span: i.fa.fa-fw.fa-search
+      span.hidden-sm.hidden-xs =< t('strings.Search')

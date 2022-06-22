@@ -1,0 +1,20 @@
+h1.pb-2.mt-4.mb-2.border-bottom
+
+  .float-left
+    = t('obj.sort', obj: SwitchField.model_name.human(count: 0).downcase)
+
+  .float-right
+    = link_to [@submit_point, :switch_fields], class: :'btn btn-sm btn-secondary', data: {spinner: true}
+      = fa_icon('arrow-left')
+      =< t('actions.back')
+
+  .clearfix
+
+.alert.alert-info
+  = "Clicca sull'icona con le frecce e trascina il campo per spostarlo."
+
+ul#sortable.sortable
+  - @switch_fields.each do |sf|
+    li data-action="#{url_for([:sort, @submit_point, sf])}"
+      = fa_icon('sort')
+      =< sf.name

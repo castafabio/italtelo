@@ -1,0 +1,26 @@
+doctype html
+
+html lang="#{I18n::locale}"
+
+  head == render 'head'
+
+  body class="#{user_signed_in? ? '' : 'devise_bg'}"
+
+    #modal.modal.fade data-backdrop="static" data-keyboard="false"
+
+    #spinner.modal
+
+    - if user_signed_in?
+      #header.header
+        == render 'header'
+
+    #main.main
+
+      .container-fluid
+        - if flash.keys.length > 0
+          == render 'flash'
+
+        == yield
+
+    #footer
+      nav.navbar.fixed-bottom.navbar-dark == render 'footer'

@@ -1,0 +1,4 @@
+it:
+  flash:
+    application_error: "Questo sembra un errore. E’ stata emessa una richiesta non valida, riprova."
+    authorization_missing: "Non disponi di permessi sufficienti per poter accedere alla risorsa richiesta."

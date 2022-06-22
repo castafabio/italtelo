@@ -1,0 +1,20 @@
+h1.pb-2.mt-4.mb-2.border-bottom
+
+  .float-left
+    =< LineItem.model_name.human(count: 0)
+
+  .clearfix
+
+- if Vg7Machine.empty_customer_machines.present?
+  br
+  .text-center
+    span.alert.alert-warning.margin = "Nessuna macchina fisica avente codice #{Vg7Machine.empty_customer_machines} configurata"
+  br
+
+ul.nav.nav-tabs
+  li.nav-item.bg-light class="#{params[:worked].present? ? '' : 'active'}"
+    = link_to t('strings.To_work'), [:line_items], class: 'nav-link', data: {spinner: true}
+  li.nav-item.bg-light class="#{params[:worked].present? ? 'active' : ''}"
+    = link_to t('strings.Worked'), [:line_items, worked: true], class: 'nav-link', data: {spinner: true}
+
+== render partial: 'list', locals: { collection: @line_items }

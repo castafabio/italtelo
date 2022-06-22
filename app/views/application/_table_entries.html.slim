@@ -1,0 +1,10 @@
+nav.entries aria-label="breadcrumb"
+  ol.breadcrumb
+    li.show: span = t('strings.Show')
+    - [10, 25, 50].each do |count|
+      - if params[:per_page].blank? && WillPaginate.per_page == count
+        li.breadcrumb-item = count
+      - elsif params[:per_page] == count.to_s
+        li.breadcrumb-item = count
+      - else
+        li.breadcrumb-item = link_to count, url_for(per_page: count, kind: params[:kind], tag: params[:tag])

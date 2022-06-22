@@ -1,0 +1,9 @@
+tr
+  td
+    = link_to [:edit, role], class: :'btn btn-sm btn-primary', remote: true
+      = fa_icon 'edit'
+    =< link_to [role], class: :'btn btn-sm btn-danger', data: { confirm: t('confirm.generic'), method: :delete }
+      = fa_icon 'trash'
+  td = role.code
+  td = role.name
+  td = role.value

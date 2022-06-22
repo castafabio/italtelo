@@ -1,0 +1,20 @@
+form
+  td
+    = button_tag t('strings.Search'), class: :'btn btn-sm btn-success', data: { disable: true }, type: :submit
+      = fa_icon('search')
+
+    =< link_to [:customer_machines], class: :'btn btn-sm btn-secondary'
+      = fa_icon('broom')
+  td = ''
+  td
+    = select_tag :kind, options_for_select(CUSTOMER_MACHINE_KINDS.collect { |mk| [I18n::t("enumerators.customer_machine.kinds.#{mk}"), mk]}, params[:kind]), class: :'form-control', prompt: t('strings.Select_one')
+  td = ''
+  td = ''
+  td = ''
+  td = ''
+  td = ''
+  td = ''
+  td = ''
+  td = ''
+  td = ''
+  td = ''

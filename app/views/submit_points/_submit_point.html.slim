@@ -1,0 +1,11 @@
+tr
+  td
+    .action-btns
+      = link_to [submit_point, :switch_fields], class: :'btn btn-info btn-sm', data: {spinner: true}
+        = fa_icon 'search-plus'
+      =< link_to [:edit, submit_point], class: :'btn btn-sm btn-primary', remote: true
+        = fa_icon('edit')
+      =< link_to [submit_point], class: :'btn btn-sm btn-danger', data: { confirm: t('confirm.generic'), method: :delete }
+        = fa_icon('trash')
+  td = submit_point.name
+  td = t("enumerators.submit_point_kind.#{submit_point.kind}")

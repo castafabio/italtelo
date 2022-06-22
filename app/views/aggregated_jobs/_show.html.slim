@@ -1,0 +1,19 @@
+h1.pb-2.mt-4.mb-2.border-bottom
+
+  .float-left
+    =< "#{AggregatedJob.model_name.human} #{@aggregated_job}"
+
+  .float-right
+    = link_to [:aggregated_jobs], class: :'btn btn-sm btn-secondary', data: {spinner: true}
+      = fa_icon('list')
+      =< AggregatedJob.model_name.human(count: 0)
+
+    =< link_to [:line_items], class: :'btn btn-sm btn-secondary', data: {spinner: true}
+      = fa_icon('list')
+      =< LineItem.model_name.human(count: 0)
+
+    == render partial: 'aggregated_jobs/actions', locals: { aggregated_job: @aggregated_job }
+
+  .clearfix
+
+== render partial: 'show_body', locals: { pdf: false }

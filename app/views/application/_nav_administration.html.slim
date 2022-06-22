@@ -1,0 +1,28 @@
+- if can? :read, Role
+  = link_to [:roles], class: "#{params[:controller] == 'roles' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
+    = fa_icon 'balance-scale-right'
+    span =< Role.model_name.human(count: 0)
+- if can? :read, User
+  = link_to [:users], class: "#{params[:controller] == 'users' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
+    = fa_icon 'users'
+    span =< User.model_name.human(count: 0)
+- if can? :read, CustomerMachine
+  = link_to [:customer_machines], class: "#{params[:controller] == 'customer_machines' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
+    = fa_icon 'hdd'
+    span =< CustomerMachine.model_name.human(count: 0)
+- if can? :read, Log
+  = link_to [:logs], class: "#{params[:controller] == 'logs' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
+    = fa_icon 'eye'
+    span =< Log.model_name.human(count: 0)
+- if can? :read, SubmitPoint
+  = link_to [:submit_points], class: "#{['submit_points', 'switch_fields'].include?(params[:controller]) ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
+    = fa_icon('magnet')
+    span =< SubmitPoint.model_name.human(count: 0)
+- if can?(:see_sidekiq, current_user) && !current_user.is_printing?
+  = link_to [:sidekiq_web], target: :_blank, class: 'dropdown-item', data: { spinner: false }
+    = fa_icon 'history'
+    span =< t('strings.Sidekiq')
+- if can? :read, Customization
+  = link_to [:customizations], class: "#{params[:controller] == 'customizations' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
+    = fa_icon('wrench')
+    span =< Customization.model_name.human(count: 0)

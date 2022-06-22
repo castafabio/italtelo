@@ -1,0 +1,71 @@
+doctype html
+
+html
+  head
+    meta charset="utf-8"
+    = wicked_pdf_stylesheet_link_tag "application"
+    = wicked_pdf_stylesheet_link_tag "bootstrap"
+    scss:
+      html, body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      h1 {
+        font-size: 20px;
+      }
+      code {
+        border-radius: 6px;
+        border: 2px solid black;
+        color: black;
+        display: block;
+        font: 12px/22px "Source Code Pro", Inconsolata, "Lucida Console", Terminal, "Courier New", Courier;
+        padding: 10px;
+        text-align: center;
+        height: 100px;
+      }
+      code.height1 {
+        height: 80px;
+      }
+      code.height2 {
+        height: 110px;
+      }
+      section, aside {
+        margin: 0 1.5% 24px 1.5%;
+      }
+      section {
+        float: left;
+        width: 40%;
+      }
+      aside {
+        float: right;
+        width: 50%;
+      }
+      .row {
+        page-break-inside:avoid; page-break-after:auto
+      }
+      .page-break {
+        display: block;
+        clear: both;
+        page-break-after: always;
+      }
+      #barby {
+        table.barby-barcode { border-spacing: 0; }
+        tr.barby-row {}
+        td.barby-cell { width: 3px; height: 60px; }
+        td.barby-cell.on { background: #000; }
+      }
+
+    javascript:
+      function numberPages() {
+        var vars={};
+        var x=document.location.search.substring(1).split('&');
+        for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = decodeURIComponent(z[1]);}
+        var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];
+        for(var i in x) {
+          var y = document.getElementsByClassName(x[i]);
+          for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];
+        }
+      }
+
+  body onload="numberPages();" == yield

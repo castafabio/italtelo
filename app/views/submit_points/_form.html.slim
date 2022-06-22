@@ -1,0 +1,15 @@
+= form_for [@submit_point], html: { autocomplete: :off }, data: { method: :patch, remote: true } do |f|
+
+  .alert.alert-info
+    = "Inserisci il nome del submit point creato su switch. Presta attenzione ad eventuali lettere maiuscole e minuscole."
+
+  .form-group
+    = f.label :name
+    = f.text_field :name, class: :'form-control'
+
+  .form-group
+    = f.label :kind
+    = f.select :kind, SubmitPoint.get_kinds.collect { |kind| [I18n::t("enumerators.submit_point_kind.#{kind}"), kind] }, { prompt: t('strings.Select_one') }, { class: :'form-control', data: { behaviour: :toggle_fields } }
+
+  .form-group
+    = button_tag t('strings.Save'), class: :'btn btn-success btn-block', data: { disable: true }, type: :submit

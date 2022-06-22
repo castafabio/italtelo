@@ -1,0 +1,14 @@
+= form_for [@aggregated_job], html: { autocomplete: :off }, data: { method: :patch, remote: true } do |f|
+
+  = f.hidden_field :submit_point_id
+  = f.hidden_field :sending
+
+  = f.fields :fields_data do |field|
+    - SwitchField.descriptions(@aggregated_job.submit_point).each do |description|
+      .card
+        h5.card-header = description.split('_').last
+        .card-body
+          .form-row
+            == job_for(field, @aggregated_job, description)
+
+    = button_tag t('strings.Save'), class: :'btn btn-success btn-block', data: { disable: true }, type: :submit

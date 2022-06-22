@@ -1,0 +1,14 @@
+h1.pb-2.mt-4.mb-2.border-bottom
+
+  .float-left
+    = t('obj.list', obj: AggregatedJob.model_name.human(count: 0).downcase)
+
+  .clearfix
+
+ul.nav.nav-tabs
+  - AGGREGATED_JOB_STATUSES.each do |status|
+    li.nav-item.bg-light class="#{params[:tag] == status ? 'active' : ''}"
+      = link_to [:aggregated_jobs, tag: status], class: 'nav-link', data: {spinner: true}
+        span = t("enumerators.aggregated_job.statuses.#{status}")
+
+== render partial: 'list', locals: { collection: @aggregated_jobs }

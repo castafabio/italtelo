@@ -1,0 +1,8 @@
+.modal-dialog
+  .modal-content
+
+    .modal-header
+      h5.modal-title = t('obj.add', obj: LineItem.model_name.human(count: 0).downcase)
+      button.close type="button" data-dismiss="modal": span &times;
+
+    .modal-body == render 'add_line_items_form'

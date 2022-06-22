@@ -1,0 +1,8 @@
+h1.pb-2.mt-4.mb-2.border-bottom
+
+  .float-left
+    = t('obj.list', obj: Log.model_name.human(count: 0).downcase)
+
+  .clearfix
+
+== render partial: 'list', locals: { collection: @logs }

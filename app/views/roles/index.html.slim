@@ -1,0 +1,13 @@
+h1.pb-2.mt-4.mb-2.border-bottom
+
+  .float-left
+    = t('obj.list', obj: Role.model_name.human(count: 0).downcase)
+
+  .float-right
+    = link_to [:new, :role], class: :'btn btn-sm btn-primary', remote: true
+      = fa_icon 'plus-square'
+      span.hidden-sm.hidden-xs =< t('actions.new')
+
+  .clearfix
+
+== render partial: 'list', locals: { collection: @roles }

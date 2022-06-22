@@ -1,0 +1,21 @@
+it:
+  enumerators:
+    aggregated_job:
+      statuses:
+        brand_new: "Nuovo"
+        completed: "Completato"
+    common:
+      boolean:
+        "false": "No"
+        "true": "Si"
+    status:
+      new: "Nuovo"
+      completed: "Terminato"
+    customer_machine:
+      kinds:
+        printer: Stampante
+        cutter: Taglierina
+    submit_point_kind:
+      line_item: Riga ordine
+      aggregated_job: Lavoro aggregato
+      all: Tutte

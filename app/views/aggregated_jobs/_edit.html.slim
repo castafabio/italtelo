@@ -1,0 +1,8 @@
+.modal-dialog
+  .modal-content
+
+    .modal-header
+      h5.modal-title = t('obj.edit', obj: AggregatedJob.model_name.human.downcase)
+      button.close type="button" data-dismiss="modal": span &times;
+
+    .modal-body == render 'edit_form'

@@ -1,0 +1,12 @@
+= form_for [:add_line_items, @aggregated_job], html: { autocomplete: :off, multipart: true }, data: { method: :patch, remote: true } do |f|
+
+  - if @error
+    p.alert.alert-danger = @error
+
+  .form-group
+    = f.label LineItem.model_name.human(count: 0)
+    = f.collection_select :appendable_line_items, @aggregated_job.appendable_line_item_list, :id, :to_s, { }, class: 'form-control', multiple: true
+    .small.help-block = 'Tenere premuto CTRL per la multi selezione'
+
+  .form-group
+    = button_tag t('actions.save'), class: :'btn btn-success btn-block', data: { disable: true }, type: :submit

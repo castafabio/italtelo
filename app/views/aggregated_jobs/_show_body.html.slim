@@ -1,0 +1,111 @@
+.card-group
+  .card.bg-light
+    h5.card-header = "Dati #{AggregatedJob.model_name.human.downcase}"
+    .card-body
+      dl.row
+        dt.col-sm-4 = AggregatedJob.model_name.human
+        dd.col-sm-8 = @aggregated_job.to_s
+
+        dt.col-sm-4 = AggregatedJob.human_attribute_name(:deadline)
+        dd.col-sm-8 = @aggregated_job.deadline&.strftime("%d-%m-%Y")
+
+        - if @aggregated_job.notes.present?
+          dt.col-sm-4 = AggregatedJob.human_attribute_name(:notes)
+          dd.col-sm-8 = simple_format @aggregated_job.notes
+
+        dt.col-sm-4 = AggregatedJob.human_attribute_name(:switch_sent)
+        dd.col-sm-8
+          - if @aggregated_job.sending
+            = boolean @aggregated_job.sending
+          - else
+            = boolean @aggregated_job.switch_sent
+            =< @aggregated_job.switch_sent&.strftime("%d-%m-%Y")
+
+        - if @aggregated_job.print_customer_machine_id.present?
+          dt.col-sm-4 = AggregatedJob.human_attribute_name(:print_customer_machine)
+          dd.col-sm-8 = @aggregated_job.line_items.first&.print_customer_machine&.name
+
+        - if @aggregated_job.cut_customer_machine_id.present?
+          dt.col-sm-4 = AggregatedJob.human_attribute_name(:cut_customer_machine)
+          dd.col-sm-8 = @aggregated_job.line_items.first&.cut_customer_machine&.name
+
+        dt.col-sm-4 = AggregatedJob.human_attribute_name(:error_message)
+        dd.col-sm-8 = simple_format @aggregated_job.error_message
+
+  - if @aggregated_job.compiled? && !@aggregated_job.switch_sent.nil?
+    - SwitchField.descriptions(@aggregated_job.submit_point).each do |description|
+      .card.bg-light
+        h5.card-header = description.split('_').last
+        .card-body
+          dl.row
+            - @aggregated_job.submit_point.switch_fields.where(description: description, display_field: true).each do |sf|
+              - if @aggregated_job.fields_data[sf.field_id].present?
+                dt.col-sm-4 = sf.name
+                dd.col-sm-8 = @aggregated_job.fields_data[sf.field_id]
+
+  - if @aggregated_job.can_upload_print_files?
+    - if !@aggregated_job.print_customer_machine_id.nil?
+      .card.text-center.bg-light.col-sm-3
+        h5.card-header = AggregatedJob.human_attribute_name(:print_file)
+        .card-body
+          - if @aggregated_job.print_file.attached?
+            = link_to rails_blob_path(@aggregated_job.print_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Print_file')}")
+              = fa_icon('download')
+              =< t('obj.download', obj: "#{t('strings.Print_file').downcase}")
+          - elsif can?(:upload_files, @aggregated_job) && !@aggregated_job.switch_sent
+            .alert.alert-info = 'Caricare qui un file con la plancia oppure invia i singoli file dei lavori'
+            =< link_to [:upload_file, @aggregated_job, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{AggregatedJob.human_attribute_name(:print_file)}")
+                = fa_icon('upload')
+          - else
+            .alert.alert-success = 'Sono stati inviati i singoli file dei lavori'
+
+          br
+          br
+
+          - if @aggregated_job.print_file&.attached? && @aggregated_job.switch_sent.nil?
+            - if !@aggregated_job.sending
+              - if can?(:delete_attachment, @aggregated_job)
+                =< link_to [:delete_attachment,  @aggregated_job, kind: 'print'],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
+                  = fa_icon('trash')
+                  =< t('obj.delete', obj: AggregatedJob.human_attribute_name(:print_file).downcase)
+
+  - if @aggregated_job.can_upload_cut_files?
+    - if !@aggregated_job.cut_customer_machine_id.nil?
+      .card.text-center.bg-light.col-sm-3
+        h5.card-header = AggregatedJob.human_attribute_name(:cut_file)
+        .card-body
+          - if @aggregated_job.cut_file.attached?
+            = link_to rails_blob_path(@aggregated_job.cut_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Cut_file')}")
+              = fa_icon('download')
+              =< t('obj.download', obj: "#{t('strings.Cut_file').downcase}")
+          - elsif can?(:upload_files, @aggregated_job)
+            .alert.alert-info = 'Caricare qui un file con la plancia oppure invia i singoli file dei lavori'
+            =< link_to [:upload_file, @aggregated_job, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{AggregatedJob.human_attribute_name(:cut_file)}")
+                = fa_icon('upload')
+          br
+          br
+
+          - if  @aggregated_job.cut_file&.attached? && @aggregated_job.switch_sent.nil?
+            - if !@aggregated_job.sending
+              - if can?(:delete_attachment, @aggregated_job)
+                =< link_to [:delete_attachment,  @aggregated_job, kind: 'cut', redirect: params['controller']],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
+                  = fa_icon('trash')
+                  =< t('obj.delete', obj: AggregatedJob.human_attribute_name(:cut_file).downcase)
+
+.card.bg-light
+  h5.card-header = LineItem.model_name.human(count: 0)
+  .card-body
+    == render partial: 'line_items/list', locals: { line_item: @aggregated_job.line_items, collection: @aggregated_job.line_items }
+
+.card-group
+  - if @aggregated_job.printers.size > 0
+    .card.bg-light.text-center
+      h5.card-header = 'Dati Stampa'
+      .card-body
+        == render partial: 'printers/list', locals: { collection: @aggregated_job.printers.paginate(page: params[:page], per_page: params[:per_page]) }
+
+  - if @aggregated_job.cutters.size > 0
+    .card.bg-light.text-center
+      h5.card-header = 'Dati taglierina'
+      .card-body
+        == render partial: 'cutters/list', locals: { collection: @aggregated_job.cutters.paginate(page: params[:page], per_page: params[:per_page]) }

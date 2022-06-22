@@ -1,0 +1,19 @@
+= form_for [@role], html: { autocomplete: :off }, data: { method: :patch, remote: true } do |f|
+
+  .alert.alert-info
+    = "Il campo valore indica il peso che ha il ruolo, più il umero è basso più diritti ha l'utente."
+
+  .form-group
+    = f.label :code
+    = f.text_field :code, class: :'form-control'
+
+  .form-group
+    = f.label :name
+    = f.text_field :name, class: :'form-control'
+
+  .form-group
+    = f.label :value
+    = f.text_field :value, class: :'form-control'
+
+  .form-group
+    = button_tag t('strings.Save'), class: :'btn btn-success btn-block', data: { disable: true }, type: :submit

@@ -1,0 +1,22 @@
+tr
+  - if params[:controller] == 'cutters'
+    td
+      .action-btns
+        - if cutter.resource.present?
+          - if cutter.is_line_item?
+            = link_to "Riga ordine: #{LineItem.find_by(id: cutter.resource_id).id}", [:line_items, line_item_id: LineItem.find_by(id: cutter.resource_id).id]
+          - elsif cutter.is_aggregated_job?
+            =< link_to [AggregatedJob.find_by(id: cutter.resource_id)], title: AggregatedJob.model_name.human, class: :'btn btn-sm btn-info', data: {spinner: true}
+              = fa_icon('search-plus')
+  td = cutter.customer_machine
+  td = cutter.file_name
+  td = l(cutter.starts_at, format: :short)
+  td = l(cutter.ends_at, format: :short)
+  td = number_to_hour_minutes cutter.cut_time.to_i
+  td
+    - if cutter.gest_sent.present?
+      = l(cutter.gest_sent, format: :short)
+    - else
+      = link_to [:resend, cutter], class: 'btn btn-sm btn-warning'
+        = fa_icon 'redo'
+        =< 'Reinvia'

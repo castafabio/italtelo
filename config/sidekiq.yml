@@ -1,0 +1,9 @@
+development:
+  :concurrency: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  :pidfile: tmp/pids/sidekiq.pid
+  :queues:
+    - printing_solutions_v2
+production:
+  :concurrency: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  :queues:
+    - printing_solutions_v2

@@ -1,0 +1,146 @@
+it:
+  activerecord:
+    attributes:
+      aggregated_job:
+        aluan: Alwan
+        deadline: Scadenza
+        switch_sent: "Files inviati"
+        notes: Note di produzione
+        status: Stato
+        print_customer_machine: Macchina da stampa
+        print_file: File di stampa
+        cut_customer_machine: Macchina da taglio
+        cut_file: File di taglio
+        error_message: Errori
+      customer_machine:
+        name: Nome
+        machine_switch_name: Nome macchina switch
+        kind: Tipologia
+        path: Percorso
+        ip_address: Indirizzo IP
+        serial_number: Serial number
+        psw: Password
+        api_key: Chiave API
+        hotfolder_path: Percorso Hotfolder
+        is_mounted: Collegato
+        print_customer_machine: Macchina da stampa
+        cut_customer_machine: Macchina da taglio
+        vg7_machine_reference: ID macchine VG7
+      customization:
+        parameter: Parametro
+        value: Valore
+        um: Unità misura
+        notes: Note
+      cutter:
+        file_name: Nome file
+        cut_time: Tempo di taglio
+        starts_at: Data inizio
+        ends_at: Data fine
+      line_item:
+        row_number: N. riga
+        subjects: Soggetti
+        quantity: Quantità
+        height: Altezza
+        width: Larghezza
+        material: Materiale
+        article_code: Codice articolo
+        article_name: Nome articolo
+        description: Descrizione
+        aluan: Alwan
+        print_file: File di stampa
+        cut_file: File di taglio
+        scale: Scala
+        sides: Stampa
+        error_message: Errori
+      log:
+        action: "Azione"
+        description: "Descrizione"
+        created_at: "Data"
+      order:
+        order_code: Codice ordine
+        order_date: Data ordine
+        customer: Cliente
+      printer:
+        file_name: Nome file
+        copies: Copie
+        material: Materiale
+        ink: "Consumi inchiostro"
+        print_time: "Tempo di stampa"
+        start_at: "Inizio"
+        extra_data: "Dati aggiuntivi"
+        gest_sent: Inviato a gest
+      role:
+        code: "Codice"
+        name: "Nome"
+        value: "Valore"
+      submit_point:
+        name: "Nome"
+        kind: "Tipo"
+      switch_field:
+        submit_point_name: "Submit point"
+        dependency: "Dipende da"
+        dependency_condition: "Condizione"
+        dependency_value: "Valore condizione"
+        display_field: "Visibile"
+        field_id: "ID switch"
+        kind: "Tipo"
+        enum_values: "Valori select"
+        required: "Obbligatorio"
+        name: "Nome"
+        description: "Decrizione"
+        sort: "Ordine"
+        read_only: "Visibile nella scheda"
+        # Usiamo questo campo per stabilire se il field va mostrato o meno nella scheda di lavoro.
+        default_value: "Valore default"
+      user:
+        current_password: "Password corrente"
+        current_sign_in_at: "Accesso attuale"
+        email: "Email"
+        first_name: "Nome"
+        last_name: "Cognome"
+        last_sign_in_at: "Ultimo accesso"
+        password: "Password"
+        password_confirmation: "Conferma password"
+        remember_me: "Ricordami"
+        sign_in_count: "Accessi"
+
+    models:
+      aggregated_job:
+        one: Lavoro aggregato
+        other: Lavori aggregati
+      customer_machine:
+        one: Macchina fisica
+        other: Macchine fisiche
+      customization:
+        one: Configurazione
+        other: Configurazioni
+      cutter:
+        one: "Dati Taglierina"
+        other: "Dati Taglierine"
+      line_item:
+        one: Riga ordine
+        other: Righe ordine
+      log:
+        one: "Log"
+        other: "Logs"
+      order:
+        one: Ordine
+        other: Ordini
+      printer:
+        one: "Dati Stampante"
+        other: "Dati Stampanti"
+      role:
+        one: "Ruolo"
+        other: "Ruoli"
+      submit_point:
+        one: "Flusso switch"
+        other: "Flussi switch"
+      switch_field:
+        one: "Campo switch"
+        other: "Campi switch"
+      user:
+        one: "Operatore"
+        other: "Operatori"
+      vg7_machine:
+        one: "Configurazione macchina Vg7"
+        other: "Configurazioni macchine Vg7"

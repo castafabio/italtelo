@@ -1,0 +1,9 @@
+it:
+  mailer:
+    common:
+      signature: |
+
+        Saluti.
+
+        --
+        Questo è un messaggio automatico. Si prega di non rispondere a questo indirizzo.

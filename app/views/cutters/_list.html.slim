@@ -1,0 +1,31 @@
+.table-responsive
+
+  table#cutters.table.table-bordered.table-sm.table-hover.table-striped
+
+    thead
+      tr
+        - if params[:controller] == 'cutters'
+          th = t('strings.Actions')
+        th = CustomerMachine.model_name.human
+        th = Cutter.human_attribute_name(:file_name)
+        th = Cutter.human_attribute_name(:starts_at)
+        th = Cutter.human_attribute_name(:ends_at)
+        th = Cutter.human_attribute_name(:cut_time)
+        th = Cutter.human_attribute_name(:send_to_switch)
+
+    - if params[:controller] == 'cutters'
+      tfoot
+        tr
+          td.colspan
+            .float-left = will_paginate collection
+            .float-right == render 'table_entries'
+
+    tbody
+      - if params[:controller] == 'cutters'
+        tr
+          == render partial: 'filters'
+      - if collection.length > 0
+        - if params[:controller] == 'cutters'
+          == render collection
+      - else
+        tr: td.colspan.info = t('obj.empty_list', obj: Cutter.model_name.human(count: 0).downcase)

@@ -1,0 +1,34 @@
+.table-responsive
+
+  table#aggregated_jobs.table.table-bordered.table-sm.table-hover.table-striped
+
+    thead
+      tr
+        th = t('strings.Actions')
+        th = AggregatedJob.human_attribute_name(:aluan)
+        th = AggregatedJob.model_name.human
+        th = Order.human_attribute_name(:customer)
+        - if params[:tag] == 'completed'
+          th = AggregatedJob.human_attribute_name('print_file')
+          th = AggregatedJob.human_attribute_name('cut_file')
+        - else
+          th = t('obj.upload', obj: AggregatedJob.human_attribute_name('print_file').downcase)
+          th = t('obj.upload', obj: AggregatedJob.human_attribute_name('cut_file').downcase)
+        th = CustomerMachine.human_attribute_name(:print_customer_machine)
+        th = CustomerMachine.human_attribute_name(:cut_customer_machine)
+        th = AggregatedJob.human_attribute_name(:deadline)
+        th = AggregatedJob.human_attribute_name(:error_message)
+
+    tfoot
+      tr
+        td.colspan
+          .float-left = will_paginate collection
+          .float-right == render 'table_entries'
+
+    tbody
+      tr
+        == render partial: 'index_filters'
+      - if collection.length > 0
+        == render collection
+      - else
+        tr: td.colspan.alert-warning = t('obj.empty_list', obj: AggregatedJob.model_name.human(count: 0).downcase)

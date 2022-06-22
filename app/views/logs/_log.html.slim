@@ -1,0 +1,5 @@
+tr class="#{log.kind}"
+  td = log.id
+  td = log.action
+  td = log.description
+  td = log.created_at&.strftime("%d-%m-%Y %H:%M:%S")

@@ -1,0 +1,11 @@
+/ - if can? :read, Role
+= link_to [:line_items], class: "#{params[:controller] == 'line_items' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
+  = fa_icon 'tools'
+  span =< LineItem.model_name.human(count: 0)
+= link_to [:scheduler, :aggregated_jobs], class: "#{(params[:action] == 'scheduler' && params[:controller] == 'aggregated_jobs') ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
+  = fa_icon 'magic'
+  span =< t('strings.Scheduler')
+- if can?(:see_aggregation, AggregatedJob)
+  = link_to [:aggregated_jobs], class: "#{params[:action] != 'scheduler' && params[:controller] == 'aggregated_jobs' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
+    = fa_icon 'clipboard'
+    span =< AggregatedJob.model_name.human(count: 0)

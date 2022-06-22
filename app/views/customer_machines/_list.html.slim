@@ -1,0 +1,33 @@
+.table-responsive
+
+  table#customer_machines.table.table-bordered.table-sm.table-hover.table-striped
+
+    thead
+      tr
+        th = t('strings.Actions')
+        th = CustomerMachine.human_attribute_name(:name)
+        th = CustomerMachine.human_attribute_name(:kind)
+        th = CustomerMachine.human_attribute_name(:machine_switch_name)
+        th = CustomerMachine.human_attribute_name(:vg7_machine_reference)
+        th = CustomerMachine.human_attribute_name(:import_job)
+        th = CustomerMachine.human_attribute_name(:path)
+        th = CustomerMachine.human_attribute_name(:ip_address)
+        th = CustomerMachine.human_attribute_name(:serial_number)
+        th = CustomerMachine.human_attribute_name(:psw)
+        th = CustomerMachine.human_attribute_name(:api_key)
+        th = CustomerMachine.human_attribute_name(:hotfolder_path)
+        th = CustomerMachine.human_attribute_name(:is_mounted)
+
+    tfoot
+      tr
+        td.colspan
+          .float-left = will_paginate collection
+          .float-right == render 'table_entries'
+
+    tbody
+      tr
+        == render partial: 'filters'
+      - if collection.length > 0
+        == render collection
+      - else
+        tr: td.colspan.info = t('obj.empty_list', obj: CustomerMachine.model_name.human(count: 0).downcase)

@@ -1,0 +1,27 @@
+h1.pb-2.mt-4.mb-2.border-bottom
+
+  .float-left
+    = link_to "#", class: :'btn btn-sm btn-secondary', data: { target: "##{@submit_point.to_id}", toggle: :collapse }
+      = fa_icon "#{collapsed ? 'caret-square-down' : 'caret-square-up'}"
+    =< "#{SubmitPoint.model_name.human} #{@submit_point}"
+
+  .float-right
+    = link_to :submit_points, class: :'btn btn-sm btn-secondary', data: {spinner: true}
+      = fa_icon('arrow-left')
+      =< t('actions.back')
+
+    =< link_to [:edit, @submit_point], class: :'btn btn-sm btn-primary', remote: true
+      = fa_icon('edit')
+      =< t('actions.edit')
+
+    =< link_to [@submit_point], class: :'btn btn-sm btn-danger', data: { confirm: t('confirm.generic'), method: :delete }
+      = fa_icon('trash')
+      =< t('actions.delete')
+
+  .clearfix
+
+.collapse id="#{@submit_point.to_id}" class=(collapsed ? '' : 'show')
+  .card.bg-light.text-center
+    .card-body
+      p.card-text = "#{SubmitPoint.human_attribute_name(:name)}: #{@submit_point.name}"
+      p.card-text = "#{SubmitPoint.human_attribute_name(:kind)}: #{t("enumerators.submit_point_kind.#{@submit_point.kind}")}"

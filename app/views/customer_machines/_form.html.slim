@@ -1,0 +1,59 @@
+= form_for [@customer_machine], html: { autocomplete: :off }, data: { remote: true } do |f|
+
+  - if @error
+    p.alert.alert-danger = @error
+
+  .form-group
+    = f.label :name
+    = f.text_field :name, class: :'form-control'
+
+  .form-group
+    = f.label :kind
+    = f.select :kind, CUSTOMER_MACHINE_KINDS.map { |mk| [t("enumerators.customer_machine.kinds.#{mk}"), mk] }, { prompt: t('strings.Select_one') }, { class: :'form-control', data: { behaviour: :toggle_fields } }
+
+  .form-group
+    = f.label :machine_switch_name
+    = f.text_field :machine_switch_name, class: :'form-control'
+
+  .form-group
+    = f.label :vg7_machine_reference
+    = f.text_field :vg7_machine_reference, class: :'form-control'
+
+  .form-group
+    = f.label Vg7Machine.model_name.human(count: 0)
+    = f.select :vg7_machine_ids, @vg7_machines.collect { |machine| [machine.to_s, machine.id] }, {}, { class: :'form-control selectpicker', multiple: true, data: {'live-search': true, 'none-selected-text': t('strings.Select_one') } }
+
+  .form-group
+    = f.label :path
+    = f.text_field :path, class: :'form-control'
+
+  .form-group
+    = f.label :import_job
+    = f.text_field :import_job, class: :'form-control'
+
+  .form-group
+    = f.label :ip_address
+    = f.text_field :ip_address, class: :'form-control'
+
+  .form-group
+    = f.label :serial_number
+    = f.text_field :serial_number, class: :'form-control'
+
+  .form-group
+    = f.label :username
+    = f.text_field :username, class: :'form-control'
+
+  .form-group
+    = f.label :psw
+    = f.text_field :psw, class: :'form-control'
+
+  .form-group
+    = f.label :api_key
+    = f.text_field :api_key, class: :'form-control'
+
+  .form-group
+    = f.label :hotfolder_path
+    = f.text_field :hotfolder_path, class: :'form-control'
+
+  .form-group
+    = button_tag t('strings.Save'), class: :'btn btn-success btn-block', data: { disable: true }, type: :submit

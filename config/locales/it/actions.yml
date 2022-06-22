@@ -1,0 +1,23 @@
+it:
+  actions:
+    add: "Aggiungi"
+    aluan_yes: "Alwan: si"
+    aluan_no: "Alwan: no"
+    aggregate: "Aggrega"
+    back: "Indietro"
+    brand_new: "Nuova"
+    cancel: "Annulla"
+    close: "Chiudi"
+    delete: "Elimina"
+    download: "Scarica"
+    edit: "Modifica"
+    list: "Elenco"
+    new: "Crea"
+    save: "Salva"
+    send: "Invia"
+    sign_out: "Esci"
+    sync: "Sincronizza"
+    sort: "Ordina"
+    upload: "Carica"
+    send_to_switch: Invia a switch
+    send_all_to_switch: Invia tutti a hotfolder

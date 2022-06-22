@@ -1,0 +1,22 @@
+= form_for [@customization], html: { autocomplete: :off }, data: { method: :patch, remote: true } do |f|
+
+  - if can? :create, Customization
+    .form-group
+      = f.label :parameter
+      = f.text_field :parameter, class: :'form-control'
+
+    .form-group
+      = f.label :um
+      = f.text_field :um, class: :'form-control'
+
+    .form-group
+      = f.label :notes
+      = f.text_area :notes, class: :'form-control'
+
+    .form-group
+      = f.label "#{Customization.human_attribute_name(:value)} #{@customization.um}"
+      = f.text_field :value, class: :'form-control'
+      .small.help-block = @customization.notes
+
+  .form-group
+    = button_tag t('strings.Save'), class: :'btn btn-sm btn-success btn-block', data: { disable: true }, type: :submit

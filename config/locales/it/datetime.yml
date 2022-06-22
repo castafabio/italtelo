@@ -1,0 +1,17 @@
+it:
+  date:
+    formats:
+      day: "%e"
+      default: "%e %B %Y"
+      long: "%A, %e %B %Y"
+      month_year: "%B %Y"
+      short: "%d/%m/%Y"
+  datetime:
+    distance_in_words:
+      x_hours:
+        one: "1 ora"
+        other: "%{count} ore"
+  time:
+    formats:
+      long: "%d/%m/%Y %H:%M:%S"
+      short: "%d/%m/%Y %H:%M"

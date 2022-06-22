@@ -1,0 +1,19 @@
+tr
+  td
+    .action-btns
+      = link_to [:edit, customer_machine], class: :'btn btn-sm btn-primary', remote: true
+        = fa_icon 'edit'
+      =< link_to [customer_machine], class: :'btn btn-sm btn-danger', data: { confirm: t('confirm.generic'), method: :delete }
+        = fa_icon 'trash'
+  td = customer_machine.name
+  td = t("enumerators.customer_machine.kinds.#{customer_machine.kind}")
+  td = customer_machine.machine_switch_name
+  td = customer_machine.vg7_machine_reference
+  td = customer_machine.import_job
+  td = customer_machine.path
+  td = customer_machine.ip_address
+  td = customer_machine.serial_number
+  td = customer_machine.psw
+  td = customer_machine.api_key
+  td = customer_machine.hotfolder_path
+  td = boolean customer_machine.is_mounted?

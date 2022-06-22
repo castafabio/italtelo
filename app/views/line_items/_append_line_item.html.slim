@@ -1,0 +1,8 @@
+.modal-dialog
+  .modal-content
+
+    .modal-header
+      h5.modal-title = t('strings.Aggregate')
+      button.close type="button" data-dismiss="modal": span &times;
+
+    .modal-body == render 'append_line_item_form'

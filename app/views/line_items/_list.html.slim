@@ -1,0 +1,36 @@
+.table-responsive
+  table.table.table-bordered.table-sm.table-hover.table-striped
+    thead
+      tr
+        == content_for :extra_thead
+        th = t('strings.Actions')
+        th = LineItem.human_attribute_name(:aluan)
+        th = Order.human_attribute_name(:order_code)
+        th = AggregatedJob.model_name.human
+        th = LineItem.human_attribute_name(:row_number)
+        th = LineItem.human_attribute_name(:print_file)
+        th = LineItem.human_attribute_name(:cut_file)
+        th = LineItem.human_attribute_name(:scale)
+        th = LineItem.human_attribute_name(:sides)
+        th = CustomerMachine.human_attribute_name(:print_customer_machine)
+        th = CustomerMachine.human_attribute_name(:cut_customer_machine)
+        th = Order.human_attribute_name(:order_date)
+        th = Order.human_attribute_name(:customer)
+        th = LineItem.human_attribute_name(:article_code)
+        th = LineItem.human_attribute_name(:article_name)
+        th = LineItem.human_attribute_name(:description)
+        th = LineItem.human_attribute_name(:material)
+        th = LineItem.human_attribute_name(:subjects)
+        th = LineItem.human_attribute_name(:quantity)
+        th = LineItem.human_attribute_name(:height)
+        th = LineItem.human_attribute_name(:width)
+        th = LineItem.human_attribute_name(:error_message)
+
+    tbody
+      - if params[:controller ] == 'line_items'
+        tr
+          == render partial: 'filters'
+      - if collection.size > 0
+        == render collection
+      - else
+        tr: td.colspan.alert-warning = t('obj.empty_list', obj: LineItem.model_name.human(count: 0).downcase)

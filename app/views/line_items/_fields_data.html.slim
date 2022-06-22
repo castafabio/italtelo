@@ -1,0 +1,10 @@
+- SwitchField.descriptions(line_item.submit_point).each do |description|
+  br
+  = description.split('_').last
+  br
+  br
+  - line_item.submit_point.switch_fields.where(description: description, display_field: true).each do |sf|
+    - if line_item.fields_data[sf.field_id].present?
+      = "#{sf.name}: "
+      = line_item.fields_data[sf.field_id]
+      br

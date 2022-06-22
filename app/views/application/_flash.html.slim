@@ -1,0 +1,6 @@
+#flash.container-fluid
+  - flash.each do |context, message|
+    .alert class="alert-#{context}"
+      a.close data-dismiss="alert" href="#"
+        = fa_icon "times", class: 'mx-2'
+      p.message = message

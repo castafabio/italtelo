@@ -1,0 +1,33 @@
+.table-responsive
+
+  table#printers.table.table-bordered.table-sm.table-hover.table-striped
+
+    thead
+      tr
+        - if params[:controller] == 'printers'
+          th = t('strings.Actions')
+        th = CustomerMachine.model_name.human
+        th = Printer.human_attribute_name(:job_id)
+        th = Printer.human_attribute_name(:file_name)
+        th = Printer.human_attribute_name(:copies)
+        th = Printer.human_attribute_name(:material)
+        th = Printer.human_attribute_name(:ink)
+        th = Printer.human_attribute_name(:start_at)
+        th = Printer.human_attribute_name(:print_time)
+        th = Printer.human_attribute_name(:gest_sent)
+
+    - if params[:controller] == 'printers'
+      tfoot
+        tr
+          td.colspan
+            .float-left = will_paginate collection
+            .float-right == render 'table_entries'
+
+    tbody
+      - if params[:controller] == 'printers'
+        tr
+          == render partial: 'filters'
+      - if collection.length > 0
+        == render collection
+      - else
+        tr: td.colspan.info = t('obj.empty_list', obj: Printer.model_name.human(count: 0).downcase)

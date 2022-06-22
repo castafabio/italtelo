@@ -1,0 +1,5 @@
+it:
+  confirm:
+    delete_file: "Confermi di voler eliminare il file?"
+    generic: "Confermi?"
+    send_to_switch: "Confermi di voler inviare il file alla hotfolder?"

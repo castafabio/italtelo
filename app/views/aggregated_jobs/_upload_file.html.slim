@@ -1,0 +1,9 @@
+.modal-dialog
+  .modal-content
+
+    .modal-header
+      h5.modal-title = t('obj.upload', obj: 'file')
+      button.close onclick="javascript:window.location.reload()" type="button" data-dismiss="modal": span &times;
+
+    .modal-body
+      #drag-drop-area data-uppy-max-files="10" data-url="#{url_for([:upload_file, @aggregated_job, kind: params[:kind]])}"

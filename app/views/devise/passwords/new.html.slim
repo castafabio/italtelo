@@ -1,0 +1,16 @@
+.devise-box
+  .text-center
+    = image_tag 'logo.png', class: :'session-logo'
+
+  = form_for resource, as: resource_name, url: password_path(resource_name), autocomplete: :off, html: { class: :'box', method: :post } do |f|
+
+    h1 = t('.forgot_your_password')
+
+    .form-group
+      = f.label :email
+      = f.email_field :email, autofocus: true, class: :'form-control'
+
+    .form-group
+      = f.submit t('.send_me_reset_password_instructions'), class: 'btn btn-primary'
+
+  = render 'devise/shared/links'

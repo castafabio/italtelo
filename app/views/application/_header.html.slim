@@ -1,0 +1,50 @@
+.container
+  nav.navbar.navbar-main.navbar-expand-lg.fixed-top.navbar-dark
+    = link_to :root, class: :'navbar-brand', data: {spinner: true}
+      span = image_tag 'logo.png'
+
+    button.navbar-toggler type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
+      span.navbar-toggler-icon
+
+    .collapse.navbar-collapse id="navbarSupportedContent"
+      ul.navbar-nav.mr-auto
+        li.nav-item.dropdown class="#{'active' if ['line_items', 'scheduler', 'aggregated_jobs'].include?(params[:controller])}"
+          = link_to '#', class: 'nav-link dropdown-toggle', data: {toggle: "dropdown"}
+            = fa_icon('list-ul')
+            span =< t('strings.Summary')
+          .dropdown-menu
+            == render 'nav_summary'
+
+        - if can? :read, Printer
+          li.nav-item class="#{'active' if ['printers'].include?(params[:controller])}"
+            = link_to [:printers], class: 'nav-link', data: {spinner: true}
+              = fa_icon('print')
+              span =< Printer.model_name.human(count: 0)
+
+        - if can? :read, Cutter
+          li.nav-item class="#{'active' if ['cutters'].include?(params[:controller])}"
+            = link_to [:cutters], class: 'nav-link', data: {spinner: true}
+              = fa_icon('cut')
+              span =< Cutter.model_name.human(count: 0)
+
+        - if current_user.has_role?('super_admin') || current_user.has_role?('admin') || current_user.has_role?('clerk')
+          li.nav-item.dropdown class="#{'active' if ['roles', 'users',  'customer_machines', 'logs', 'customizations'].include?(params[:controller]) }"
+            = link_to '#', class: 'nav-link dropdown-toggle', data: {toggle: "dropdown"}
+              = fa_icon 'cogs'
+              span =< t('strings.Administration')
+            .dropdown-menu
+              == render 'nav_administration'
+
+      ul#user-navbar.nav.navbar-nav.navbar-right
+        li.nav-item.dropdown class="#{'active' if ['registrations'].include?(params[:controller])}"
+          = link_to '#', class: 'nav-link dropdown-toggle', data: {toggle: "dropdown"}
+            =< fa_icon 'user'
+            span =< current_user.first_name
+          .dropdown-menu.dropdown-menu-right
+            - if user_signed_in?
+              = link_to edit_user_registration_path, class: "#{params[:controller] == 'registrations' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
+                i.fa.fa-fw.fa-edit
+                span =< t('obj.edit', obj: User.model_name.human)
+              = link_to destroy_user_session_path, method: :delete, class: 'dropdown-item'
+                = fa_icon 'sign-out-alt'
+                span =< t('actions.sign_out')
