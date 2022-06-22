@@ -63,5 +63,5 @@ Rails.application.configure do
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
 
   # Whitelist one hostname
-  config.hosts << "printing-solutions-v2-development.it"
+  config.hosts << "italtelo-development.it"
 end

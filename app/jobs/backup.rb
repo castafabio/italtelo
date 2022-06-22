@@ -2,7 +2,7 @@ class Backup < ApplicationJob
   require 'net/ssh'
   require 'net/sftp'
 
-  queue_as :printing_solutions_v2
+  queue_as :italtelo
   sidekiq_options retry: 0, backtrace: 10
 
   def perform
@@ -28,7 +28,7 @@ class Backup < ApplicationJob
     user = ENV['SS_FTP_USER']
     password = ENV['SS_FTP_PSW']
     folder = ENV['SS_FTP_FOLDER']
-    backup_path = "#{folder}/backup/printing_solutions_v2"
+    backup_path = "#{folder}/backup/italtelo"
     Net::SFTP.start(server, user, password: password, port: port.to_i) do |sftp|
       file_intro = "#{Date.today.strftime("%A")}_#{Time.now.hour}_"
       begin

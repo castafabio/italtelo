@@ -5,7 +5,7 @@ require 'rails/all'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-module PrintingSolutionsV2
+module Italtelo
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 6.0
@@ -26,6 +26,6 @@ module PrintingSolutionsV2
     # -- all .rb files in that directory are automatically loaded after loading
     # the framework and any gems in your application.
     config.active_job.queue_adapter = :sidekiq
-    config.active_storage.queue = :printing_solutions_v2
+    config.active_storage.queue = :italtelo
   end
 end

@@ -1,7 +1,7 @@
 class ImportKongsberg < ApplicationJob
   require 'nokogiri'
 
-  queue_as :printing_solutions_v2
+  queue_as :italtelo
   sidekiq_options retry: 0, backtrace: 10
 
   def perform

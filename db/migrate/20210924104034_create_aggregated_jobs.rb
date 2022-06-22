@@ -2,7 +2,6 @@ class CreateAggregatedJobs < ActiveRecord::Migration[6.0]
   def change
     create_table :aggregated_jobs do |t|
       t.belongs_to :customer_machine
-      t.belongs_to :submit_point
       t.string :status, default: "brand_new"
       t.date :deadline
       t.datetime :switch_sent, default: nil

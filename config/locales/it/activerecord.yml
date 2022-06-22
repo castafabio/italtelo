@@ -14,7 +14,7 @@ it:
         error_message: Errori
       customer_machine:
         name: Nome
-        machine_switch_name: Nome macchina switch
+        bus240_machine_code: Codice macchina BUS240
         kind: Tipologia
         path: Percorso
         ip_address: Indirizzo IP
@@ -25,7 +25,6 @@ it:
         is_mounted: Collegato
         print_customer_machine: Macchina da stampa
         cut_customer_machine: Macchina da taglio
-        vg7_machine_reference: ID macchine VG7
       customization:
         parameter: Parametro
         value: Valore
@@ -141,6 +140,3 @@ it:
       user:
         one: "Operatore"
         other: "Operatori"
-      vg7_machine:
-        one: "Configurazione macchina Vg7"
-        other: "Configurazioni macchine Vg7"

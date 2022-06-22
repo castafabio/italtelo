@@ -1,7 +1,7 @@
 class ImportOrders < ApplicationJob
   require 'nokogiri'
 
-  queue_as :printing_solutions_v2
+  queue_as :italtelo
   sidekiq_options retry: 1, backtrace: 10
 
   def perform
@@ -17,7 +17,7 @@ class ImportOrders < ApplicationJob
       else
         import_from_ftp!
       end
-      # Dir.glob("/home/soltech/Documenti/Printing Solutions v2/import_orders/*.xml").each do |xml_string|
+      # Dir.glob("/home/soltech/Documenti/Italtelo/import_orders/*.xml").each do |xml_string|
       #   doc = Nokogiri::XML( File.read(xml_string) )
       #   order = parse_order_xml!(doc)
       # end

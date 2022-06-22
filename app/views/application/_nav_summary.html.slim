@@ -1,4 +1,3 @@
-/ - if can? :read, Role
 = link_to [:line_items], class: "#{params[:controller] == 'line_items' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
   = fa_icon 'tools'
   span =< LineItem.model_name.human(count: 0)

@@ -68,7 +68,7 @@ tr class="#{line_item.sending ? 'sending' : ''}"
   td
     - if line_item.need_printing && line_item.editable?
       - if line_item.print_customer_machine_id.nil? && line_item.switch_sent.nil? || line_item.aggregated_job.nil?
-        = select_tag :print_customer_machine_id, grouped_options_for_select(CustomerMachine.grouped_options_for_select('print'), line_item.get_machines('print')), prompt: t('strings.Select_one'), class: :'inline_select print form-control', data: { id: line_item.id }
+        = select_tag :print_customer_machine_id, options_for_select(CustomerMachine.printing_machines.collection {|p| [p.to_s, p.id]}), prompt: t('strings.Select_one'), class: :'inline_select print form-control', data: { id: line_item.id }
       - else
         = line_item.to_customer_machine('print')
     - else
@@ -76,7 +76,7 @@ tr class="#{line_item.sending ? 'sending' : ''}"
   td
     - if line_item.need_cutting && line_item.editable?
       - if line_item.cut_customer_machine_id.nil? && line_item.switch_sent.nil? || line_item.aggregated_job.nil?
-        = select_tag :print_customer_machine_id, grouped_options_for_select(CustomerMachine.grouped_options_for_select('cut')), prompt: t('strings.Select_one'), class: :'inline_select print form-control', data: { id: line_item.id }
+        = select_tag :print_customer_machine_id, options_for_select(CustomerMachine.cutting_machines.collection {|p| [p.to_s, p.id]}), prompt: t('strings.Select_one'), class: :'inline_select print form-control', data: { id: line_item.id }
       - else
         = line_item&.to_customer_machine('cut')
     - else

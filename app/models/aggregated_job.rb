@@ -5,8 +5,6 @@ class AggregatedJob < ApplicationRecord
   belongs_to :submit_point, optional: true
   belongs_to :print_customer_machine, class_name: 'CustomerMachine', optional: true
   belongs_to :cut_customer_machine, class_name: 'CustomerMachine', optional: true
-  belongs_to :vg7_print_machine, class_name: 'Vg7Machine', optional: true
-  belongs_to :vg7_cut_machine, class_name: 'Vg7Machine', optional: true
 
   has_one_attached :print_file
   has_one_attached :cut_file
@@ -17,8 +15,6 @@ class AggregatedJob < ApplicationRecord
   has_many :cutters, as: :resource, dependent: :destroy
 
   before_validation :set_code, on: :create
-
-  # after_commit :send_to_switch, on: :update
 
   attr_accessor :appendable_line_items, :send_now
 
@@ -53,7 +49,7 @@ class AggregatedJob < ApplicationRecord
       raise "Devono essere presenti i file. Verifica e riprova." if file_present.uniq.size > 1
       raise "I lavori selezionati hanno fasi di lavoro diverse. Verifica e riprova." if line_items.pluck(:need_printing).uniq.size > 1 || line_items.pluck(:need_cutting).uniq.size > 1
       raise "Il lavoro richiede la stampa, selezionare almeno una macchina da stampa. Verifica e riprova." if line_items.pluck(:need_printing).include?(true) && line_items.pluck(:print_customer_machine_id).include?(nil)
-      aggregated_job = AggregatedJob.create!(deadline: deadline, print_customer_machine_id: line_items.first.print_customer_machine.id, vg7_print_machine_id: line_items.first.vg7_print_machine.id, cut_customer_machine_id: line_items&.first&.cut_customer_machine_id&.id, vg7_cut_machine_id: line_items&.first&.vg7_cut_machine&.id)
+      aggregated_job = AggregatedJob.create!(deadline: deadline, print_customer_machine_id: line_items.first.print_customer_machine.id, cut_customer_machine_id: line_items&.first&.cut_customer_machine_id&.id)
       line_items.each do |line_item|
         line_item.update!(aggregated_job_id: aggregated_job.id)
       end
@@ -71,12 +67,12 @@ class AggregatedJob < ApplicationRecord
     CreateAjXml.perform_later(self.id)
   end
 
-  def update_line_items_machines!(kind, customer_machine_id, vg7_machine_id)
+  def update_line_items_machines!(kind, customer_machine_id)
     self.line_items.each do |line_item|
       if kind == 'print'
-        line_item.update!(print_customer_machine_id: customer_machine_id, vg7_print_machine_id: vg7_machine_id)
+        line_item.update!(print_customer_machine_id: customer_machine_id)
       else
-        line_item.update!(cut_customer_machine_id: customer_machine_id, vg7_cut_machine_id: vg7_machine_id)
+        line_item.update!(cut_customer_machine_id: customer_machine_id)
       end
     end
   end
@@ -84,23 +80,11 @@ class AggregatedJob < ApplicationRecord
   def to_customer_machine(kind)
     text = ""
     if kind == 'print'
-      if self.vg7_print_machine.present?
-        text += "#{self.print_customer_machine.name} - #{self.vg7_print_machine.description}"
-      end
+      text += "#{self.print_customer_machine.name}"
     else
-      if self.vg7_cut_machine.present?
-        text += "#{self.cut_customer_machine.name} - #{self.vg7_cut_machine.description}"
-      end
+      text += "#{self.cut_customer_machine.name}"
     end
     text
-  end
-
-  def get_machines(kind)
-    if kind == 'print'
-      self.print_customer_machine.to_vg7_machine_id(self.vg7_print_machine) if self.print_customer_machine.present?
-    elsif kind == 'cut'
-      self.cut_customer_machine.to_vg7_machine_id(self.vg7_cut_machine) if self.cut_customer_machine.present?
-    end
   end
 
   def editable?
@@ -168,12 +152,6 @@ class AggregatedJob < ApplicationRecord
     self.need_cutting && !self.line_items.first.cut_file.attached?
   end
 
-  # def send_to_switch
-  #   if self.switch_sent.nil? && self.send_now
-  #     SendToSwitch.perform_later(self.id, 'aggregated_job')
-  #   end
-  # end
-
   def toggle_is_active!(linked_resource = nil)
     if self.aluan == false
       self.update!(aluan: true)
@@ -207,7 +185,6 @@ class AggregatedJob < ApplicationRecord
       ret << (self.line_items.first.scale == line_item.scale)
       ret << (self.line_items.first.need_printing == line_item.need_printing)
       ret << (self.line_items.first.print_customer_machine_id == line_item.print_customer_machine_id)
-      ret << (self.line_items.first.vg7_print_machine_id == line_item.vg7_print_machine.id)
       ret << (self.line_items.first.need_cutting == line_item.need_cutting)
       ret << (self.line_items.first.cut_number_of_files > 0 == line_item.cut_number_of_files > 0)
       if ret.uniq.size == 1 && ret == true
@@ -243,7 +220,6 @@ class AggregatedJob < ApplicationRecord
     need_cut = self.line_items.pluck(:need_cutting)
     cut_number_of_files = self.line_items.pluck(:cut_number_of_files)
     print_machine = self.line_items.pluck(:print_customer_machine_id)
-    vg7_print_machine = self.line_items.pluck(:vg7_print_machine_id)
     cut_machine = self.line_items.pluck(:cut_customer_machine_id)
     line_items = LineItem.where(id: line_item_list)
     line_items.each do |line_item|
@@ -263,8 +239,6 @@ class AggregatedJob < ApplicationRecord
       raise "I lavori selezionati devono avere almeno un file di taglio caricato. Verifica e riprova." if cut_number_of_files.uniq.size > 1
       print_machine << line_item.print_customer_machine_id
       raise "I lavori selezionati hanno macchine fisiche diverse. Verifica e riprova." if print_machine.uniq.size > 1
-      vg7_print_machine << line_item.vg7_print_machine_id
-      raise "I lavori selezionati hanno configurazioni di macchine diverse. Verifica e riprova." if vg7_print_machine.uniq.size > 1
       line_item.update_column(:aggregated_job_id, self.id)
     end
   end

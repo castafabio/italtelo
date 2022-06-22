@@ -21,15 +21,13 @@ class AggregatedJobsController < ApplicationController
         if @aggregated_job.need_printing
           if params[:print].present?
             @aggregated_job.update(print_customer_machine_id: params[:print].split('_').first.to_i)
-            @aggregated_job.update(vg7_print_machine_id: params[:print].split('_').last.to_i)
-            @aggregated_job.update_line_items_machines!('print', @aggregated_job.print_customer_machine_id, @aggregated_job.vg7_print_machine_id)
+            @aggregated_job.update_line_items_machines!('print', @aggregated_job.print_customer_machine_id)
           end
         end
         if @aggregated_job.need_cutting
           if params[:cut].present?
             @aggregated_job.update(cut_customer_machine_id: params[:cut].split('_').first.to_i)
-            @aggregated_job.update(vg7_cut_machine_id: params[:cut].split('_').last.to_i)
-            @aggregated_job.update_line_items_machines!('cut', @aggregated_job.print_customer_machine_id, @aggregated_job.vg7_print_machine_id)
+            @aggregated_job.update_line_items_machines!('cut', @aggregated_job.print_customer_machine_id)
           end
         end
         render json: { code: 200 }

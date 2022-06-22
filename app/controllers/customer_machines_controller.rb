@@ -35,13 +35,8 @@ class CustomerMachinesController < ApplicationController
     @customer_machines = @customer_machines.where('name LIKE :search', search: "%#{params[:search]}%") if params[:search].present?
   end
 
-  def edit
-    @vg7_machines = Vg7Machine.where(vg7_machine_reference: @customer_machine.vg7_machine_reference)
-  end
-
   def new
     @customer_machine = CustomerMachine.new
-    @vg7_machines = []
   end
 
   def update
@@ -61,7 +56,7 @@ class CustomerMachinesController < ApplicationController
   end
 
   def create_params
-    params.require(:customer_machine).permit(:name, :kind, :path, :serial_number, :ip_address, :username, :psw, :api_key, :hotfolder_path, :import_job, :machine_switch_name, :vg7_machine_reference, vg7_machine_ids: [])
+    params.require(:customer_machine).permit(:name, :kind, :path, :serial_number, :ip_address, :username, :psw, :api_key, :hotfolder_path, :import_job, :machine_switch_name)
   end
 
   def update_params

@@ -14,10 +14,6 @@
   = link_to [:logs], class: "#{params[:controller] == 'logs' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
     = fa_icon 'eye'
     span =< Log.model_name.human(count: 0)
-- if can? :read, SubmitPoint
-  = link_to [:submit_points], class: "#{['submit_points', 'switch_fields'].include?(params[:controller]) ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
-    = fa_icon('magnet')
-    span =< SubmitPoint.model_name.human(count: 0)
 - if can?(:see_sidekiq, current_user) && !current_user.is_printing?
   = link_to [:sidekiq_web], target: :_blank, class: 'dropdown-item', data: { spinner: false }
     = fa_icon 'history'

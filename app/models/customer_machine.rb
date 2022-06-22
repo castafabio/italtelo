@@ -9,25 +9,8 @@ class CustomerMachine < ApplicationRecord
   has_many :print_aggregated_jobs, class_name: "LineItem", foreign_key: "print_customer_machine_id", dependent: :nullify
   has_many :cut_aggregated_jobs, class_name: "LineItem", foreign_key: "cut_customer_machine_id", dependent: :nullify
 
-  has_and_belongs_to_many :vg7_machines, dependend: :nullify
-
   validates :name, presence: true, uniqueness: true
-  validates :vg7_machine_reference, presence: true
   validates :kind, inclusion: { in: CUSTOMER_MACHINE_KINDS }
-
-  def self.grouped_options_for_select(kind)
-    grouped_options = {}
-    if kind == 'print'
-      CustomerMachine.printer_machines.each do |cm|
-        grouped_options["#{cm.name}"] = cm.vg7_machines.map { |machine| [machine.to_s, cm.to_vg7_machine_id(machine.id)] }
-      end
-    elsif kind == 'cut'
-      CustomerMachine.cutter_machines.each do |cm|
-        grouped_options["#{cm.name}"] = cm.vg7_machines.map { |machine| [machine.to_s, machine.id] }
-      end
-    end
-    grouped_options
-  end
 
   def self.hour_to_seconds(time)
     print_time = 0
@@ -55,10 +38,6 @@ class CustomerMachine < ApplicationRecord
     require 'net/ping'
     check = Net::Ping::External.new(host)
     check.ping?
-  end
-
-  def to_vg7_machine_id(vg7_machine_id)
-    "#{self.id}_#{Vg7Machine.find_by(id: vg7_machine_id).id}" if vg7_machine_id.present?
   end
 
   def is_mounted?

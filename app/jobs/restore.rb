@@ -1,5 +1,5 @@
 class Restore < ApplicationJob
-  queue_as :printing_solutions_v2
+  queue_as :italtelo
   sidekiq_options retry: 1, backtrace: 10
 
   # Il comando da lanciare per eseguire il restore dalla console di rails è: Restore.perform_later('environment') dove environment può essere production o development

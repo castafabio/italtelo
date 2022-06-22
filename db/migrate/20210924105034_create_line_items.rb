@@ -4,7 +4,6 @@ class CreateLineItems < ActiveRecord::Migration[6.0]
       t.belongs_to :order
       t.belongs_to :customer_machine
       t.belongs_to :aggregated_job
-      t.belongs_to :submit_point
       t.integer :row_number
       t.integer :subjects
       t.integer :quantity
@@ -19,7 +18,6 @@ class CreateLineItems < ActiveRecord::Migration[6.0]
       t.string :sides, default: 'Monofacciale'
       t.text :description
       t.text :error_message, default: nil
-      t.datetime :switch_sent, default: nil
       t.boolean :aluan, default: true
       t.boolean :need_printing, default: false
       t.boolean :need_cutting, default: false

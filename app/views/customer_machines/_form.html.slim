@@ -12,16 +12,8 @@
     = f.select :kind, CUSTOMER_MACHINE_KINDS.map { |mk| [t("enumerators.customer_machine.kinds.#{mk}"), mk] }, { prompt: t('strings.Select_one') }, { class: :'form-control', data: { behaviour: :toggle_fields } }
 
   .form-group
-    = f.label :machine_switch_name
-    = f.text_field :machine_switch_name, class: :'form-control'
-
-  .form-group
-    = f.label :vg7_machine_reference
-    = f.text_field :vg7_machine_reference, class: :'form-control'
-
-  .form-group
-    = f.label Vg7Machine.model_name.human(count: 0)
-    = f.select :vg7_machine_ids, @vg7_machines.collect { |machine| [machine.to_s, machine.id] }, {}, { class: :'form-control selectpicker', multiple: true, data: {'live-search': true, 'none-selected-text': t('strings.Select_one') } }
+    = f.label :bus240_machine_code
+    = f.text_field :bus240_machine_code, class: :'form-control'
 
   .form-group
     = f.label :path

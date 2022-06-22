@@ -76,13 +76,11 @@ class LineItemsController < ApplicationController
         if @line_item.need_printing
           if params[:print].present?
             @line_item.update(print_customer_machine_id: params[:print].split('_').first.to_i)
-            @line_item.update(vg7_print_machine_id: params[:print].split('_').last.to_i)
           end
         end
         if @line_item.need_cutting
           if params[:cut].present?
             @line_item.update(cut_customer_machine_id: params[:cut].split('_').first.to_i)
-            @line_item.update(vg7_cut_machine_id: params[:cut].split('_').last.to_i)
           end
         end
         render json: { code: 200 }

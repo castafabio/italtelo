@@ -2,8 +2,6 @@ class LineItem < ApplicationRecord
   belongs_to :order
   belongs_to :print_customer_machine, class_name: 'CustomerMachine', optional: true
   belongs_to :cut_customer_machine, class_name: 'CustomerMachine', optional: true
-  belongs_to :vg7_print_machine, class_name: 'Vg7Machine', optional: true
-  belongs_to :vg7_cut_machine, class_name: 'Vg7Machine', optional: true
   belongs_to :aggregated_job, optional: true
   belongs_to :submit_point, optional: true
 
@@ -32,24 +30,12 @@ class LineItem < ApplicationRecord
     LineItem.where(id: line_item_ids)
   end
 
-  def get_machines(kind)
-    if kind == 'print'
-      self.print_customer_machine.to_vg7_machine_id(self.vg7_print_machine) if self.print_customer_machine.present?
-    elsif kind == 'cut'
-      self.cut_customer_machine.to_vg7_machine_id(self.vg7_cut_machine) if self.cut_customer_machine.present?
-    end
-  end
-
   def to_customer_machine(kind)
     text = ""
     if kind == 'print'
-      if self.vg7_print_machine.present?
-        text += "#{self.print_customer_machine.name} - #{self.vg7_print_machine.description}"
-      end
+      text += "#{self.print_customer_machine.name}"
     else
-      if self.vg7_cut_machine.present?
-        text += "#{self.cut_customer_machine.name} - #{self.vg7_cut_machine.description}"
-      end
+      text += "#{self.cut_customer_machine.name}"
     end
     text
   end
@@ -71,30 +57,7 @@ class LineItem < ApplicationRecord
   end
 
   def to_description(filter)
-    text = ''
-    initial_machine = self.description.split("macchina: ").last.split(";").first
-    if self.need_printing && self.vg7_print_machine.present?
-      if initial_machine != self.vg7_print_machine.description
-        text += "Macchina impostata: #{self.vg7_print_machine.description}\r\n"
-      end
-    end
-    if self.need_cutting && self.vg7_cut_machine.present?
-      text += "Macchina impostata: #{self.vg7_print_machine.description}\r\n"
-      if initial_machine != self.vg7_cut_machine.description
-      end
-    end
-    text += self.description
-    if self.submit_point.present? && !filter
-      SwitchField.descriptions(self.submit_point).each do |description|
-        text += "- #{description.split('_').last}\r\n"
-        self.submit_point.switch_fields.where(description: description, display_field: true).each do |sf|
-          if self&.fields_data[sf&.field_id]&.present?
-            text += "#{sf.name}: #{self.fields_data[sf.field_id]}\r\n"
-          end
-        end
-      end
-    end
-    text
+    text = self.description
   end
 
   def send_to_switch
@@ -122,13 +85,13 @@ class LineItem < ApplicationRecord
     if self.has_files?
       all_aggregated_jobs.brand_new.each do |aj|
         if aj.has_files?
-          aggregated_line_item_ids << aj.id if (self.need_printing && aj.line_items.first.need_printing || self.need_cutting && aj.line_items.first.need_cutting) && (self&.print_customer_machine&.id == aj.print_customer_machine_id || self&.vg7_print_machine_id == aj.vg7_print_machine_id || self&.cut_customer_machine&.id == aj.cut_customer_machine_id)
+          aggregated_line_item_ids << aj.id if (self.need_printing && aj.line_items.first.need_printing || self.need_cutting && aj.line_items.first.need_cutting) && (self&.print_customer_machine&.id == aj.print_customer_machine_id || self&.cut_customer_machine&.id == aj.cut_customer_machine_id)
         end
       end
     else
       all_aggregated_jobs.brand_new.each do |aj|
         unless aj.has_files?
-          aggregated_line_item_ids << aj.id if (self.need_printing && aj.line_items.first.need_printing || self.need_cutting && aj.line_items.first.need_cutting) && (self&.print_customer_machine&.id == aj.print_customer_machine_id || self&.vg7_print_machine_id == aj.vg7_print_machine_id || self&.cut_customer_machine&.id == aj.cut_customer_machine_id)
+          aggregated_line_item_ids << aj.id if (self.need_printing && aj.line_items.first.need_printing || self.need_cutting && aj.line_items.first.need_cutting) && (self&.print_customer_machine&.id == aj.print_customer_machine_id || self&.cut_customer_machine&.id == aj.cut_customer_machine_id)
         end
       end
     end
