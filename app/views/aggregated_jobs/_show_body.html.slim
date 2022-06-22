@@ -13,14 +13,6 @@
           dt.col-sm-4 = AggregatedJob.human_attribute_name(:notes)
           dd.col-sm-8 = simple_format @aggregated_job.notes
 
-        dt.col-sm-4 = AggregatedJob.human_attribute_name(:switch_sent)
-        dd.col-sm-8
-          - if @aggregated_job.sending
-            = boolean @aggregated_job.sending
-          - else
-            = boolean @aggregated_job.switch_sent
-            =< @aggregated_job.switch_sent&.strftime("%d-%m-%Y")
-
         - if @aggregated_job.print_customer_machine_id.present?
           dt.col-sm-4 = AggregatedJob.human_attribute_name(:print_customer_machine)
           dd.col-sm-8 = @aggregated_job.line_items.first&.print_customer_machine&.name
@@ -32,17 +24,6 @@
         dt.col-sm-4 = AggregatedJob.human_attribute_name(:error_message)
         dd.col-sm-8 = simple_format @aggregated_job.error_message
 
-  - if @aggregated_job.compiled? && !@aggregated_job.switch_sent.nil?
-    - SwitchField.descriptions(@aggregated_job.submit_point).each do |description|
-      .card.bg-light
-        h5.card-header = description.split('_').last
-        .card-body
-          dl.row
-            - @aggregated_job.submit_point.switch_fields.where(description: description, display_field: true).each do |sf|
-              - if @aggregated_job.fields_data[sf.field_id].present?
-                dt.col-sm-4 = sf.name
-                dd.col-sm-8 = @aggregated_job.fields_data[sf.field_id]
-
   - if @aggregated_job.can_upload_print_files?
     - if !@aggregated_job.print_customer_machine_id.nil?
       .card.text-center.bg-light.col-sm-3
@@ -52,7 +33,7 @@
             = link_to rails_blob_path(@aggregated_job.print_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Print_file')}")
               = fa_icon('download')
               =< t('obj.download', obj: "#{t('strings.Print_file').downcase}")
-          - elsif can?(:upload_files, @aggregated_job) && !@aggregated_job.switch_sent
+          - elsif can?(:upload_files, @aggregated_job)
             .alert.alert-info = 'Caricare qui un file con la plancia oppure invia i singoli file dei lavori'
             =< link_to [:upload_file, @aggregated_job, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{AggregatedJob.human_attribute_name(:print_file)}")
                 = fa_icon('upload')
@@ -62,12 +43,11 @@
           br
           br
 
-          - if @aggregated_job.print_file&.attached? && @aggregated_job.switch_sent.nil?
-            - if !@aggregated_job.sending
-              - if can?(:delete_attachment, @aggregated_job)
-                =< link_to [:delete_attachment,  @aggregated_job, kind: 'print'],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
-                  = fa_icon('trash')
-                  =< t('obj.delete', obj: AggregatedJob.human_attribute_name(:print_file).downcase)
+          - if @aggregated_job.print_file&.attached?
+            - if can?(:delete_attachment, @aggregated_job)
+              =< link_to [:delete_attachment,  @aggregated_job, kind: 'print'],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
+                = fa_icon('trash')
+                =< t('obj.delete', obj: AggregatedJob.human_attribute_name(:print_file).downcase)
 
   - if @aggregated_job.can_upload_cut_files?
     - if !@aggregated_job.cut_customer_machine_id.nil?
@@ -85,12 +65,11 @@
           br
           br
 
-          - if  @aggregated_job.cut_file&.attached? && @aggregated_job.switch_sent.nil?
-            - if !@aggregated_job.sending
-              - if can?(:delete_attachment, @aggregated_job)
-                =< link_to [:delete_attachment,  @aggregated_job, kind: 'cut', redirect: params['controller']],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
-                  = fa_icon('trash')
-                  =< t('obj.delete', obj: AggregatedJob.human_attribute_name(:cut_file).downcase)
+          - if  @aggregated_job.cut_file&.attached?
+            - if can?(:delete_attachment, @aggregated_job)
+              =< link_to [:delete_attachment,  @aggregated_job, kind: 'cut', redirect: params['controller']],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
+                = fa_icon('trash')
+                =< t('obj.delete', obj: AggregatedJob.human_attribute_name(:cut_file).downcase)
 
 .card.bg-light
   h5.card-header = LineItem.model_name.human(count: 0)

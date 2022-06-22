@@ -5,7 +5,6 @@
     thead
       tr
         th = t('strings.Actions')
-        th = AggregatedJob.human_attribute_name(:aluan)
         th = AggregatedJob.model_name.human
         th = Order.human_attribute_name(:customer)
         - if params[:tag] == 'completed'

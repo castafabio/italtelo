@@ -4,7 +4,6 @@
       tr
         == content_for :extra_thead
         th = t('strings.Actions')
-        th = LineItem.human_attribute_name(:aluan)
         th = Order.human_attribute_name(:order_code)
         th = AggregatedJob.model_name.human
         th = LineItem.human_attribute_name(:row_number)

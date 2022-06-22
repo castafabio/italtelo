@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_06_20_140223) do
+ActiveRecord::Schema.define(version: 2021_10_05_072715) do
 
   create_table "active_storage_attachments", charset: "utf8mb3", force: :cascade do |t|
     t.string "name", null: false
@@ -42,10 +42,8 @@ ActiveRecord::Schema.define(version: 2022_06_20_140223) do
 
   create_table "aggregated_jobs", charset: "utf8mb3", force: :cascade do |t|
     t.integer "customer_machine_id"
-    t.integer "submit_point_id"
     t.string "status", default: "brand_new"
     t.date "deadline"
-    t.datetime "switch_sent"
     t.text "error_message"
     t.text "notes"
     t.integer "print_number_of_files", default: 0
@@ -53,27 +51,19 @@ ActiveRecord::Schema.define(version: 2022_06_20_140223) do
     t.boolean "need_printing", default: false
     t.boolean "need_cutting", default: false
     t.boolean "tilia", default: false
-    t.boolean "aluan", default: true
-    t.boolean "sending", default: false
     t.json "fields_data"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.bigint "print_customer_machine_id"
     t.bigint "cut_customer_machine_id"
-    t.bigint "vg7_print_machine_id"
-    t.bigint "vg7_cut_machine_id"
-    t.text "code"
     t.index ["customer_machine_id"], name: "index_aggregated_jobs_on_customer_machine_id"
     t.index ["cut_customer_machine_id"], name: "index_aggregated_jobs_on_cut_customer_machine_id"
     t.index ["print_customer_machine_id"], name: "index_aggregated_jobs_on_print_customer_machine_id"
-    t.index ["submit_point_id"], name: "index_aggregated_jobs_on_submit_point_id"
-    t.index ["vg7_cut_machine_id"], name: "index_aggregated_jobs_on_vg7_cut_machine_id"
-    t.index ["vg7_print_machine_id"], name: "index_aggregated_jobs_on_vg7_print_machine_id"
   end
 
   create_table "customer_machines", charset: "utf8mb3", force: :cascade do |t|
     t.string "name"
-    t.string "machine_switch_name"
+    t.string "bus240_machine_code"
     t.string "kind"
     t.string "ip_address"
     t.string "serial_number"
@@ -85,12 +75,6 @@ ActiveRecord::Schema.define(version: 2022_06_20_140223) do
     t.string "import_job"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.text "vg7_machine_reference"
-  end
-
-  create_table "customer_machines_vg7_machines", id: false, charset: "utf8mb3", force: :cascade do |t|
-    t.bigint "customer_machine_id", null: false
-    t.bigint "vg7_machine_id", null: false
   end
 
   create_table "customizations", charset: "utf8mb3", force: :cascade do |t|
@@ -122,7 +106,6 @@ ActiveRecord::Schema.define(version: 2022_06_20_140223) do
     t.integer "order_id"
     t.integer "customer_machine_id"
     t.integer "aggregated_job_id"
-    t.integer "submit_point_id"
     t.integer "row_number"
     t.integer "subjects"
     t.integer "quantity"
@@ -137,24 +120,15 @@ ActiveRecord::Schema.define(version: 2022_06_20_140223) do
     t.string "sides", default: "Monofacciale"
     t.text "description"
     t.text "error_message"
-    t.datetime "switch_sent"
-    t.boolean "aluan", default: true
     t.boolean "need_printing", default: false
     t.boolean "need_cutting", default: false
-    t.boolean "sending", default: false
-    t.json "fields_data"
     t.bigint "print_customer_machine_id"
     t.bigint "cut_customer_machine_id"
-    t.bigint "vg7_print_machine_id"
-    t.bigint "vg7_cut_machine_id"
     t.index ["aggregated_job_id"], name: "index_line_items_on_aggregated_job_id"
     t.index ["customer_machine_id"], name: "index_line_items_on_customer_machine_id"
     t.index ["cut_customer_machine_id"], name: "index_line_items_on_cut_customer_machine_id"
     t.index ["order_id"], name: "index_line_items_on_order_id"
     t.index ["print_customer_machine_id"], name: "index_line_items_on_print_customer_machine_id"
-    t.index ["submit_point_id"], name: "index_line_items_on_submit_point_id"
-    t.index ["vg7_cut_machine_id"], name: "index_line_items_on_vg7_cut_machine_id"
-    t.index ["vg7_print_machine_id"], name: "index_line_items_on_vg7_print_machine_id"
   end
 
   create_table "logs", charset: "utf8mb3", force: :cascade do |t|
@@ -208,34 +182,6 @@ ActiveRecord::Schema.define(version: 2022_06_20_140223) do
     t.index ["user_id"], name: "index_roles_users_on_user_id"
   end
 
-  create_table "submit_points", charset: "utf8mb3", force: :cascade do |t|
-    t.string "name"
-    t.string "kind", default: "preflight"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-  end
-
-  create_table "switch_fields", charset: "utf8mb3", force: :cascade do |t|
-    t.integer "submit_point_id"
-    t.string "dependency", default: ""
-    t.string "dependency_condition", default: ""
-    t.string "dependency_value", default: ""
-    t.boolean "display_field", default: false
-    t.boolean "read_only", default: false
-    t.string "field_id"
-    t.string "kind"
-    t.text "enum_values"
-    t.boolean "required"
-    t.string "name", default: ""
-    t.text "description"
-    t.integer "sort"
-    t.string "default_value"
-    t.boolean "visible_on_line_item", default: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["submit_point_id"], name: "index_switch_fields_on_submit_point_id"
-  end
-
   create_table "users", charset: "utf8mb3", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -250,21 +196,10 @@ ActiveRecord::Schema.define(version: 2022_06_20_140223) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  create_table "vg7_machines", charset: "utf8mb3", force: :cascade do |t|
-    t.text "description"
-    t.text "vg7_machine_reference"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-  end
-
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "aggregated_jobs", "customer_machines", column: "cut_customer_machine_id"
   add_foreign_key "aggregated_jobs", "customer_machines", column: "print_customer_machine_id"
-  add_foreign_key "aggregated_jobs", "vg7_machines", column: "vg7_cut_machine_id"
-  add_foreign_key "aggregated_jobs", "vg7_machines", column: "vg7_print_machine_id"
   add_foreign_key "line_items", "customer_machines", column: "cut_customer_machine_id"
   add_foreign_key "line_items", "customer_machines", column: "print_customer_machine_id"
-  add_foreign_key "line_items", "vg7_machines", column: "vg7_cut_machine_id"
-  add_foreign_key "line_items", "vg7_machines", column: "vg7_print_machine_id"
 end

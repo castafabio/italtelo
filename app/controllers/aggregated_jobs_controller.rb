@@ -111,7 +111,7 @@ class AggregatedJobsController < ApplicationController
   end
 
   def scheduler
-    @line_items = LineItem.aggregable.joins(:order).where(switch_sent: nil).order('orders.order_code': :desc)
+    @line_items = LineItem.aggregable.joins(:order).order('orders.order_code': :desc)
     @orders = @line_items.joins(:order).pluck(:order_code)
     @all_line_items = @line_items
     @print_machines = CustomerMachine.printer_machines.where(id: @all_line_items.pluck(:print_customer_machine_id).uniq)
@@ -217,39 +217,16 @@ class AggregatedJobsController < ApplicationController
 
   def edit
     @aggregated_job.submit_point = SubmitPoint.find(params[:submit_point_id])
-    @aggregated_job.sending = true
     if @aggregated_job.line_items.pluck(:sides).uniq.size > 1
       sides = 'Bifacciale'
     else
       sides = 'Monofacciale'
-    end
-    if @aggregated_job.aluan == true
-      aluan = 'Si'
-    else
-      aluan = 'No'
     end
     if !@aggregated_job.cut_customer_machine_id.nil?
       cut_machine = CustomerMachine.get_machine_switch_name(@aggregated_job.line_items.first.cut_customer_machine.id)
     end
     if !@aggregated_job.print_customer_machine_id.nil?
       print_machine = CustomerMachine.get_machine_switch_name(@aggregated_job.line_items.first.print_customer_machine.id)
-    end
-    unless @aggregated_job.fields_data.present?
-      @aggregated_job.fields_data = {}
-      @aggregated_job.fields_data[@aggregated_job.submit_point.switch_fields.find_by(name: 'Nome cliente').field_id] = @aggregated_job.orders.pluck(:customer)
-      @aggregated_job.fields_data[@aggregated_job.submit_point.switch_fields.find_by(name: 'Numero ordine').field_id] = @aggregated_job.orders.pluck(:order_code)
-      @aggregated_job.fields_data[@aggregated_job.submit_point.switch_fields.find_by(name: 'ID Lavoro aggregato').field_id] = @aggregated_job.id
-      @aggregated_job.fields_data[@aggregated_job.submit_point.switch_fields.find_by(name: 'ID Nesting').field_id] = @aggregated_job.metadata_id_nesting
-      @aggregated_job.fields_data[@aggregated_job.submit_point.switch_fields.find_by(name: 'Operatore').field_id] = current_user
-      @aggregated_job.fields_data[@aggregated_job.submit_point.switch_fields.find_by(name: 'Stampa').field_id] = sides
-      @aggregated_job.fields_data[@aggregated_job.submit_point.switch_fields.find_by(name: 'Scala').field_id] = @aggregated_job.line_items.first.scale
-      @aggregated_job.fields_data[@aggregated_job.submit_point.switch_fields.find_by(name: 'Alwan').field_id] = aluan
-      if !@aggregated_job.cut_customer_machine_id.nil?
-        @aggregated_job.fields_data[@aggregated_job.submit_point.switch_fields.find_by(name: 'Macchina').field_id] = cut_machine
-      end
-      if !@aggregated_job.print_customer_machine_id.nil?
-        @aggregated_job.fields_data[@aggregated_job.submit_point.switch_fields.find_by(name: 'Macchina').field_id] = print_machine
-      end
     end
   end
 

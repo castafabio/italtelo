@@ -18,11 +18,8 @@ class CreateLineItems < ActiveRecord::Migration[6.0]
       t.string :sides, default: 'Monofacciale'
       t.text :description
       t.text :error_message, default: nil
-      t.boolean :aluan, default: true
       t.boolean :need_printing, default: false
       t.boolean :need_cutting, default: false
-      t.boolean :sending, default: false
-      t.json :fields_data
     end
     add_reference :line_items, :print_customer_machine, foreign_key: { to_table: 'customer_machines' }
     add_reference :line_items, :cut_customer_machine, foreign_key: { to_table: 'customer_machines' }

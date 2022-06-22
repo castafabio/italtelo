@@ -44,26 +44,12 @@ class LineItem < ApplicationRecord
     return false if self.error_message == nil
   end
 
-  def toggle_is_active!(linked_resource = nil)
-    if self.aluan == false
-      self.update!(aluan: true)
-    else
-      self.update!(aluan: false)
-    end
-  end
-
   def editable?
-    (self.aggregated_job.nil? && self.switch_sent.nil? && !self.sending)
+    self.aggregated_job.nil?
   end
 
   def to_description(filter)
     text = self.description
-  end
-
-  def send_to_switch
-    if self.switch_sent.nil? && self.send_now
-      SendToSwitch.perform_later(self.id, 'line_item')
-    end
   end
 
   def to_file_path(kind)

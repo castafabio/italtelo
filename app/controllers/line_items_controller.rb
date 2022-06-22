@@ -24,10 +24,10 @@ class LineItemsController < ApplicationController
 
   def index
     if params[:worked] == 'true'
-      @line_items = LineItem.joins(:order).where.not(switch_sent: nil).order('orders.order_date': :desc)
+      @line_items = LineItem.joins(:order).order('orders.order_date': :desc)
     else
       params[:worked] = ''
-      @line_items = LineItem.joins(:order).where(switch_sent: nil).order('orders.order_date': :desc)
+      @line_items = LineItem.joins(:order).order('orders.order_date': :desc)
     end
     @all_line_items = @line_items
     @print_machines = CustomerMachine.printer_machines.where(id: @all_line_items.pluck(:print_customer_machine_id).compact)
@@ -181,39 +181,18 @@ class LineItemsController < ApplicationController
 
   def edit
     @line_item.submit_point = SubmitPoint.find(params[:submit_point_id])
-    @line_item.sending = true
-    if @line_item.aluan == true
-      aluan = 'Si'
-    else
-      aluan = 'No'
-    end
     if !@line_item.cut_customer_machine.nil?
       cut_machine = CustomerMachine.get_machine_switch_name(@line_item.cut_customer_machine.id)
     end
     if !@line_item.print_customer_machine.nil?
       print_machine = CustomerMachine.get_machine_switch_name(@line_item.print_customer_machine.id)
     end
-    unless @line_item.fields_data.present?
-      @line_item.fields_data = {}
-      @line_item.fields_data[@line_item.submit_point.switch_fields.find_by(name: 'Nome cliente').field_id] = @line_item.order.customer
-      @line_item.fields_data[@line_item.submit_point.switch_fields.find_by(name: 'Numero ordine').field_id] = @line_item.order.order_code
-      @line_item.fields_data[@line_item.submit_point.switch_fields.find_by(name: 'Alwan').field_id] = aluan
-      @line_item.fields_data[@line_item.submit_point.switch_fields.find_by(name: 'Scala').field_id] = @line_item.scale
-      @line_item.fields_data[@line_item.submit_point.switch_fields.find_by(name: 'Stampa').field_id] = @line_item.sides
-      @line_item.fields_data[@line_item.submit_point.switch_fields.find_by(name: 'Operatore').field_id] = current_user
-      if !@line_item.cut_customer_machine.nil?
-        @line_item.fields_data[@line_item.submit_point.switch_fields.find_by(name: 'Macchina').field_id] = cut_machine
-      end
-      if !@line_item.print_customer_machine.nil?
-        @line_item.fields_data[@line_item.submit_point.switch_fields.find_by(name: 'Macchina').field_id] = print_machine
-      end
-    end
   end
 
   private
 
   def update_params
-    params.require(:line_item).permit( :submit_point_id, :order_id, :print_customer_machine_id, :cut_customer_machine_id, :aggregated_job_id, :row_number, :subjects, :quantity, :height, :width, :material, :article_code, :article_name, :description, :aluan, :send_now, :scale, :sides, :error_message, :sending, fields_data: {} )
+    params.require(:line_item).permit( :submit_point_id, :order_id, :print_customer_machine_id, :cut_customer_machine_id, :aggregated_job_id, :row_number, :subjects, :quantity, :height, :width, :material, :article_code, :article_name, :description, :send_now, :scale, :sides, :error_message, :sending, fields_data: {} )
   end
 
   def append_line_item_params

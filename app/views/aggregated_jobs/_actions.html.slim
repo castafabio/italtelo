@@ -1,5 +1,5 @@
 =< ''
-- unless params[:action] == 'show' && aggregated_job.switch_sent && !aggregated_job.sending
+- unless params[:action] == 'show'
   button.btn.btn-sm.btn-info.dropdown-toggle class="#{aggregated_job.compiled? ? 'btn-info' : 'btn-warning pulse'}" type="button" data-toggle="dropdown"
     = t('strings.Actions')
 
@@ -9,7 +9,7 @@
       = fa_icon 'search-plus'
       =< t('obj.show', obj: AggregatedJob.model_name.human)
 
-  - if aggregated_job.editable? && !aggregated_job.sending
+  - if aggregated_job.editable?
     =< link_to [:send_to_switch, aggregated_job], class: :'dropdown-item', data: { remote: true }
       = fa_icon('paper-plane')
       =< t('obj.send', obj: AggregatedJob.model_name.human(count: 0).downcase)
@@ -19,7 +19,7 @@
         = fa_icon('link')
         =< t('obj.add', obj: LineItem.model_name.human(count: 0).downcase)
 
-    - if can?(:delete, aggregated_job) && !aggregated_job.sending
+    - if can?(:delete, aggregated_job)
       =< link_to [aggregated_job], class: :'dropdown-item', data: { confirm: t('confirm.generic'), method: :delete }
         = fa_icon('trash')
         =< t('strings.Delete')

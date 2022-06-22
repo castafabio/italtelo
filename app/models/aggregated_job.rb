@@ -60,13 +60,6 @@ class AggregatedJob < ApplicationRecord
     end
   end
 
-  def send_to_switch!
-    raise 'Caricare almeno un file di stampa' if self.need_printing && !self.print_file.attached?
-    raise 'Caricare almeno un file di taglio' if self.need_cutting && !self.cut_file.attached?
-    SendToSwitch.perform_later(self.id, 'aggregated_job')
-    CreateAjXml.perform_later(self.id)
-  end
-
   def update_line_items_machines!(kind, customer_machine_id)
     self.line_items.each do |line_item|
       if kind == 'print'
@@ -85,10 +78,6 @@ class AggregatedJob < ApplicationRecord
       text += "#{self.cut_customer_machine.name}"
     end
     text
-  end
-
-  def editable?
-    self.switch_sent.nil?
   end
 
   def has_errors?
@@ -150,14 +139,6 @@ class AggregatedJob < ApplicationRecord
 
   def can_upload_cut_files?
     self.need_cutting && !self.line_items.first.cut_file.attached?
-  end
-
-  def toggle_is_active!(linked_resource = nil)
-    if self.aluan == false
-      self.update!(aluan: true)
-    else
-      self.update!(aluan: false)
-    end
   end
 
   def to_file_path(kind)

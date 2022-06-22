@@ -1,15 +1,11 @@
-tr class="#{line_item.sending ? 'sending' : ''}"
+tr
   - if line_item.aggregated_job.present? && line_item.aggregated_job.status == 'completed'
     td = ''
   - else
-    - if (params[:controller] == 'line_items' && params[:worked] == '' && !line_item.sending) || (line_item.aggregated_job_id.present? && line_item.aggregated_job.line_items.size > 1)
+    - if (params[:controller] == 'line_items' && params[:worked] == '') || (line_item.aggregated_job_id.present? && line_item.aggregated_job.line_items.size > 1)
       td.dropdown == render partial: 'line_items/actions', locals: {line_item: line_item}
     - else
       td = ''
-  - if line_item.aggregated_job.nil? && line_item.editable?
-    td = toggle_is_active(line_item)
-  - else
-    td = boolean line_item.aluan
   td = line_item.order.order_code
   td.text-center
     - if line_item.aggregated_job.present?
@@ -23,13 +19,11 @@ tr class="#{line_item.sending ? 'sending' : ''}"
         - if line_item.print_file.attached?
           = link_to rails_blob_path(line_item&.print_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Print_file')}")
             = fa_icon('download')
-          - if line_item.switch_sent.nil? && !line_item.sending
-            =< link_to [:delete_attachment, line_item, kind: 'print'], class: :'tn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file'), spinner: true }
-              = fa_icon('trash')
+          =< link_to [:delete_attachment, line_item, kind: 'print'], class: :'tn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file'), spinner: true }
+            = fa_icon('trash')
         - else
-          - if !line_item.sending
-            = link_to [:upload_file, line_item, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Print_file')}")
-              = fa_icon('upload')
+          = link_to [:upload_file, line_item, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Print_file')}")
+            = fa_icon('upload')
     - else
       td.text-center = boolean line_item.print_file.attached?
     - if line_item.need_cutting && line_item.cut_customer_machine.present?
@@ -37,13 +31,11 @@ tr class="#{line_item.sending ? 'sending' : ''}"
         - if line_item.cut_file.attached?
           = link_to rails_blob_path(line_item&.cut_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Cut_file')}")
             = fa_icon('download')
-          - if line_item.switch_sent.nil? && !line_item.sending
-            =< link_to [:delete_attachment, line_item, kind: 'cut'], class: :'tn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file'), spinner: true }
-              = fa_icon('trash')
+          =< link_to [:delete_attachment, line_item, kind: 'cut'], class: :'tn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file'), spinner: true }
+            = fa_icon('trash')
         - else
-          - if !line_item.sending
-            = link_to [:upload_file, line_item, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Cut_file')}")
-              = fa_icon('upload')
+          = link_to [:upload_file, line_item, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Cut_file')}")
+            = fa_icon('upload')
     - else
       td.text-center = boolean line_item.cut_file.attached?
   - else
@@ -67,7 +59,7 @@ tr class="#{line_item.sending ? 'sending' : ''}"
   td = line_item.sides
   td
     - if line_item.need_printing && line_item.editable?
-      - if line_item.print_customer_machine_id.nil? && line_item.switch_sent.nil? || line_item.aggregated_job.nil?
+      - if line_item.print_customer_machine_id.nil? || line_item.aggregated_job.nil?
         = select_tag :print_customer_machine_id, options_for_select(CustomerMachine.printing_machines.collection {|p| [p.to_s, p.id]}), prompt: t('strings.Select_one'), class: :'inline_select print form-control', data: { id: line_item.id }
       - else
         = line_item.to_customer_machine('print')
@@ -75,7 +67,7 @@ tr class="#{line_item.sending ? 'sending' : ''}"
       = line_item&.to_customer_machine('print')
   td
     - if line_item.need_cutting && line_item.editable?
-      - if line_item.cut_customer_machine_id.nil? && line_item.switch_sent.nil? || line_item.aggregated_job.nil?
+      - if line_item.cut_customer_machine_id.nil? || line_item.aggregated_job.nil?
         = select_tag :print_customer_machine_id, options_for_select(CustomerMachine.cutting_machines.collection {|p| [p.to_s, p.id]}), prompt: t('strings.Select_one'), class: :'inline_select print form-control', data: { id: line_item.id }
       - else
         = line_item&.to_customer_machine('cut')

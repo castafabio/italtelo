@@ -8,11 +8,9 @@ form
       = fa_icon('search')
     =< link_to [:line_items, worked: params[:worked]], class: :'btn btn-sm btn-secondary'
       = fa_icon('broom')
-  td = ''
   td
     = select_tag :line_item_id, options_for_select(@all_line_items.collect { |li| [li.to_s, li.id]}, params[:line_item_id]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
-
-  td = ""
+  td
   td = ""
   td = ""
   td = ""

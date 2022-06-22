@@ -8,7 +8,6 @@ form
     =< link_to [:aggregated_jobs, tag: params[:tag]], class: :'btn btn-sm btn-secondary'
       = fa_icon('broom')
   td = ''
-  td = ''
   td
     = select_tag :customer, options_for_select(@customers, params[:customer]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
   td = ''

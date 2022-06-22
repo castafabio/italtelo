@@ -4,7 +4,6 @@ class CreateAggregatedJobs < ActiveRecord::Migration[6.0]
       t.belongs_to :customer_machine
       t.string :status, default: "brand_new"
       t.date :deadline
-      t.datetime :switch_sent, default: nil
       t.text :error_message, default: nil
       t.text :notes
       t.integer :print_number_of_files, default: 0
@@ -12,8 +11,6 @@ class CreateAggregatedJobs < ActiveRecord::Migration[6.0]
       t.boolean :need_printing, default: false
       t.boolean :need_cutting, default: false
       t.boolean :tilia, default: false
-      t.boolean :aluan, default: true
-      t.boolean :sending, default: false
       t.json :fields_data
       t.timestamps
     end

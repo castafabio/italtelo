@@ -2,9 +2,7 @@ it:
   activerecord:
     attributes:
       aggregated_job:
-        aluan: Alwan
         deadline: Scadenza
-        switch_sent: "Files inviati"
         notes: Note di produzione
         status: Stato
         print_customer_machine: Macchina da stampa
@@ -45,7 +43,6 @@ it:
         article_code: Codice articolo
         article_name: Nome articolo
         description: Descrizione
-        aluan: Alwan
         print_file: File di stampa
         cut_file: File di taglio
         scale: Scala

@@ -1,8 +1,6 @@
 it:
   actions:
     add: "Aggiungi"
-    aluan_yes: "Alwan: si"
-    aluan_no: "Alwan: no"
     aggregate: "Aggrega"
     back: "Indietro"
     brand_new: "Nuova"
