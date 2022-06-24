@@ -48,11 +48,12 @@ class ImportOrders < ApplicationJob
             else
               line_item.update!(line_item_details)
             end
-        rescue Exception => e
-          GESTIONALE_LOGGER.info(" Order Errore: #{e.message}")
-          Log.create!(kind: 'error', action: "Import Ordine", description: e.message)
-        ensure
-          GESTIONALE_LOGGER.info("**** IMPORTAZIONE ORDINI TERMINATA ****")
+          rescue Exception => e
+            GESTIONALE_LOGGER.info(" Order Errore: #{e.message}")
+            Log.create!(kind: 'error', action: "Import Ordine", description: e.message)
+          ensure
+            GESTIONALE_LOGGER.info("**** IMPORTAZIONE ORDINI TERMINATA ****")
+          end
         end
       end
     rescue Exception => e
