@@ -55,12 +55,12 @@ class ImportOrders < ApplicationJob
           GESTIONALE_LOGGER.info("**** IMPORTAZIONE ORDINI TERMINATA ****")
         end
       end
-    end
-  rescue Exception => e
-    GESTIONALE_LOGGER.info("errore connessione = #{e.message}")
-    log_details = { kind: 'error', action: "Connessione import DB_TABLE", description: "#{e.message}" }
-    if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
-      Log.create!(log_details)
+    rescue Exception => e
+      GESTIONALE_LOGGER.info("errore connessione = #{e.message}")
+      log_details = { kind: 'error', action: "Connessione import DB_TABLE", description: "#{e.message}" }
+      if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
+        Log.create!(log_details)
+      end
     end
   end
 end

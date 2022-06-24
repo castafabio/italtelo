@@ -21,7 +21,12 @@
     .card-body
       - if @line_item.aggregated_job.nil?
         - if @line_item.attached_file.attached?
-          =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@line_item.attached_file, disposition: 'attachment'))
+          - if @line_item.number_of_files > 1
+            =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@line_item.attached_file, disposition: 'attachment'))
+          - elsif @line_item.attached_file.representable?
+            =< link_to(image_tag(@line_item.attached_file.representation(resize: "150x150>")), rails_blob_path(@line_item.attached_file, disposition: 'attachment'))
+          br
+          br
 
           - if can?(:delete_attachment, @line_item)
             =< link_to [:delete_attachment,  @line_item],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }

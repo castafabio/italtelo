@@ -14,7 +14,11 @@
       h5.card-header = AggregatedJob.human_attribute_name(:attached_file)
       .card-body
         - if @aggregated_job.attached_file.attached?
-          =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@aggregated_job.attached_file, disposition: 'attachment'))
+          - if @aggregated_job.number_of_files > 1
+            =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@aggregated_job.attached_file, disposition: 'attachment'))
+          - elsif @aggregated_job.attached_file.representable?
+            = link_to(image_tag(@aggregated_job.attached_file.representation(resize: "150x150>")), rails_blob_path(@aggregated_job.attached_file, disposition: 'attachment'))
+
         - elsif can?(:upload_files, @aggregated_job)
           .alert.alert-info = 'Per poter inviare i file in hotfolder caricare qui un file con la plancia'
           =< link_to [:upload_file, @aggregated_job, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{AggregatedJob.human_attribute_name(:attached_file)}")
