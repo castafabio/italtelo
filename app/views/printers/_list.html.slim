@@ -30,5 +30,14 @@
           == render partial: 'filters'
       - if collection.length > 0
         == render collection
+        - if params[:controller] == 'aggregated_jobs'
+          tr
+            td colspan="10"
+              = simple_format "Tot. consumo: \r\n #{aggregated_job.calculate_ink_total.map{|k,v| "#{k}: #{v}"}.join('; ')}"
+
+        - if params[:controller] == 'line_items'
+          tr
+            td colspan="10"
+              = simple_format "Tot. consumo: \r\n #{line_item.calculate_ink_total.map{|k,v| "#{k}: #{v}"}.join('; ')}"
       - else
         tr: td.colspan.info = t('obj.empty_list', obj: Printer.model_name.human(count: 0).downcase)

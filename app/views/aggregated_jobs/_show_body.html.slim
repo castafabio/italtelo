@@ -51,10 +51,10 @@
     .card.bg-light.text-center
       h5.card-header = 'Dati Stampa'
       .card-body
-        == render partial: 'printers/list', locals: { collection: @aggregated_job.printers.paginate(page: params[:page], per_page: params[:per_page]) }
+        == render partial: 'printers/list', locals: { collection: @aggregated_job.printers.paginate(page: params[:page], per_page: params[:per_page]), aggregated_job: @aggregated_job }
 
   - if @aggregated_job.cutters.size > 0
     .card.bg-light.text-center
       h5.card-header = 'Dati taglierina'
       .card-body
-        == render partial: 'cutters/list', locals: { collection: @aggregated_job.cutters.paginate(page: params[:page], per_page: params[:per_page]) }
+        == render partial: 'cutters/list', locals: { collection: @aggregated_job.cutters.paginate(page: params[:page], per_page: params[:per_page]), aggregated_job: @aggregated_job }

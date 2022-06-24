@@ -4,14 +4,27 @@ class UpdateItalteloTable < ApplicationJob
 
   def perform(id, type)
     skip = false
+    new_inks = ""
     if type == 'printer'
       resource = Printer.find_by(id: id)
-      printers = Printer.where(resource_id: resource.resource_id, resource_type: 'AggregatedJob')
+      if Printer.where(resource_id: resource.resource_id, resource_type: 'AggregatedJob').size > 0
+        printers = Printer.where(resource_id: resource.resource_id, resource_type: 'AggregatedJob')
+      elsif Printer.where(resource_id: resource.resource_id, resource_type: 'LineItem').size > 0
+        printers = Printer.where(resource_id: resource.resource_id, resource_type: 'LineItem')
+      end
       if printers.size > 1
         skip = true
         duration = (printers.pluck(:print_time).map { |v| v.to_i }).sum
       else
         duration = resource.print_time.to_i
+      end
+      printer_ink_total = resource.resource.calculate_ink_total
+      if resource.resource.is_a?(AggregatedJob)
+        printer_ink_total.map { |k, v| printer_ink_total[k] = v / resource.resource.line_items.size }
+      end
+      inks = ""
+      printer_ink_total.each do |name, value|
+        inks += "#{name}: #{value}; "
       end
       start_at = resource.start_at
       end_at = resource.end_at
@@ -51,14 +64,15 @@ class UpdateItalteloTable < ApplicationJob
 
       italtelo_line_item_ids.split(";").each do |li_row_number|
         if skip
+          #  colonna_inchiostri = #{new_inks}
           tsql = "UPDATE avlav SET lce_qtaes = #{quantity}, lce_stato = 'C', lce_stop = #{end_at}, lce_tempese = #{duration}, lce_ultagg = #{DateTime.now} WHERE id = #{li_row_number}"
         else
-          tsql = "UPDATE avlav SET lce_qtaes = #{quantity}, lce_start = #{start_at}, lce_stato = 'C', lce_stop = #{end_at}, lce_tempese = #{duration}, lce_ultagg = #{DateTime.now} WHERE id = #{li_row_number}"
+          tsql = "UPDATE avlav SET lce_qtaes = #{quantity}, lce_start = #{start_at}, lce_stato = 'C', lce_stop = #{end_at}, lce_tempese = #{duration}, lce_ultagg = #{DateTime.now}, colonna_inchiostri = #{new_inks} WHERE id = #{li_row_number}"
         end
         GESTIONALE_LOGGER.info("tsql == #{tsql}")
         client.execute(tsql)
         line_item = LineItem.find_by(row_number: li_row_number)
-        line_item.update!(status: 'completed')
+        line_item.update!(status: 'completed') if line_item.status == 'brand_new'
         line_item.check_aggregated_job
       end
       # ActiveRecord::Base.connection.exec_query(tsql)
@@ -70,5 +84,4 @@ class UpdateItalteloTable < ApplicationJob
       end
     end
   end
-
 end

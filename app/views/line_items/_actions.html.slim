@@ -1,6 +1,10 @@
 button.btn.btn-sm.btn-info.dropdown-toggle type="button" data-toggle="dropdown"
   = t('strings.Actions')
 .dropdown-menu
+
+  = link_to [line_item], class: :'dropdown-item', spinner: true
+    = fa_icon('search')
+    =< LineItem.model_name.human
   - if can? :aggregate, LineItem
     - if line_item.customer_machine.present? && line_item.aggregated_job.nil? && line_item.attached_file.attached?
       =< link_to [:send_to_hotfolder, line_item], class: :'dropdown-item', data: { remote: true }

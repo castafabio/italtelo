@@ -27,24 +27,3 @@ json.each do |environment, users|
   end
 end
 puts "Users imported. "
-
-puts "Customizations ... "
-if Customization.where(parameter: 'switch_token').size == 0
-  Customization.create!(parameter: 'switch_token', value: '0')
-end
-
-if Customization.where(parameter: 'switch_url').size == 0
-  Customization.create!(parameter: 'switch_url', value: 'http://', notes: 'Url server switch')
-end
-
-if Customization.where(parameter: 'switch_port').size == 0
-  Customization.create!(parameter: 'switch_port', value: '51088', notes: 'Porta server switch')
-end
-
-if Customization.where(parameter: 'switch_user').size == 0
-  Customization.create!(parameter: 'switch_user', value: 'Administrator', notes: 'Utente switch')
-end
-
-if Customization.where(parameter: 'switch_psw').size == 0
-  Customization.create!(parameter: 'switch_psw', value: '', notes: 'Password utente switch')
-end

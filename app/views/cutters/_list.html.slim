@@ -25,7 +25,6 @@
         tr
           == render partial: 'filters'
       - if collection.length > 0
-        - if params[:controller] == 'cutters'
           == render collection
       - else
         tr: td.colspan.info = t('obj.empty_list', obj: Cutter.model_name.human(count: 0).downcase)

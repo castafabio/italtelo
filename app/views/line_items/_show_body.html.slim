@@ -1,0 +1,58 @@
+.card-group
+  .card.bg-light
+    h5.card-header = "Dati #{LineItem.model_name.human.downcase}"
+    .card-body
+      dl.row
+        dt.col-sm-4 = LineItem.model_name.human
+        dd.col-sm-8 = @line_item.to_s
+
+        dt.col-sm-4 = AggregatedJob.human_attribute_name(:customer_machine)
+        dd.col-sm-8 = @line_item.customer_machine.name
+
+        - if @line_item.aggregated_job.present?
+          dt.col-sm-4 = AggregatedJob.model_name.human
+          dd.col-sm-8 = @line_item.aggregated_job.to_s
+
+        dt.col-sm-4 = LineItem.human_attribute_name(:customer)
+        dd.col-sm-8 = @line_item.customer
+
+  .card.text-center.bg-light.col-sm-3
+    h5.card-header = AggregatedJob.human_attribute_name(:attached_file)
+    .card-body
+      - if @line_item.aggregated_job.nil?
+        - if @line_item.attached_file.attached?
+          =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@line_item.attached_file, disposition: 'attachment'))
+
+          - if can?(:delete_attachment, @line_item)
+            =< link_to [:delete_attachment,  @line_item],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
+              = fa_icon('trash')
+              =< t('obj.delete', obj: LineItem.human_attribute_name(:attached_file).downcase)
+
+          =< link_to [:send_to_hotfolder, @line_item], class: :'btn btn-sm btn-info', data: { remote: true }
+            =< fa_icon('paper-plane')
+            =< t('obj.send', obj: '')
+
+        - elsif can?(:upload_files, @line_item)
+          =< link_to [:upload_file, @line_item], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{LineItem.human_attribute_name(:attached_file)}")
+              = fa_icon('upload')
+
+      - else
+        = boolean @line_item.attached_file.attached?
+
+      br
+      br
+      - if @line_item.send_at.present?
+        p = "Inviato: #{l(@line_item.send_at, format: :long)}"
+
+.card-group
+  - if @line_item.printers.size > 0
+    .card.bg-light.text-center
+      h5.card-header = 'Dati Stampa'
+      .card-body
+        == render partial: 'printers/list', locals: { collection: @line_item.printers.paginate(page: params[:page], per_page: params[:per_page]), line_item: @line_item }
+
+  - if @line_item.cutters.size > 0
+    .card.bg-light.text-center
+      h5.card-header = 'Dati taglierina'
+      .card-body
+        == render partial: 'cutters/list', locals: { collection: @line_item.cutters.paginate(page: params[:page], per_page: params[:per_page]), line_item: @line_item }

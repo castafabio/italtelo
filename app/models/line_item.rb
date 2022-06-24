@@ -4,6 +4,9 @@ class LineItem < ApplicationRecord
   belongs_to :customer_machine
   belongs_to :aggregated_job, optional: true
 
+  has_many :printers, as: :resource, dependent: :destroy
+  has_many :cutters, as: :resource, dependent: :destroy
+
   has_one_attached :attached_file
 
   attr_accessor :send_now
@@ -95,6 +98,23 @@ class LineItem < ApplicationRecord
 
   def to_s
     "#{self.order_code} - #{self.row_number}"
+  end
+
+  def calculate_ink_total
+    result = {}
+    self.printers.where.not(ink: nil).pluck(:ink).each do |inks|
+      inks.split(';').each do |color|
+        key, value = color.split(':')
+        next if key.blank?
+        key = key.downcase.strip
+        if result[key].present?
+          result[key] = result[key] + value.to_f
+        else
+          result[key] = value.to_f
+        end
+      end
+    end
+    result
   end
 
   def check_aggregated_job

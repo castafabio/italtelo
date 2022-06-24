@@ -1,7 +1,7 @@
 class LineItemsController < ApplicationController
   load_and_authorize_resource
 
-  before_action :fetch_line_item, only: [:inline_update, :edit, :upload_file, :delete_attachment, :append_line_item, :send_to_hotfolder]
+  before_action :fetch_line_item, only: [:inline_update, :edit, :upload_file, :delete_attachment, :append_line_item, :send_to_hotfolder, :show]
 
   skip_before_action :verify_authenticity_token, only: :upload_file
 
@@ -33,7 +33,11 @@ class LineItemsController < ApplicationController
   end
 
   def index
-    @line_items = LineItem.all
+    if params[:worked].present?
+      @line_items = LineItem.where(status: 'completed')
+    else
+      @line_items = LineItem.where(status: 'brand_new')
+    end
     @all_line_items = @line_items
     if params[:line_item_id].present?
       @line_items = @line_items.where(id: params[:line_item_id])
