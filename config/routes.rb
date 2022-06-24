@@ -16,7 +16,7 @@ Rails.application.routes.draw do
     end
     member do
       delete :delete_attachment
-      match :send_to_switch, via: [:get, :post]
+      match :send_to_hotfolder, via: [:get, :post]
       match :upload_file, via: [:get, :post]
       match :add_line_items, via: [:get, :patch]
       patch :inline_update
@@ -25,8 +25,6 @@ Rails.application.routes.draw do
   end
 
   resources :customer_machines
-
-  resources :customizations
 
   resources :cutters, only: :index do
     member do
@@ -39,10 +37,9 @@ Rails.application.routes.draw do
       delete :delete_attachment
       match :upload_file, via: [:get, :post]
       match :append_line_item, via: [:get, :patch]
-      patch :toggle_is_active
       patch :deaggregate
       patch :inline_update
-      post :send_to_switch
+      match :send_to_hotfolder, via: [:get, :post]
     end
   end
 

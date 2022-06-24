@@ -18,7 +18,3 @@
   = link_to [:sidekiq_web], target: :_blank, class: 'dropdown-item', data: { spinner: false }
     = fa_icon 'history'
     span =< t('strings.Sidekiq')
-- if can? :read, Customization
-  = link_to [:customizations], class: "#{params[:controller] == 'customizations' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
-    = fa_icon('wrench')
-    span =< Customization.model_name.human(count: 0)

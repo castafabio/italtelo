@@ -1,20 +1,21 @@
 button.btn.btn-sm.btn-info.dropdown-toggle type="button" data-toggle="dropdown"
   = t('strings.Actions')
 .dropdown-menu
-  - if line_item.aggregated_job_id.nil?
-    - if (line_item.li_print_file_attached? && line_item.li_cut_file_attached?)
-      - if can?(:send_to_switch, LineItem)
-        - SubmitPoint.for_line_items.each do |submit_point|
-          - unless line_item.is_aggregated?
-            =< link_to [:edit, line_item, submit_point_id: submit_point.id], class: :'dropdown-item', remote: true
-              = fa_icon('paper-plane')
-              =< "Invia a #{submit_point}"
   - if can? :aggregate, LineItem
+    - if line_item.customer_machine.present? && line_item.aggregated_job.nil? && line_item.attached_file.attached?
+      =< link_to [:send_to_hotfolder, line_item], class: :'dropdown-item', data: { remote: true }
+        = fa_icon('paper-plane')
+        =< t('strings.Send_to_hotfolder')
     - unless line_item.is_aggregated?
-      =< link_to [:append_line_item, line_item], class: :'dropdown-item', remote: true
-        = fa_icon('link')
-        =< t('strings.Aggregate')
+      - if line_item.send_at.nil?
+        =< link_to [:append_line_item, line_item], class: :'dropdown-item', remote: true
+          = fa_icon('link')
+          =< t('strings.Aggregate')
     - else
-      =< link_to [:deaggregate, line_item], class: :'dropdown-item', method: :patch, data: {spinner: true}, remote: true
+      =< link_to [line_item.aggregated_job], class: :'dropdown-item', data: {spinner: true}
+        = fa_icon('search-plus')
+        =< AggregatedJob.model_name.human
+
+      =< link_to [:deaggregate, line_item, index: params[:controller]], class: :'dropdown-item', method: :patch, remote: true
         = fa_icon('unlink')
         =< "Deaggrega"

@@ -28,7 +28,7 @@
               span =< Cutter.model_name.human(count: 0)
 
         - if current_user.has_role?('super_admin') || current_user.has_role?('admin') || current_user.has_role?('clerk')
-          li.nav-item.dropdown class="#{'active' if ['roles', 'users',  'customer_machines', 'logs', 'customizations'].include?(params[:controller]) }"
+          li.nav-item.dropdown class="#{'active' if ['roles', 'users',  'customer_machines', 'logs'].include?(params[:controller]) }"
             = link_to '#', class: 'nav-link dropdown-toggle', data: {toggle: "dropdown"}
               = fa_icon 'cogs'
               span =< t('strings.Administration')

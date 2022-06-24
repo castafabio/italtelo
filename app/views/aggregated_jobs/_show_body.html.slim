@@ -6,70 +6,40 @@
         dt.col-sm-4 = AggregatedJob.model_name.human
         dd.col-sm-8 = @aggregated_job.to_s
 
-        dt.col-sm-4 = AggregatedJob.human_attribute_name(:deadline)
-        dd.col-sm-8 = @aggregated_job.deadline&.strftime("%d-%m-%Y")
+        dt.col-sm-4 = AggregatedJob.human_attribute_name(:customer_machine)
+        dd.col-sm-8 = @aggregated_job.line_items.first.customer_machine.name
 
-        - if @aggregated_job.notes.present?
-          dt.col-sm-4 = AggregatedJob.human_attribute_name(:notes)
-          dd.col-sm-8 = simple_format @aggregated_job.notes
+  - if !@aggregated_job.customer_machine.nil?
+    .card.text-center.bg-light.col-sm-3
+      h5.card-header = AggregatedJob.human_attribute_name(:attached_file)
+      .card-body
+        - if @aggregated_job.attached_file.attached?
+          =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@aggregated_job.attached_file, disposition: 'attachment'))
+        - elsif can?(:upload_files, @aggregated_job)
+          .alert.alert-info = 'Per poter inviare i file in hotfolder caricare qui un file con la plancia'
+          =< link_to [:upload_file, @aggregated_job, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{AggregatedJob.human_attribute_name(:attached_file)}")
+              = fa_icon('upload')
+        - else
+          .alert.alert-success = 'Sono stati inviati i singoli file dei lavori'
 
-        - if @aggregated_job.print_customer_machine_id.present?
-          dt.col-sm-4 = AggregatedJob.human_attribute_name(:print_customer_machine)
-          dd.col-sm-8 = @aggregated_job.line_items.first&.print_customer_machine&.name
+        br
+        br
 
-        - if @aggregated_job.cut_customer_machine_id.present?
-          dt.col-sm-4 = AggregatedJob.human_attribute_name(:cut_customer_machine)
-          dd.col-sm-8 = @aggregated_job.line_items.first&.cut_customer_machine&.name
+        - if @aggregated_job.attached_file&.attached?
+          - if can?(:delete_attachment, @aggregated_job)
+            =< link_to [:delete_attachment,  @aggregated_job],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
+              = fa_icon('trash')
+              =< t('obj.delete', obj: AggregatedJob.human_attribute_name(:attached_file).downcase)
 
-        dt.col-sm-4 = AggregatedJob.human_attribute_name(:error_message)
-        dd.col-sm-8 = simple_format @aggregated_job.error_message
+          =< link_to [:send_to_hotfolder, @aggregated_job], class: :'btn btn-sm btn-info', data: { remote: true }
+            =< fa_icon('paper-plane')
+            =< t('obj.send', obj: '')
 
-  - if @aggregated_job.can_upload_print_files?
-    - if !@aggregated_job.print_customer_machine_id.nil?
-      .card.text-center.bg-light.col-sm-3
-        h5.card-header = AggregatedJob.human_attribute_name(:print_file)
-        .card-body
-          - if @aggregated_job.print_file.attached?
-            = link_to rails_blob_path(@aggregated_job.print_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Print_file')}")
-              = fa_icon('download')
-              =< t('obj.download', obj: "#{t('strings.Print_file').downcase}")
-          - elsif can?(:upload_files, @aggregated_job)
-            .alert.alert-info = 'Caricare qui un file con la plancia oppure invia i singoli file dei lavori'
-            =< link_to [:upload_file, @aggregated_job, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{AggregatedJob.human_attribute_name(:print_file)}")
-                = fa_icon('upload')
-          - else
-            .alert.alert-success = 'Sono stati inviati i singoli file dei lavori'
+        br
+        br
+        - if @aggregated_job.send_at.present?
+          p = "Inviato: #{l(@aggregated_job.send_at, format: :long)}"
 
-          br
-          br
-
-          - if @aggregated_job.print_file&.attached?
-            - if can?(:delete_attachment, @aggregated_job)
-              =< link_to [:delete_attachment,  @aggregated_job, kind: 'print'],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
-                = fa_icon('trash')
-                =< t('obj.delete', obj: AggregatedJob.human_attribute_name(:print_file).downcase)
-
-  - if @aggregated_job.can_upload_cut_files?
-    - if !@aggregated_job.cut_customer_machine_id.nil?
-      .card.text-center.bg-light.col-sm-3
-        h5.card-header = AggregatedJob.human_attribute_name(:cut_file)
-        .card-body
-          - if @aggregated_job.cut_file.attached?
-            = link_to rails_blob_path(@aggregated_job.cut_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Cut_file')}")
-              = fa_icon('download')
-              =< t('obj.download', obj: "#{t('strings.Cut_file').downcase}")
-          - elsif can?(:upload_files, @aggregated_job)
-            .alert.alert-info = 'Caricare qui un file con la plancia oppure invia i singoli file dei lavori'
-            =< link_to [:upload_file, @aggregated_job, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{AggregatedJob.human_attribute_name(:cut_file)}")
-                = fa_icon('upload')
-          br
-          br
-
-          - if  @aggregated_job.cut_file&.attached?
-            - if can?(:delete_attachment, @aggregated_job)
-              =< link_to [:delete_attachment,  @aggregated_job, kind: 'cut', redirect: params['controller']],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
-                = fa_icon('trash')
-                =< t('obj.delete', obj: AggregatedJob.human_attribute_name(:cut_file).downcase)
 
 .card.bg-light
   h5.card-header = LineItem.model_name.human(count: 0)

@@ -1,14 +1,24 @@
 class LineItemsController < ApplicationController
   load_and_authorize_resource
 
-  before_action :fetch_line_item, only: [:inline_update, :edit, :show, :toggle_is_active, :upload_file, :delete_attachment, :append_line_item]
+  before_action :fetch_line_item, only: [:inline_update, :edit, :upload_file, :delete_attachment, :append_line_item, :send_to_hotfolder]
 
   skip_before_action :verify_authenticity_token, only: :upload_file
 
+  def send_to_hotfolder
+    begin
+      @line_item.send_to_hotfolder!
+      @line_item.update!(send_at: DateTime.now)
+      flash[:notice] = I18n::t('obj.sent', obj: LineItem.human_attribute_name(:attached_file))
+    rescue Exception => e
+      flash[:alert] = I18n::t('obj.not_sent_exception', obj: LineItem.human_attribute_name(:attached_file), message: e.message)
+    ensure
+      render js: 'location.reload();'
+    end
+  end
+
   def create
     @line_item = LineItem.new(create_params)
-    @line_item.submit_point = SubmitPoint.preflight.first
-    @line_item.order = @order
     if @line_item.save
       flash[:notice] = I18n::t('obj.created', obj: LineItem.model_name.human.downcase)
       if params[:subaction] == 'finish'
@@ -23,32 +33,16 @@ class LineItemsController < ApplicationController
   end
 
   def index
-    if params[:worked] == 'true'
-      @line_items = LineItem.joins(:order).order('orders.order_date': :desc)
-    else
-      params[:worked] = ''
-      @line_items = LineItem.joins(:order).order('orders.order_date': :desc)
-    end
+    @line_items = LineItem.all
     @all_line_items = @line_items
-    @print_machines = CustomerMachine.printer_machines.where(id: @all_line_items.pluck(:print_customer_machine_id).compact)
-    @cut_machines = CustomerMachine.cutter_machines.where(id: @all_line_items.pluck(:cut_customer_machine_id).compact)
     if params[:line_item_id].present?
       @line_items = @line_items.where(id: params[:line_item_id])
     end
     if params[:customer].present?
-      @line_items = @line_items.joins(:order).where('orders.customer': params[:customer])
+      @line_items = @line_items.where(customer: params[:customer])
     end
-    if params[:print_customer_machine_id].present?
-      @line_items = @line_items.where(print_customer_machine_id: params[:print_customer_machine_id])
-    end
-    if params[:cut_customer_machine_id].present?
-      @line_items = @line_items.where(cut_customer_machine_id: params[:cut_customer_machine_id])
-    end
-    if params[:from].present?
-      @line_items = @line_items.joins(:order).where('orders.order_date >= :from', from: params[:from].to_date)
-    end
-    if params[:to].present?
-      @line_items = @line_items.joins(:order).where('orders.order_date <= :to', to: params[:to].to_date)
+    if params[:customer_machine_id].present?
+      @line_items = @line_items.where(customer_machine_id: params[:customer_machine_id])
     end
     @line_items = @line_items.where('description LIKE :search', search: "%#{params[:search]}%") if params[:search].present?
   end
@@ -70,17 +64,15 @@ class LineItemsController < ApplicationController
       if @line_item.aggregated_job_id.present?
         render json: { code: 400 }
       else
-        if params[:value] == '1:1' || params[:value] == '1:10'
-          @line_item.update!(scale: params[:value])
-        end
-        if @line_item.need_printing
-          if params[:print].present?
-            @line_item.update(print_customer_machine_id: params[:print].split('_').first.to_i)
-          end
-        end
-        if @line_item.need_cutting
-          if params[:cut].present?
-            @line_item.update(cut_customer_machine_id: params[:cut].split('_').first.to_i)
+        if params[:customer_machine].present?
+          customer_machine = CustomerMachine.find_by(id: params[:customer_machine].to_i)
+          @line_item.update!(customer_machine_id: customer_machine.id)
+          if customer_machine.kind == 'printer'
+            @line_item.update!(need_printing: true)
+            @line_item.update!(need_cutting: false)
+          else
+            @line_item.update!(need_printing: false)
+            @line_item.update!(need_cutting: true)
           end
         end
         render json: { code: 200 }
@@ -105,16 +97,9 @@ class LineItemsController < ApplicationController
 
   def delete_attachment
     begin
-      case params[:kind]
-      when 'print'
-        @line_item.print_file.purge
-        @line_item.update_column(:print_number_of_files, 0)
-        flash[:notice] = t('obj.destroyed', obj: LineItem.human_attribute_name(:print_file).downcase)
-      when 'cut'
-        @line_item.cut_file.purge
-        @line_item.update_column(:cut_number_of_files, 0)
-        flash[:notice] = t('obj.destroyed', obj: LineItem.human_attribute_name(:cut_file).downcase)
-      end
+      @line_item.attached_file.purge
+      @line_item.update!(number_of_files: 0)
+      flash[:notice] = t('obj.destroyed', obj: LineItem.human_attribute_name(:attached_file).downcase)
     rescue Exception => e
       flash[:alert] = t('obj.not_destroyed', obj: LineItem.model_name.human.downcase, message: e.message)
     ensure
@@ -130,7 +115,11 @@ class LineItemsController < ApplicationController
     rescue Exception => e
       flash[:danger] = I18n::t('obj.not_updated_exception', obj: LineItem.model_name.human.downcase, message: e.message)
     ensure
-      render js: 'location.reload();'
+      if aggregated_job.line_items.size == 0 && params[:index] == 'aggregated_jobs'
+        render js: %{ window.location = "#{url_for([:aggregated_jobs])}"; }
+      else
+        render js: 'location.reload();'
+      end
     end
   end
 
@@ -139,27 +128,28 @@ class LineItemsController < ApplicationController
       begin
         tmpdir = Dir.mktmpdir
         number_of_files = params[:files].size
-        code = @line_item.id.to_s.rjust(7, '0')
-        uploaded_file = Tempfile.new
-        Zip::File.open(uploaded_file, Zip::File::CREATE) do |zipfile|
-          params[:files].each_with_index do |file, index|
-            filename = "#{code}01LI#{index + 1}_#{file.original_filename}"
-            path = "#{tmpdir}/#{filename}"
-            File.open(path, 'wb') do |f|
-              f.write(file.read)
+        if number_of_files > 1
+          uploaded_file = Tempfile.new
+          Zip::File.open(uploaded_file, Zip::File::CREATE) do |zipfile|
+            params[:files].each do |file|
+              filename = "#{@line_item.id}#LI_#{file.original_filename}"
+              path = "#{tmpdir}/#{filename}"
+              File.open(path, 'wb') do |f|
+                f.write(file.read)
+              end
+              zipfile.add(filename, path)
             end
-            zipfile.add(filename, path)
+          end
+          job_name = "#{@line_item.id}#LI_zip.zip"
+        else
+          job_name = "#{@line_item.id}#LI_#{ params[:files].first.original_filename}"
+          uploaded_file = "#{tmpdir}/#{job_name}"
+          File.open(uploaded_file, 'wb') do |f|
+            f.write(params[:files].first.read)
           end
         end
-        line_item_name = "#{code}01LI.zip"
-        case params[:kind]
-        when 'print'
-          @line_item.print_file.attach(io: File.open(uploaded_file), filename: line_item_name)
-          @line_item.update_column(:print_number_of_files, number_of_files)
-        when 'cut'
-          @line_item.cut_file.attach(io: File.open(uploaded_file), filename: line_item_name)
-          @line_item.update_column(:cut_number_of_files, number_of_files)
-        end
+        @line_item.attached_file.attach(io: File.open(uploaded_file), filename: job_name)
+        @line_item.update!(number_of_files: number_of_files)
         flash[:notice] = t('obj.updated', obj: LineItem.model_name.human.downcase)
       rescue Exception => e
         flash[:alert] = t('obj.not_updated_exception', obj: LineItem.model_name.human.downcase, message: e.message)
@@ -179,20 +169,10 @@ class LineItemsController < ApplicationController
     end
   end
 
-  def edit
-    @line_item.submit_point = SubmitPoint.find(params[:submit_point_id])
-    if !@line_item.cut_customer_machine.nil?
-      cut_machine = CustomerMachine.get_machine_switch_name(@line_item.cut_customer_machine.id)
-    end
-    if !@line_item.print_customer_machine.nil?
-      print_machine = CustomerMachine.get_machine_switch_name(@line_item.print_customer_machine.id)
-    end
-  end
-
   private
 
   def update_params
-    params.require(:line_item).permit( :submit_point_id, :order_id, :print_customer_machine_id, :cut_customer_machine_id, :aggregated_job_id, :row_number, :subjects, :quantity, :height, :width, :material, :article_code, :article_name, :description, :send_now, :scale, :sides, :error_message, :sending, fields_data: {} )
+    params.require(:line_item).permit(:customer_machine_id, :aggregated_job_id, :row_number, :quantity, :article_code, :article_description, :send_now, :customer, :status, :order_code, :number_of_files, :notes, :need_printing, :need_cutting)
   end
 
   def append_line_item_params
@@ -204,7 +184,7 @@ class LineItemsController < ApplicationController
   end
 
   def upload_params
-    params.require(:line_item).permit(print_file: [], cut_file: [])
+    params.require(:line_item).permit(:attached_file)
   end
 
   def fetch_line_item

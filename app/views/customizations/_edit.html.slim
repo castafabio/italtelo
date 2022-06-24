@@ -1,8 +1,0 @@
-.modal-dialog
-  .modal-content
-
-    .modal-header
-      h5.modal-title = t('obj.edit', obj: Customization.model_name.human.downcase)
-      button.close type="button" data-dismiss="modal": span &times;
-
-    .modal-body == render 'form'

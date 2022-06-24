@@ -6,17 +6,12 @@
       tr
         th = t('strings.Actions')
         th = AggregatedJob.model_name.human
-        th = Order.human_attribute_name(:customer)
+        th = CustomerMachine.model_name.human
         - if params[:tag] == 'completed'
-          th = AggregatedJob.human_attribute_name('print_file')
-          th = AggregatedJob.human_attribute_name('cut_file')
+          th = AggregatedJob.human_attribute_name('attached_file')
         - else
-          th = t('obj.upload', obj: AggregatedJob.human_attribute_name('print_file').downcase)
-          th = t('obj.upload', obj: AggregatedJob.human_attribute_name('cut_file').downcase)
-        th = CustomerMachine.human_attribute_name(:print_customer_machine)
-        th = CustomerMachine.human_attribute_name(:cut_customer_machine)
-        th = AggregatedJob.human_attribute_name(:deadline)
-        th = AggregatedJob.human_attribute_name(:error_message)
+          th = t('obj.upload', obj: AggregatedJob.human_attribute_name('attached_file').downcase)
+        th = LineItem.human_attribute_name(:customer)
 
     tfoot
       tr

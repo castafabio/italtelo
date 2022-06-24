@@ -22,8 +22,8 @@ class Printer < ApplicationRecord
   private
 
   def send_to_gest
-    unless self.resource.nil? 
-      SendToGest.perform_later(self.id, 'printer')
+    unless self.resource.nil?
+      UpdateItalteloTable.perform_later(self.id, 'printer')
     end
   end
 end

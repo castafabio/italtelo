@@ -6,18 +6,17 @@ tr
           - if printer.is_line_item?
             = link_to "Riga ordine: #{LineItem.find_by(id: printer.resource_id).id}", [:line_items, line_item_id: LineItem.find_by(id: printer.resource_id).id]
           - elsif printer.is_aggregated_job?
-            .text-center=< link_to [AggregatedJob.find_by(id: printer.resource_id)], title: AggregatedJob.model_name.human, class: :'btn btn-sm btn-info', data: {spinner: true}
-              = fa_icon('search-plus')
+            =< link_to "Aggregato: #{AggregatedJob.find_by(id: printer.resource_id)}", [:aggregated_jobs, code: AggregatedJob.find_by(id: printer.resource_id).code]
+
   td = printer.customer_machine
   td = printer.job_id
   td = printer.file_name
   td = printer.copies
   td = printer.material
   td = printer.ink
-
-
   td = l printer.start_at, format: :short
   td = number_to_hour_minutes printer.print_time.to_i
+  td = l printer.end_at, format: :short if printer.end_at.present?
   td
     - if printer.gest_sent.present?
       = l(printer.gest_sent, format: :short)

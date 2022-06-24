@@ -7,26 +7,14 @@ form
     =< link_to [:scheduler, :aggregated_jobs], class: :'btn btn-sm btn-secondary'
       = fa_icon('broom')
   td
+    = select_tag :customer_machine_id, options_for_select(CustomerMachine.all.collect { |cm| [cm.to_s, cm.id]}, params[:customer_machine_id]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
   td
-    = select_tag :print_customer_machine_id, options_for_select(@print_machines.collect { |pm| [pm.to_s, pm.id]}, params[:print_customer_machine_id]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
-  td
-    = select_tag :cut_customer_machine_id, options_for_select(@cut_machines.collect { |cm| [cm.to_s, cm.id]}, params[:cut_customer_machine_id]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
-  td
-    = select_tag :customer, options_for_select(@all_line_items.joins(:order).pluck(:customer).uniq, params[:customer]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
-
+    = select_tag :customer, options_for_select(@all_line_items.pluck(:customer).uniq, params[:customer]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
   td
     = select_tag :order_code, options_for_select(@orders, params[:order_code]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
   td = ''
   td
-    .row
-      .col-sm-6
-        = text_field_tag :from, params[:from], class: :'form-control fake_date_field', placeholder: "Da: gg/mm/aaaa", onchange: "this.form.submit();"
-      .col-sm-6
-        = text_field_tag :to, params[:to], class: :'form-control fake_date_field', placeholder: "A: gg/mm/aaaa", onchange: "this.form.submit();"
-  td = ''
-  td = ''
-  td = ''
-  td = ''
+    = select_tag :article_code, options_for_select(@articles, params[:order_code]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
   td = ''
   td = ''
   td = ''

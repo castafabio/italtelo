@@ -18,19 +18,13 @@ h1.pb-2.mt-4.mb-2.border-bottom
       tr
         th = check_box_tag 'check_all', "", false, :style => "width: 30px; height: 30px"
         th = t('strings.Actions')
-        th = LineItem.human_attribute_name(:scale)
-        th = CustomerMachine.human_attribute_name(:print_customer_machine)
-        th = CustomerMachine.human_attribute_name(:cut_customer_machine)
-        th = Order.human_attribute_name(:customer)
-        th = Order.model_name.human
+        th = CustomerMachine.model_name.human
+        th = LineItem.human_attribute_name(:customer)
+        th = LineItem.human_attribute_name(:order_code)
         th = LineItem.human_attribute_name(:row_number)
-        th = Order.human_attribute_name(:order_date)
         th = LineItem.human_attribute_name(:article_code)
-        th = LineItem.human_attribute_name(:print_file)
-        th = LineItem.human_attribute_name(:cut_file)
-        th = LineItem.human_attribute_name(:article_name)
-        th = LineItem.human_attribute_name(:material)
-        th = LineItem.human_attribute_name(:description)
+        th = LineItem.human_attribute_name(:article_description)
+        th = LineItem.human_attribute_name(:attached_file)
         th = LineItem.human_attribute_name(:quantity)
 
 
@@ -39,6 +33,6 @@ h1.pb-2.mt-4.mb-2.border-bottom
         == render partial: 'filters'
       - if @line_items.length > 0
         - @line_items.each do |line_item|
-          == render partial: "scheduler_job", locals: {line_item: line_item, order: line_item.order}
+          == render partial: "scheduler_job", locals: {line_item: line_item}
       - else
         tr: td.colspan.alert-warning = t('obj.empty_list', obj: LineItem.model_name.human(count: 0).downcase)

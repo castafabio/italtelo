@@ -1,28 +1,11 @@
-tr class="#{'danger' if Date.today + 2.days <= order.order_date}"
+tr
   td = check_box_tag 'check_line_item', line_item.id, false, class: 'check_line_item', :style => "width: 30px; height: 30px; margin: 7px"
   td
-    .action-btns
-      / =< link_to [order, line_item], class: :'btn btn-info btn-sm', data: {spinner: true}
-        i.fa.fa-fw.fa-search-plus
-  td = line_item.scale
-  - if line_item.print_customer_machine
-    td = line_item.to_customer_machine('print')
-  - else
-    td = ''
-  - if line_item.cut_customer_machine
-    td = line_item.to_customer_machine('cut')
-  - else
-    td = ''
-  td = order.customer
-  td = order.order_code
+  td = line_item.customer_machine
+  td = line_item.customer
+  td = line_item.order_code
   td = line_item.row_number
-  td = l order.order_date, format: :short
   td = line_item.article_code
-  td = boolean line_item.print_file.attached?
-  td = boolean line_item.cut_file.attached?
-  td = line_item.article_name
-  td = line_item.material
-  td.popup
-    .description = simple_format line_item.to_description(true).truncate(25)
-    .flyout = simple_format line_item.to_description(false)
+  td = line_item.article_description
+  td = boolean line_item.attached_file.attached?
   td = line_item.quantity

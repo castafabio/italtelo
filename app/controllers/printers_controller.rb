@@ -6,7 +6,7 @@ class PrintersController < ApplicationController
   def index
     @printers = Printer.all.order(created_at: :desc)
     @all_printers = @printers
-    @print_machines = CustomerMachine.printer_machines.where(id: @printers&.pluck(:customer_machine_id)&.uniq)
+    @print_machines = CustomerMachine.printer_machines.ordered
     if params[:customer_machine_id].present?
       @printers = @printers.where(customer_machine_id: params[:customer_machine_id])
     end
@@ -18,7 +18,7 @@ class PrintersController < ApplicationController
   end
 
   def resend
-    SendToGest.perform_later(@printer.id, 'printer')
+    UpdateItalteloTable.perform_later(@printer.id, 'printer')
     flash[:notice] = I18n::t('obj.updated', obj: Printer.model_name.human.downcase)
     redirect_to [:printers]
   end

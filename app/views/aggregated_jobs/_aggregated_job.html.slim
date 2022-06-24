@@ -1,47 +1,27 @@
 tr
-  td.dropdown == render partial: 'aggregated_jobs/actions', locals: { aggregated_job: aggregated_job }
+  td
+    == render partial: 'aggregated_jobs/actions', locals: { aggregated_job: aggregated_job }
   td = aggregated_job.to_s
-  td = aggregated_job.line_items.first.order.customer
-  - if aggregated_job.can_upload_print_files?
-    - if aggregated_job.print_customer_machine_id.present?
-      td.text-center
-        - if aggregated_job.print_file.attached?
-            = link_to rails_blob_path(aggregated_job&.print_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Print_file')}")
-              = fa_icon('download')
-            =< link_to [:delete_attachment, aggregated_job, kind: 'print'], class: :'tn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file'), spinner: true }
-              = fa_icon('trash')
+  td
+    - if aggregated_job.status == 'brand_new'
+      - if aggregated_job.editable?
+        - if aggregated_job.need_printing
+          = select_tag :customer_machine_id, options_for_select(CustomerMachine.printer_machines.collect {|p| [p.to_s, p.id]}, aggregated_job&.customer_machine&.id), prompt: t('strings.Select_one'), class: :'inline_select customer_machine form-control', data: { id: aggregated_job.id, aggregated_job: true }
         - else
-            = link_to [:upload_file, aggregated_job, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Print_file')}")
-              = fa_icon('upload')
+          = select_tag :customer_machine_id, options_for_select(CustomerMachine.cutter_machines.collect {|p| [p.to_s, p.id]}, aggregated_job&.customer_machine&.id), prompt: t('strings.Select_one'), class: :'inline_select customer_machine form-control', data: { id: aggregated_job.id, aggregated_job: true }
     - else
-      td = ''
+      = aggregated_job&.to_customer_machine
+  - if aggregated_job.customer_machine.present?
+    td.text-center
+      - if aggregated_job.attached_file.attached?
+          = link_to rails_blob_path(aggregated_job&.attached_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Attached_file')}")
+            = fa_icon('download')
+          =< link_to [:delete_attachment, aggregated_job], class: :'tn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file'), spinner: true }
+            = fa_icon('trash')
+      - else
+          = link_to [:upload_file, aggregated_job], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Attached_file')}")
+            = fa_icon('upload')
   - else
     td = ''
 
-  - if aggregated_job.can_upload_cut_files?
-    - if aggregated_job.cut_customer_machine_id.present?
-      td.text-center
-        - if aggregated_job.cut_file.attached?
-          = link_to rails_blob_path(aggregated_job&.cut_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Cut_file')}")
-            = fa_icon('download')
-          =< link_to [:delete_attachment, aggregated_job, kind: 'cut', all: 'true'], class: :'tn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file'), spinner: true }
-            = fa_icon('trash')
-        - else
-          = link_to [:upload_file, aggregated_job, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Cut_file')}")
-            = fa_icon('upload')
-    - else
-      td = ''
-  - else
-    td = ''
-  td
-    - if aggregated_job.need_printing && aggregated_job.editable?
-      = select_tag :print_customer_machine_id, options_for_select(CustomerMachine.printing_machines.collection {|p| [p.to_s, p.id]}), prompt: t('strings.Select_one'), class: :'inline_select print form-control', data: { id: aggregated_job.id, aggregated_job: true }
-    - else
-      = aggregated_job&.to_customer_machine('print')
-  td
-    - if aggregated_job.need_cutting && aggregated_job.editable?
-      = select_tag :cut_customer_machine_id, options_for_select(CustomerMachine.cutting_machines.collection {|p| [p.to_s, p.id]}), prompt: t('strings.Select_one'), class: :'inline_select print form-control', data: { id: aggregated_job.id, aggregated_job: true }
-    - else
-      = aggregated_job&.to_customer_machine('cut')
-  td = aggregated_job.deadline.strftime("%d-%m-%Y")
-  td = simple_format aggregated_job.error_message
+  td = aggregated_job.line_items.first.customer

@@ -1,4 +1,5 @@
 class CustomerMachine < ApplicationRecord
+  scope :ordered, -> { order(:name) }
   scope :printer_machines, -> { where(kind: 'printer') }
   scope :cutter_machines, -> { where(kind: 'cutter') }
   scope :import_machines, -> {where('customer_machines.path IS true OR customer_machines.ip_address IS true')}
@@ -10,7 +11,7 @@ class CustomerMachine < ApplicationRecord
   has_many :cut_aggregated_jobs, class_name: "LineItem", foreign_key: "cut_customer_machine_id", dependent: :nullify
 
   validates :name, presence: true, uniqueness: true
-  validates :kind, inclusion: { in: CUSTOMER_MACHINE_KINDS }
+  validates :bus240_machine_code, presence: true, uniqueness: true
 
   def self.hour_to_seconds(time)
     print_time = 0

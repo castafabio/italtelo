@@ -4,26 +4,16 @@
       tr
         == content_for :extra_thead
         th = t('strings.Actions')
-        th = Order.human_attribute_name(:order_code)
+        th = LineItem.human_attribute_name(:order_code)
         th = AggregatedJob.model_name.human
         th = LineItem.human_attribute_name(:row_number)
-        th = LineItem.human_attribute_name(:print_file)
-        th = LineItem.human_attribute_name(:cut_file)
-        th = LineItem.human_attribute_name(:scale)
-        th = LineItem.human_attribute_name(:sides)
-        th = CustomerMachine.human_attribute_name(:print_customer_machine)
-        th = CustomerMachine.human_attribute_name(:cut_customer_machine)
-        th = Order.human_attribute_name(:order_date)
-        th = Order.human_attribute_name(:customer)
+        th = LineItem.human_attribute_name(:attached_file)
+        th = "Inviato il"
+        th = CustomerMachine.model_name.human
+        th = LineItem.human_attribute_name(:customer)
         th = LineItem.human_attribute_name(:article_code)
-        th = LineItem.human_attribute_name(:article_name)
-        th = LineItem.human_attribute_name(:description)
-        th = LineItem.human_attribute_name(:material)
-        th = LineItem.human_attribute_name(:subjects)
+        th = LineItem.human_attribute_name(:article_description)
         th = LineItem.human_attribute_name(:quantity)
-        th = LineItem.human_attribute_name(:height)
-        th = LineItem.human_attribute_name(:width)
-        th = LineItem.human_attribute_name(:error_message)
 
     tbody
       - if params[:controller ] == 'line_items'

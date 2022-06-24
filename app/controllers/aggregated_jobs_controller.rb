@@ -1,11 +1,12 @@
 class AggregatedJobsController < ApplicationController
-  before_action :fetch_aggregated_job, only: [:toggle_is_active, :destroy, :edit, :delete_attachment, :insert_notes, :set_status, :show, :update, :upload_file, :add_line_items, :inline_update, :send_to_switch]
+  before_action :fetch_aggregated_job, only: [:toggle_is_active, :destroy, :edit, :delete_attachment, :insert_notes, :set_status, :show, :update, :upload_file, :add_line_items, :inline_update, :send_to_hotfolder]
 
   skip_before_action :verify_authenticity_token, only: :upload_file
 
-  def send_to_switch
+  def send_to_hotfolder
     begin
-      @aggregated_job.send_to_switch!
+      @aggregated_job.send_to_hotfolder!
+      @aggregated_job.update!(send_at: DateTime.now)
       flash[:notice] = I18n::t('obj.sent', obj: AggregatedJob.model_name.human.downcase)
     rescue Exception => e
       flash[:alert] = I18n::t('obj.not_sent_exception', obj: AggregatedJob.model_name.human.downcase, message: e.message)
@@ -16,22 +17,13 @@ class AggregatedJobsController < ApplicationController
 
   def inline_update
     begin
-      # !line item editable
-      if @aggregated_job.editable?
-        if @aggregated_job.need_printing
-          if params[:print].present?
-            @aggregated_job.update(print_customer_machine_id: params[:print].split('_').first.to_i)
-            @aggregated_job.update_line_items_machines!('print', @aggregated_job.print_customer_machine_id)
-          end
+      if @aggregated_job.need_printing
+        @aggregated_job.update(customer_machine_id: params[:customer_machine].to_i)
+        @aggregated_job.line_items.each do |line_item|
+          line_item.update!(customer_machine_id: @aggregated_job.customer_machine.id)
         end
-        if @aggregated_job.need_cutting
-          if params[:cut].present?
-            @aggregated_job.update(cut_customer_machine_id: params[:cut].split('_').first.to_i)
-            @aggregated_job.update_line_items_machines!('cut', @aggregated_job.print_customer_machine_id)
-          end
-        end
-        render json: { code: 200 }
       end
+      render json: { code: 200 }
     rescue Exception => e
       render json: { code: 500 }
     end
@@ -51,16 +43,9 @@ class AggregatedJobsController < ApplicationController
 
   def delete_attachment
     begin
-      case params[:kind]
-      when 'print'
-        @aggregated_job.print_file.purge
-        @aggregated_job.update!(print_number_of_files: 0)
-        flash[:notice] = t('obj.destroyed', obj: AggregatedJob.human_attribute_name(:print_file))
-      when 'cut'
-        @aggregated_job.cut_file.purge
-        @aggregated_job.update!(cut_number_of_files: 0)
-        flash[:notice] = t('obj.destroyed', obj: AggregatedJob.human_attribute_name(:cut_file))
-      end
+      @aggregated_job.attached_file.purge
+      @aggregated_job.update!(number_of_files: 0)
+      flash[:notice] = t('obj.destroyed', obj: AggregatedJob.human_attribute_name(:attached_file))
     rescue Exception => e
       flash[:alert] = t('obj.not_destroyed', obj: 'file', message: e.message)
     end
@@ -85,19 +70,22 @@ class AggregatedJobsController < ApplicationController
 
   def index
     if params[:tag] == 'completed'
-      @aggregated_jobs = AggregatedJob.all.completed
+      @aggregated_jobs = AggregatedJob.completed
     else
       params[:tag] = 'brand_new'
-      @aggregated_jobs = AggregatedJob.all.brand_new
+      @aggregated_jobs = AggregatedJob.brand_new
     end
     if params[:tag] == 'completed'
-      @customers = @aggregated_jobs.joins(line_items: :order).pluck(:customer).uniq
+      @customers = @aggregated_jobs.joins(:line_items).pluck(:customer).uniq
     else
-      @customers = @aggregated_jobs.joins(line_items: :order).pluck(:customer).uniq
+      @customers = @aggregated_jobs.joins(:line_items).pluck(:customer).uniq
     end
     @all_aggregated_jobs = @aggregated_jobs
+    if params[:code].present?
+      @aggregated_jobs = @aggregated_jobs.where(code: params[:code])
+    end
     if params[:customer].present?
-      @aggregated_jobs = AggregatedJob.where(id: @aggregated_jobs.joins(line_items: :order).where("orders.customer LIKE :customer", customer: "%#{params[:customer]}%"))
+      @aggregated_jobs = @aggregated_jobs.where(id: @aggregated_jobs.joins(line_items: :order).where("orders.customer LIKE :customer", customer: "%#{params[:customer]}%"))
     end
     if params[:from].present?
       @aggregated_jobs = @aggregated_jobs.where('deadline >= :from', from: params[:from].to_date)
@@ -111,34 +99,21 @@ class AggregatedJobsController < ApplicationController
   end
 
   def scheduler
-    @line_items = LineItem.aggregable.joins(:order).order('orders.order_code': :desc)
-    @orders = @line_items.joins(:order).pluck(:order_code)
+    @line_items = LineItem.unsend.aggregable
+    @orders = @line_items.pluck(:order_code)
     @all_line_items = @line_items
-    @print_machines = CustomerMachine.printer_machines.where(id: @all_line_items.pluck(:print_customer_machine_id).uniq)
-    @cut_machines = CustomerMachine.cutter_machines.where(id: @all_line_items.pluck(:cut_customer_machine_id).uniq)
-    if params[:print_customer_machine_id].present?
-      @line_items = @line_items.where(print_customer_machine_id: params[:print_customer_machine_id])
-    end
-    if params[:cut_customer_machine_id].present?
-      @line_items = @line_items.where(cut_customer_machine_id: params[:cut_customer_machine_id])
-    end
+    @articles = @all_line_items.pluck(:article_code)
     if params[:customer].present?
-      @line_items = @line_items.joins(:order).where('orders.customer': params[:customer])
+      @line_items = @line_items.where(customer: params[:customer])
     end
     if params[:order_code].present?
-      @line_items = @line_items.joins(:order).where('orders.order_code': params[:order_code])
+      @line_items = @line_items.where(order_code: params[:order_code])
     end
-    if params[:from].present?
-      @line_items = @line_items.where('orders.order_date >= :from', from: params[:from].to_date)
+    if params[:customer_machine_id].present?
+      @line_items = @line_items.where(customer_machine_id: params[:customer_machine_id])
     end
-    if params[:to].present?
-      @line_items = @line_items.where('orders.order_date <= :to', to: params[:to].to_date)
-    end
-    if params[:print_customer_machine].present?
-      @line_items = @line_items.where(print_customer_machine_id: params[:print_customer_machine])
-    end
-    if params[:cut_customer_machine].present?
-      @line_items = @line_items.where(cut_customer_machine_id: params[:cut_customer_machine])
+    if params[:article_code].present?
+      @line_items = @line_items.where(article_code: params[:article_code])
     end
   end
 
@@ -175,27 +150,28 @@ class AggregatedJobsController < ApplicationController
       begin
         tmpdir = Dir.mktmpdir
         number_of_files = params[:files].size
-        code = @aggregated_job.id.to_s.rjust(7, '0')
-        uploaded_file = Tempfile.new
-        Zip::File.open(uploaded_file, Zip::File::CREATE) do |zipfile|
-          params[:files].each_with_index do |file, index|
-            filename = "#{code}01AJ#{index + 1}_#{file.original_filename}"
-            path = "#{tmpdir}/#{filename}"
-            File.open(path, 'wb') do |f|
-              f.write(file.read)
+        if number_of_files > 1
+          uploaded_file = Tempfile.new
+          Zip::File.open(uploaded_file, Zip::File::CREATE) do |zipfile|
+            params[:files].each do |file|
+              filename = "#{@aggregated_job.id}#AJ_#{file.original_filename}"
+              path = "#{tmpdir}/#{filename}"
+              File.open(path, 'wb') do |f|
+                f.write(file.read)
+              end
+              zipfile.add(filename, path)
             end
-            zipfile.add(filename, path)
+          end
+          job_name = "#{@aggregated_job.id}#AJ_zip.zip"
+        else
+          job_name = "#{@aggregated_job.id}#AJ_#{ params[:files].first.original_filename}"
+          uploaded_file = "#{tmpdir}/#{job_name}"
+          File.open(uploaded_file, 'wb') do |f|
+            f.write(params[:files].first.read)
           end
         end
-        aj_name = "#{code}01AJ.zip"
-        case params[:kind]
-        when 'print'
-          @aggregated_job.print_file.attach(io: File.open(uploaded_file), filename: aj_name)
-          @aggregated_job.update!(print_number_of_files: number_of_files)
-        when 'cut'
-          @aggregated_job.cut_file.attach(io: File.open(uploaded_file), filename: aj_name)
-          @aggregated_job.update!(cut_number_of_files: number_of_files)
-        end
+        @aggregated_job.attached_file.attach(io: File.open(uploaded_file), filename: job_name)
+        @aggregated_job.update!(number_of_files: number_of_files)
         flash[:notice] = t('obj.updated', obj: AggregatedJob.model_name.human.downcase)
       rescue Exception => e
         flash[:alert] = t('obj.not_updated_exception', obj: AggregatedJob.model_name.human.downcase, message: e.message)
@@ -217,11 +193,6 @@ class AggregatedJobsController < ApplicationController
 
   def edit
     @aggregated_job.submit_point = SubmitPoint.find(params[:submit_point_id])
-    if @aggregated_job.line_items.pluck(:sides).uniq.size > 1
-      sides = 'Bifacciale'
-    else
-      sides = 'Monofacciale'
-    end
     if !@aggregated_job.cut_customer_machine_id.nil?
       cut_machine = CustomerMachine.get_machine_switch_name(@aggregated_job.line_items.first.cut_customer_machine.id)
     end
@@ -244,7 +215,7 @@ class AggregatedJobsController < ApplicationController
   private
 
   def update_params
-    params.require(:aggregated_job).permit(:print_customer_machine_id, :submit_point_id, :cut_customer_machine_id, :send_now, :error_message, :sending, fields_data: {})
+    params.require(:aggregated_job).permit(:customer_machine_id, :send_now, :sending)
   end
 
   def add_line_items_params

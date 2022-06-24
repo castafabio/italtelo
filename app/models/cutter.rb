@@ -21,6 +21,6 @@ class Cutter < ApplicationRecord
   private
 
   def send_to_gest
-    SendToGest.perform_later(self.id, 'cutter')
+    UpdateItalteloTable.perform_later(self.id, 'cutter')
   end
 end

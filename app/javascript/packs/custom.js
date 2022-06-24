@@ -308,8 +308,8 @@ window.inlineUpdate = function() {
   $(".inline_select").each(function(i,el) {
     $(el).change(function() {
       id = $(el).data("id");
-      var print = $(el).closest('.print');
-      var cut = $(el).closest('.cut');
+      console.log(id)
+      var customer_machine = $(el).closest('.customer_machine');
       if ($(el).data("aggregated-job") == true) {
         url = "/aggregated_jobs/" + id + "/inline_update";
       } else {
@@ -340,8 +340,7 @@ window.inlineUpdate = function() {
         },
         data: {
           value: $(el).val(),
-          print: $(print).val(),
-          cut: $(cut).val(),
+          customer_machine: $(customer_machine).val(),
         },
         dataType: 'json'
       });

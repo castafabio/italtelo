@@ -7,17 +7,9 @@ form
 
     =< link_to [:aggregated_jobs, tag: params[:tag]], class: :'btn btn-sm btn-secondary'
       = fa_icon('broom')
+  td
+    = select_tag :code, options_for_select(@all_aggregated_jobs, params[:code]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
+  td = ''
   td = ''
   td
     = select_tag :customer, options_for_select(@customers, params[:customer]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
-  td = ''
-  td = ''
-  td = ''
-  td = ''
-  td
-    .row
-      .col-sm-6
-        = text_field_tag :from, params[:from], tag: params[:tag], class: :'form-control fake_date_field', placeholder: "Da: gg/mm/aaaa", onchange: "this.form.submit();"
-      .col-sm-6
-        = text_field_tag :to, params[:to], tag: params[:tag], class: :'form-control fake_date_field', placeholder: "A: gg/mm/aaaa", onchange: "this.form.submit();"
-  td = ''

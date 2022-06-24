@@ -5,13 +5,11 @@ class CreatePrinters < ActiveRecord::Migration[5.2]
       t.belongs_to :resource, polymorphic: true
       t.string :job_id
       t.string :file_name
-      t.integer :copies, default: 0
-      t.string :material, default: ''
       t.text :ink
       t.datetime :gest_sent, default: nil
       t.datetime :start_at
+      t.datetime :end_at
       t.string :print_time
-      t.string :folder, default: nil, index: true
       t.string :extra_data
       t.timestamps
     end

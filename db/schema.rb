@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_05_072715) do
+ActiveRecord::Schema.define(version: 2022_06_24_081030) do
 
   create_table "active_storage_attachments", charset: "utf8mb3", force: :cascade do |t|
     t.string "name", null: false
@@ -56,6 +56,9 @@ ActiveRecord::Schema.define(version: 2021_10_05_072715) do
     t.datetime "updated_at", precision: 6, null: false
     t.bigint "print_customer_machine_id"
     t.bigint "cut_customer_machine_id"
+    t.string "code"
+    t.datetime "send_at"
+    t.integer "number_of_files", default: 0
     t.index ["customer_machine_id"], name: "index_aggregated_jobs_on_customer_machine_id"
     t.index ["cut_customer_machine_id"], name: "index_aggregated_jobs_on_cut_customer_machine_id"
     t.index ["print_customer_machine_id"], name: "index_aggregated_jobs_on_print_customer_machine_id"
@@ -102,32 +105,45 @@ ActiveRecord::Schema.define(version: 2021_10_05_072715) do
     t.index ["resource_type", "resource_id"], name: "index_cutters_on_resource_type_and_resource_id"
   end
 
+  create_table "epsons", charset: "utf8mb3", force: :cascade do |t|
+    t.string "PrinterName"
+    t.string "DocName"
+    t.datetime "PrintStartTime"
+    t.datetime "PrintEndTime"
+    t.integer "PageNumber"
+    t.string "UserMediaName"
+    t.string "SerialNumber"
+    t.text "Ink"
+    t.string "DbSource"
+    t.string "DbTable"
+    t.integer "JobId"
+    t.boolean "imported", default: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "line_items", charset: "utf8mb3", force: :cascade do |t|
-    t.integer "order_id"
     t.integer "customer_machine_id"
     t.integer "aggregated_job_id"
-    t.integer "row_number"
-    t.integer "subjects"
+    t.integer "order_code"
+    t.string "row_number"
     t.integer "quantity"
-    t.integer "height"
-    t.integer "width"
-    t.integer "print_number_of_files", default: 0
-    t.integer "cut_number_of_files", default: 0
     t.string "material"
+    t.string "customer"
     t.string "article_code"
-    t.string "article_name"
-    t.string "scale", default: "1:1"
-    t.string "sides", default: "Monofacciale"
-    t.text "description"
+    t.string "article_description"
+    t.text "notes"
     t.text "error_message"
     t.boolean "need_printing", default: false
     t.boolean "need_cutting", default: false
     t.bigint "print_customer_machine_id"
     t.bigint "cut_customer_machine_id"
+    t.datetime "send_at"
+    t.string "status", default: "brand_new"
+    t.integer "number_of_files", default: 0
     t.index ["aggregated_job_id"], name: "index_line_items_on_aggregated_job_id"
     t.index ["customer_machine_id"], name: "index_line_items_on_customer_machine_id"
     t.index ["cut_customer_machine_id"], name: "index_line_items_on_cut_customer_machine_id"
-    t.index ["order_id"], name: "index_line_items_on_order_id"
     t.index ["print_customer_machine_id"], name: "index_line_items_on_print_customer_machine_id"
   end
 
@@ -137,12 +153,6 @@ ActiveRecord::Schema.define(version: 2021_10_05_072715) do
     t.string "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-  end
-
-  create_table "orders", charset: "utf8mb3", force: :cascade do |t|
-    t.string "order_code"
-    t.date "order_date"
-    t.string "customer"
   end
 
   create_table "printers", charset: "utf8mb3", force: :cascade do |t|
@@ -161,6 +171,7 @@ ActiveRecord::Schema.define(version: 2021_10_05_072715) do
     t.string "extra_data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "end_at"
     t.index ["customer_machine_id"], name: "index_printers_on_customer_machine_id"
     t.index ["folder"], name: "index_printers_on_folder"
     t.index ["resource_type", "resource_id"], name: "index_printers_on_resource"

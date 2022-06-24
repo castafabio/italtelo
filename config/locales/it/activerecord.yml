@@ -5,11 +5,8 @@ it:
         deadline: Scadenza
         notes: Note di produzione
         status: Stato
-        print_customer_machine: Macchina da stampa
-        print_file: File di stampa
-        cut_customer_machine: Macchina da taglio
-        cut_file: File di taglio
-        error_message: Errori
+        customer_machine: Macchina
+        attached_file: File
       customer_machine:
         name: Nome
         bus240_machine_code: Codice macchina BUS240
@@ -23,11 +20,6 @@ it:
         is_mounted: Collegato
         print_customer_machine: Macchina da stampa
         cut_customer_machine: Macchina da taglio
-      customization:
-        parameter: Parametro
-        value: Valore
-        um: Unità misura
-        notes: Note
       cutter:
         file_name: Nome file
         cut_time: Tempo di taglio
@@ -41,21 +33,16 @@ it:
         width: Larghezza
         material: Materiale
         article_code: Codice articolo
-        article_name: Nome articolo
+        article_description: Descrizione articolo
         description: Descrizione
-        print_file: File di stampa
-        cut_file: File di taglio
-        scale: Scala
-        sides: Stampa
-        error_message: Errori
+        attached_file: File
+        order_code: Codice ordine
+        order_date: Data ordine
+        customer: Cliente
       log:
         action: "Azione"
         description: "Descrizione"
         created_at: "Data"
-      order:
-        order_code: Codice ordine
-        order_date: Data ordine
-        customer: Cliente
       printer:
         file_name: Nome file
         copies: Copie
@@ -63,6 +50,7 @@ it:
         ink: "Consumi inchiostro"
         print_time: "Tempo di stampa"
         start_at: "Inizio"
+        end_at: "Fine"
         extra_data: "Dati aggiuntivi"
         gest_sent: Inviato a gest
       role:
@@ -105,11 +93,8 @@ it:
         one: Lavoro aggregato
         other: Lavori aggregati
       customer_machine:
-        one: Macchina fisica
-        other: Macchine fisiche
-      customization:
-        one: Configurazione
-        other: Configurazioni
+        one: Macchina cliente
+        other: Macchine clienti
       cutter:
         one: "Dati Taglierina"
         other: "Dati Taglierine"

@@ -5,7 +5,7 @@
 
   .form-group
     = f.label AggregatedJob.model_name.human
-    = f.select :aggregated_job_id, @line_item.appendable_aggregate_line_item_list.collect { |aggregate_job| [aggregate_job.to_s, aggregate_job.id] }, { prompt: t('strings.Select_one') }, { class: :'form-control' }
+    = f.select :aggregated_job_id, @line_item.appendable_aggregate_line_item_list.collect { |aggregate_job| [aggregate_job.to_s, aggregate_job.id]}, { prompt: t('strings.Select_one') }, { class: :'form-control' }
 
   .form-group
     = button_tag t('actions.save'), class: :'btn btn-sm btn-success btn-block', data: { disable: true }, type: :submit

@@ -56,7 +56,7 @@ class CustomerMachinesController < ApplicationController
   end
 
   def create_params
-    params.require(:customer_machine).permit(:name, :kind, :path, :serial_number, :ip_address, :username, :psw, :api_key, :hotfolder_path, :import_job, :machine_switch_name)
+    params.require(:customer_machine).permit(:name, :kind, :path, :serial_number, :ip_address, :username, :psw, :api_key, :hotfolder_path, :import_job, :bus240_machine_code)
   end
 
   def update_params

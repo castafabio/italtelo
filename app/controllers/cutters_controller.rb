@@ -6,7 +6,7 @@ class CuttersController < ApplicationController
   def index
     @cutters = Cutter.all.order(starts_at: :desc)
     @all_cutters = @cutters
-    @cut_machines = CustomerMachine.cutter_machines.where(id: @cutters&.pluck(:customer_machine_id)&.uniq)
+    @cut_machines = CustomerMachine.cutter_machines
     if params[:customer_machine_id].present?
       @cutters = @cutters.where(customer_machine_id: params[:customer_machine_id])
     end
@@ -18,7 +18,7 @@ class CuttersController < ApplicationController
   end
 
   def resend
-    SendToGest.perform_later(@cutter.id, 'cutter')
+    UpdateItalteloTable.perform_later(@cutter.id, 'cutter')
     flash[:notice] = I18n::t('obj.updated', obj: Cutter.model_name.human.downcase)
     redirect_to [:cutters]
   end
