@@ -87,14 +87,7 @@ class AggregatedJobsController < ApplicationController
     if params[:customer].present?
       @aggregated_jobs = @aggregated_jobs.where(id: @aggregated_jobs.joins(line_items: :order).where("orders.customer LIKE :customer", customer: "%#{params[:customer]}%"))
     end
-    if params[:from].present?
-      @aggregated_jobs = @aggregated_jobs.where('deadline >= :from', from: params[:from].to_date)
-    end
-    if params[:to].present?
-      @aggregated_jobs = @aggregated_jobs.where('deadline <= :to', to: params[:to].to_date)
-    end
     @aggregated_jobs = @aggregated_jobs.paginate(page: params[:page], per_page: params[:per_page])
-    @aggregated_jobs = @aggregated_jobs.order(deadline: :desc)
     @aggregated_jobs = @aggregated_jobs.where('id LIKE :search ', search: "%#{params[:search]}%") if params[:search].present?
   end
 

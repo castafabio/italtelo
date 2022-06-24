@@ -2,7 +2,6 @@ it:
   activerecord:
     attributes:
       aggregated_job:
-        deadline: Scadenza
         notes: Note di produzione
         status: Stato
         customer_machine: Macchina
