@@ -5,10 +5,10 @@ it:
         notes: Note di produzione
         status: Stato
         customer_machine: Macchina
-        attached_file: File
+        print_file: File di stampa
+        cut_file: File di taglio
       customer_machine:
         name: Nome
-        bus240_machine_code: Codice macchina BUS240
         kind: Tipologia
         path: Percorso
         ip_address: Indirizzo IP
@@ -34,10 +34,18 @@ it:
         article_code: Codice articolo
         article_description: Descrizione articolo
         description: Descrizione
-        attached_file: File
+        print_file: File di stampa
+        cut_file: File di taglio
         order_code: Codice ordine
         order_date: Data ordine
         customer: Cliente
+        print_reference: Codice stampa
+        cut_reference: Codice taglio
+        order_year: Anno riferimento ordine
+        order_phase: Fase riferimento ordine
+        order_line_item: Riga riferimento ordine
+        order_series: Serie riferimento ordine
+        order_type: Tipo riferimento ordine
       log:
         action: "Azione"
         description: "Descrizione"
@@ -48,8 +56,8 @@ it:
         material: Materiale
         ink: "Consumi inchiostro"
         print_time: "Tempo di stampa"
-        start_at: "Inizio"
-        end_at: "Fine"
+        starts_at: "Inizio"
+        ends_at: "Fine"
         extra_data: "Dati aggiuntivi"
         gest_sent: Inviato a gest
       role:

@@ -6,22 +6,73 @@ tr
     - if aggregated_job.status == 'brand_new'
       - if aggregated_job.editable?
         - if aggregated_job.need_printing
-          = select_tag :customer_machine_id, options_for_select(CustomerMachine.printer_machines.collect {|p| [p.to_s, p.id]}, aggregated_job&.customer_machine&.id), prompt: t('strings.Select_one'), class: :'inline_select customer_machine form-control', data: { id: aggregated_job.id, aggregated_job: true }
-        - else
-          = select_tag :customer_machine_id, options_for_select(CustomerMachine.cutter_machines.collect {|p| [p.to_s, p.id]}, aggregated_job&.customer_machine&.id), prompt: t('strings.Select_one'), class: :'inline_select customer_machine form-control', data: { id: aggregated_job.id, aggregated_job: true }
-    - else
-      = aggregated_job&.to_customer_machine
-  - if aggregated_job.customer_machine.present?
-    td.text-center
-      - if aggregated_job.attached_file.attached?
-          = link_to rails_blob_path(aggregated_job&.attached_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Attached_file')}")
-            = fa_icon('download')
-          =< link_to [:delete_attachment, aggregated_job], class: :'tn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file'), spinner: true }
-            = fa_icon('trash')
+          = select_tag :print_customer_machine_id, options_for_select(CustomerMachine.printer_machines.collect {|p| [p.to_s, p.id]}, aggregated_job&.print_customer_machine&.id), prompt: t('strings.Select_one'), class: :'inline_select customer_machine form-control', data: { id: aggregated_job.id, aggregated_job: true }
       - else
-          = link_to [:upload_file, aggregated_job], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Attached_file')}")
-            = fa_icon('upload')
-  - else
-    td = ''
+        = aggregated_job&.print_customer_machine
+    - else
+      = aggregated_job&.print_customer_machine
+
+  td
+    - if aggregated_job.status == 'brand_new'
+      - if aggregated_job.editable?
+        - if aggregated_job.need_cutting
+          = select_tag :cut_customer_machine_id, options_for_select(CustomerMachine.cutter_machines.collect {|p| [p.to_s, p.id]}, aggregated_job&.cut_customer_machine&.id), prompt: t('strings.Select_one'), class: :'inline_select customer_machine form-control', data: { id: aggregated_job.id, aggregated_job: true }
+      - else
+        = aggregated_job&.cut_customer_machine
+    - else
+      = aggregated_job&.cut_customer_machine
+  td.text-center
+    - if aggregated_job.status == 'completed'
+      - if aggregated_job.print_file.attached?
+          = link_to rails_blob_path(aggregated_job&.print_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Print_file')}")
+            = fa_icon('download')
+    - else
+      - if aggregated_job.need_printing
+        - if aggregated_job.print_file.attached?
+            = link_to rails_blob_path(aggregated_job&.print_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Print_file')}")
+              = fa_icon('download')
+            =< link_to [:send_to_hotfolder, aggregated_job], class: :'btn btn-sm btn-info', data: { remote: true }
+              =< fa_icon('paper-plane')
+
+            - if aggregated_job.send_at.nil? && can?(:delete_attachment, aggregated_job)
+              =< link_to [:delete_attachment, aggregated_job, kind: 'print'], class: :'tn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file'), spinner: true }
+                = fa_icon('trash')
+
+            - if aggregated_job.send_at.present?
+              br
+              br
+              p = "Inviato: #{l(aggregated_job.send_at, format: :short)}"
+
+
+        - else
+          - if aggregated_job.send_at.nil?
+            = link_to [:upload_file, aggregated_job, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Print_file')}")
+              = fa_icon('upload')
+
+  td.text-center
+    - if aggregated_job.status == 'completed'
+      - if aggregated_job.cut_file.attached?
+          = link_to rails_blob_path(aggregated_job&.cut_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Cut_file')}")
+            = fa_icon('download')
+    - else
+      - if aggregated_job.need_cutting
+        - if aggregated_job.cut_file.attached?
+            = link_to rails_blob_path(aggregated_job&.cut_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Print_file')}")
+              = fa_icon('download')
+            =< link_to [:send_to_hotfolder, aggregated_job], class: :'btn btn-sm btn-info', data: { remote: true }
+              =< fa_icon('paper-plane')
+
+            - if aggregated_job.send_at.nil? && can?(:delete_attachment, aggregated_job)
+              =< link_to [:delete_attachment, aggregated_job, kind: 'cut'], class: :'tn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file'), spinner: true }
+                = fa_icon('trash')
+            - if aggregated_job.send_at.present?
+              br
+              br
+              p = "Inviato: #{l(aggregated_job.send_at, format: :short)}"
+
+        - else
+          - if aggregated_job.send_at.nil?
+            = link_to [:upload_file, aggregated_job, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Print_file')}")
+              = fa_icon('upload')
 
   td = aggregated_job.line_items.first.customer

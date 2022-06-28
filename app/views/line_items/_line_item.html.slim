@@ -1,4 +1,4 @@
-tr
+tr style="#{line_item.aggregated_job.present? ? 'background-color: #d2ecf1' : ''}"
   td.dropdown == render partial: 'line_items/actions', locals: {line_item: line_item}
   td = line_item.order_code
   td.text-center
@@ -6,39 +6,78 @@ tr
       = simple_format link_to line_item.aggregated_job, [line_item.aggregated_job]
     - else
       = boolean line_item.aggregated_job
-  td = line_item.row_number
-  - if line_item.aggregated_job.nil?
-    - if line_item.customer_machine.present?
-      td.text-center
-        - if line_item.attached_file.attached?
-          = link_to rails_blob_path(line_item&.attached_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Attached_file')}")
-            = fa_icon('download')
+  td = line_item.to_s
+  td.text-center
+    - if line_item.aggregated_job.nil?
+      - if line_item.need_printing
+        - if line_item.print_customer_machine.present?
+          - if line_item.print_file.attached?
+            = link_to rails_blob_path(line_item&.print_file, disposition: 'attachment', kind: 'print'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Print_file').downcase}")
+              = fa_icon('download')
 
-          - if line_item.send_at.nil?
-            =< link_to [:delete_attachment, line_item], class: :'btn btn-sm btn-danger', method: :delete, title: t('obj.delete', obj: LineItem.human_attribute_name(:attached_file).downcase), data: { confirm: t('confirm.delete_file'), spinner: true }
-              = fa_icon('trash')
-            =< link_to [:send_to_hotfolder, line_item], class: :'btn btn-sm btn-warning', data: { remote: true }, title: t('obj.send', obj: LineItem.human_attribute_name(:attached_file).downcase)
-              = fa_icon('paper-plane')
+            - if line_item.send_at.nil?
+              =< link_to [:delete_attachment, line_item, kind: 'print'], class: :'btn btn-sm btn-danger', method: :delete, title: t('obj.delete', obj: LineItem.human_attribute_name(:print_file).downcase), data: { confirm: t('confirm.delete_file'), spinner: true }
+                = fa_icon('trash')
+              =< link_to [:send_to_hotfolder, line_item, kind: 'print'], class: :'btn btn-sm btn-warning', data: { remote: true }, title: t('obj.send', obj: LineItem.human_attribute_name(:print_file).downcase)
+                = fa_icon('paper-plane')
 
+          - else
+            = link_to [:upload_file, line_item, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Print_file').downcase}")
+              = fa_icon('upload')
+      - else
+         = boolean line_item.print_file.attached?
+    - elsif line_item.aggregated_job.present? && line_item.aggregated_job.need_printing
+      = boolean line_item.print_file.attached?
+
+  td.text-center
+    - if line_item.aggregated_job.nil?
+      - if line_item.need_cutting
+        - if line_item.cut_customer_machine.present?
+          - if line_item.cut_file.attached?
+            = link_to rails_blob_path(line_item&.cut_file, disposition: 'attachment', kind: 'cut'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Cut_file').downcase}")
+              = fa_icon('download')
+
+            - if line_item.send_at.nil?
+              =< link_to [:delete_attachment, line_item, kind: 'cut'], class: :'btn btn-sm btn-danger', method: :delete, title: t('obj.delete', obj: LineItem.human_attribute_name(:cut_file).downcase), data: { confirm: t('confirm.delete_file'), spinner: true }
+                = fa_icon('trash')
+              =< link_to [:send_to_hotfolder, line_item, kind: 'cut'], class: :'btn btn-sm btn-warning', data: { remote: true }, title: t('obj.send', obj: LineItem.human_attribute_name(:cut_file).downcase)
+                = fa_icon('paper-plane')
+
+          - else
+            = link_to [:upload_file, line_item, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Cut_file').downcase}")
+              = fa_icon('upload')
         - else
-          = link_to [:upload_file, line_item], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Attached_file')}")
-            = fa_icon('upload')
+          = boolean line_item.cut_file.attached?
+    - elsif line_item.aggregated_job.present? && line_item.aggregated_job.need_cutting
+      = boolean line_item.cut_file.attached?
+
+  td.text-center
+    - if line_item.aggregated_job.present?
+      = l(line_item.aggregated_job.send_at, format: :long) if line_item.aggregated_job.send_at.present?
     - else
-      td.text-center = boolean line_item.attached_file.attached?
-  - else
-    - if line_item.attached_file.attached?
-      td.text-center
-        = link_to rails_blob_path(line_item&.attached_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Attached_file')}")
-          = fa_icon('download')
-    - else
-      td.text-center = boolean line_item.attached_file.attached?
-  td.text-center = l(line_item.send_at, format: :long) if line_item.send_at.present?
+      = l(line_item.send_at, format: :long) if line_item.send_at.present?
   td.text-center
     - if line_item.editable?
-      = select_tag :customer_machine_id, options_for_select(CustomerMachine.ordered.collect {|p| [p.to_s, p.id]}, line_item.customer_machine.id), prompt: t('strings.Select_one'), class: :'inline_select customer_machine form-control', data: { id: line_item.id }
-      p id="#{line_item.id}" = ""
+      - if line_item.need_printing
+        - if CustomerMachine.printer_machines.ordered.size > 0
+          = select_tag :print_customer_machine_id, options_for_select(CustomerMachine.printer_machines.ordered.collect {|pm| [pm.to_s, pm.id]}, line_item&.print_customer_machine&.id), prompt: t('strings.Select_one'), class: :'inline_select customer_machine form-control', data: { id: line_item.id }
+          p id="#{line_item.id}" = ""
+        - else
+          .alert.alert-warning = "Nessuna macchina da stampa configurata"
     - else
-      = line_item.customer_machine
+      = line_item.print_customer_machine
+
+  td.text-center
+    - if line_item.editable?
+      - if line_item.need_cutting
+        - if CustomerMachine.printer_machines.ordered.size > 0
+          = select_tag :cut_customer_machine_id, options_for_select(CustomerMachine.cutter_machines.ordered.collect {|cm| [cm.to_s, cm.id]}, line_item&.cut_customer_machine&.id), prompt: t('strings.Select_one'), class: :'inline_select customer_machine form-control', data: { id: line_item.id }
+          p id="#{line_item.id}" = ""
+        - else
+          .alert.alert-warning = "Nessuna macchina da taglio configurata"
+    - else
+      = line_item.cut_customer_machine
+
   td = line_item.customer
   td = line_item.article_code
   td = line_item.article_description

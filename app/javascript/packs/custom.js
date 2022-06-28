@@ -308,7 +308,6 @@ window.inlineUpdate = function() {
   $(".inline_select").each(function(i,el) {
     $(el).change(function() {
       id = $(el).data("id");
-      console.log(id)
       var customer_machine = $(el).closest('.customer_machine');
       if ($(el).data("aggregated-job") == true) {
         url = "/aggregated_jobs/" + id + "/inline_update";

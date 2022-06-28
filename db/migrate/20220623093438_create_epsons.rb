@@ -13,7 +13,6 @@ class CreateEpsons < ActiveRecord::Migration[6.1]
       t.string   :DbTable, default: nil
       t.integer  :JobId, default: nil
       t.boolean  :imported, default: false
-      t.timestamps
     end
   end
 end

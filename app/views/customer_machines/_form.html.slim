@@ -12,10 +12,6 @@
     = f.select :kind, CUSTOMER_MACHINE_KINDS.map { |mk| [t("enumerators.customer_machine.kinds.#{mk}"), mk] }, { prompt: t('strings.Select_one') }, { class: :'form-control', data: { behaviour: :toggle_fields } }
 
   .form-group
-    = f.label :bus240_machine_code
-    = f.text_field :bus240_machine_code, class: :'form-control'
-
-  .form-group
     = f.label :path
     = f.text_field :path, class: :'form-control'
 

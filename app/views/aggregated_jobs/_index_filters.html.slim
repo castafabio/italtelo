@@ -9,7 +9,12 @@ form
       = fa_icon('broom')
   td
     = select_tag :code, options_for_select(@all_aggregated_jobs, params[:code]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
-  td = ''
-  td = ''
+  td
+    = select_tag :print_customer_machine_id, options_for_select(CustomerMachine.printer_machines.ordered.collect { |cm| [cm.to_s, cm.id]}, params[:print_customer_machine_id]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
+
+  td
+    = select_tag :cut_customer_machine_id, options_for_select(CustomerMachine.cutter_machines.ordered.collect { |cm| [cm.to_s, cm.id]}, params[:cut_customer_machine_id]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
+  td
+  td
   td
     = select_tag :customer, options_for_select(@customers, params[:customer]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"

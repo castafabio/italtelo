@@ -18,13 +18,15 @@ h1.pb-2.mt-4.mb-2.border-bottom
       tr
         th = check_box_tag 'check_all', "", false, :style => "width: 30px; height: 30px"
         th = t('strings.Actions')
-        th = CustomerMachine.model_name.human
+        th = CustomerMachine.human_attribute_name(:print_customer_machine)
+        th = CustomerMachine.human_attribute_name(:cut_customer_machine)
         th = LineItem.human_attribute_name(:customer)
         th = LineItem.human_attribute_name(:order_code)
         th = LineItem.human_attribute_name(:row_number)
         th = LineItem.human_attribute_name(:article_code)
         th = LineItem.human_attribute_name(:article_description)
-        th = LineItem.human_attribute_name(:attached_file)
+        th = LineItem.human_attribute_name(:print_file)
+        th = LineItem.human_attribute_name(:cut_file)
         th = LineItem.human_attribute_name(:quantity)
 
 

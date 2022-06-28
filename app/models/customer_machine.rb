@@ -11,7 +11,6 @@ class CustomerMachine < ApplicationRecord
   has_many :cut_aggregated_jobs, class_name: "LineItem", foreign_key: "cut_customer_machine_id", dependent: :nullify
 
   validates :name, presence: true, uniqueness: true
-  validates :bus240_machine_code, presence: true, uniqueness: true
 
   def self.hour_to_seconds(time)
     print_time = 0

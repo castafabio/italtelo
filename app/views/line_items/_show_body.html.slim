@@ -3,51 +3,92 @@
     h5.card-header = "Dati #{LineItem.model_name.human.downcase}"
     .card-body
       dl.row
-        dt.col-sm-4 = LineItem.model_name.human
-        dd.col-sm-8 = @line_item.to_s
+        dt.col-sm-3 = LineItem.model_name.human
+        dd.col-sm-3 = @line_item.to_s
 
-        dt.col-sm-4 = AggregatedJob.human_attribute_name(:customer_machine)
-        dd.col-sm-8 = @line_item.customer_machine.name
+        dt.col-sm-3 = LineItem.human_attribute_name(:customer)
+        dd.col-sm-3 = @line_item.customer
+
+        - if @line_item.need_printing
+          dt.col-sm-3 = CustomerMachine.human_attribute_name(:print_customer_machine)
+          dd.col-sm-3 = @line_item.print_customer_machine.name
+
+        - if @line_item.need_cutting
+          dt.col-sm-3 = CustomerMachine.human_attribute_name(:cut_customer_machine)
+          dd.col-sm-3 = @line_item.cut_customer_machine.name
 
         - if @line_item.aggregated_job.present?
-          dt.col-sm-4 = AggregatedJob.model_name.human
-          dd.col-sm-8 = @line_item.aggregated_job.to_s
-
-        dt.col-sm-4 = LineItem.human_attribute_name(:customer)
-        dd.col-sm-8 = @line_item.customer
+          dt.col-sm-3 = AggregatedJob.model_name.human
+          dd.col-sm-3 = @line_item.aggregated_job.to_s
 
   .card.text-center.bg-light.col-sm-3
-    h5.card-header = AggregatedJob.human_attribute_name(:attached_file)
-    .card-body
-      - if @line_item.aggregated_job.nil?
-        - if @line_item.attached_file.attached?
-          - if @line_item.number_of_files > 1
-            =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@line_item.attached_file, disposition: 'attachment'))
-          - elsif @line_item.attached_file.representable?
-            =< link_to(image_tag(@line_item.attached_file.representation(resize: "150x150>")), rails_blob_path(@line_item.attached_file, disposition: 'attachment'))
-          br
-          br
+    - if @line_item.need_printing
+      h5.card-header = LineItem.human_attribute_name(:print_file)
+      .card-body
+        - if @line_item.aggregated_job.nil?
+          - if @line_item.print_file.attached?
+            - if @line_item.print_number_of_files > 1
+              =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@line_item.print_file, disposition: 'attachment'))
+            - elsif @line_item.print_file.representable?
+              =< link_to(image_tag(@line_item.print_file.representation(resize: "150x150>")), rails_blob_path(@line_item.print_file, disposition: 'attachment'))
+            - else
+              = image_tag('spinner_preview.gif')
 
-          - if can?(:delete_attachment, @line_item)
-            =< link_to [:delete_attachment,  @line_item],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
-              = fa_icon('trash')
-              =< t('obj.delete', obj: LineItem.human_attribute_name(:attached_file).downcase)
+            br
+            br
 
-          =< link_to [:send_to_hotfolder, @line_item], class: :'btn btn-sm btn-info', data: { remote: true }
-            =< fa_icon('paper-plane')
-            =< t('obj.send', obj: '')
+            - if can?(:delete_attachment, @line_item)
+              =< link_to [:delete_attachment,  @line_item, kind: 'print'],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
+                = fa_icon('trash')
+                =< t('obj.delete', obj: LineItem.human_attribute_name(:print_file).downcase)
 
-        - elsif can?(:upload_files, @line_item)
-          =< link_to [:upload_file, @line_item], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{LineItem.human_attribute_name(:attached_file)}")
-              = fa_icon('upload')
+            =< link_to [:send_to_hotfolder, @line_item], class: :'btn btn-sm btn-info', data: { remote: true }
+              =< fa_icon('paper-plane')
+              =< t('obj.send', obj: "#{LineItem.human_attribute_name(:print_file).downcase}")
 
-      - else
-        = boolean @line_item.attached_file.attached?
+          - elsif can?(:upload_files, @line_item)
+            =< link_to [:upload_file, @line_item, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{LineItem.human_attribute_name(:print_file)}")
+                = fa_icon('upload')
 
-      br
-      br
-      - if @line_item.send_at.present?
-        p = "Inviato: #{l(@line_item.send_at, format: :long)}"
+        - else
+          = boolean @line_item.print_file.attached?
+
+  .card.text-center.bg-light.col-sm-3
+    - if @line_item.need_cutting
+      h5.card-header = LineItem.human_attribute_name(:cut_file)
+      .card-body
+        - if @line_item.aggregated_job.nil?
+          - if @line_item.cut_file.attached?
+            - if @line_item.cut_number_of_files > 1
+              =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@line_item.cut_file, disposition: 'attachment'))
+            - elsif @line_item.cut_file.representable?
+              =< link_to(image_tag(@line_item.cut_file.representation(resize: "150x150>")), rails_blob_path(@line_item.cut_file, disposition: 'attachment'))
+            - else
+              = image_tag('spinner_preview.gif')
+            br
+            br
+
+            - if can?(:delete_attachment, @line_item)
+              =< link_to [:delete_attachment,  @line_item, kind: 'cut'],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
+                = fa_icon('trash')
+                =< t('obj.delete', obj: LineItem.human_attribute_name(:cut_file).downcase)
+
+            =< link_to [:send_to_hotfolder, @line_item], class: :'btn btn-sm btn-info', data: { remote: true }
+              =< fa_icon('paper-plane')
+              =< t('obj.send', obj: "#{LineItem.human_attribute_name(:cut_file).downcase}")
+
+          - elsif can?(:upload_files, @line_item)
+            =< link_to [:upload_file, @line_item, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{LineItem.human_attribute_name(:cut_file)}")
+                = fa_icon('upload')
+
+        - else
+          = boolean @line_item.cut_file.attached?
+
+        br
+        br
+        - if @line_item.send_at.present?
+          p = "Inviato: #{l(@line_item.send_at, format: :long)}"
+
 
 .card-group
   - if @line_item.printers.size > 0

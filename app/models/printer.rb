@@ -8,7 +8,7 @@ class Printer < ApplicationRecord
   validates :resource_type, inclusion: { in: PRINTER_MODELS }, if: Proc.new {|p| p.resource_id.present? }
   validates :customer_machine_id, inclusion: { in: Proc.new { CustomerMachine.ids } }
   validates :file_name, presence: true
-  validates :start_at, presence: true
+  validates :starts_at, presence: true
   validates :print_time, presence: true
 
   def is_aggregated_job?

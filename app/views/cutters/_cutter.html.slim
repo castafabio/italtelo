@@ -1,13 +1,12 @@
 tr
   - if params[:controller] == 'cutters'
-    td
+    td.text-center
       .action-btns
         - if cutter.resource.present?
           - if cutter.is_line_item?
             = link_to "Riga ordine: #{LineItem.find_by(id: cutter.resource_id).id}", [:line_items, line_item_id: LineItem.find_by(id: cutter.resource_id).id]
           - elsif cutter.is_aggregated_job?
-            =< link_to [AggregatedJob.find_by(id: cutter.resource_id)], title: AggregatedJob.model_name.human, class: :'btn btn-sm btn-info', data: {spinner: true}
-              = fa_icon('search-plus')
+            =< link_to "Aggregato: #{AggregatedJob.find_by(id: cutter.resource_id)}", [:aggregated_jobs, code: AggregatedJob.find_by(id: cutter.resource_id).code]
   td = cutter.customer_machine
   td = cutter.file_name
   td = l(cutter.starts_at, format: :short)

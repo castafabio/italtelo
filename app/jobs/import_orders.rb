@@ -11,48 +11,50 @@ class ImportOrders < ApplicationJob
       result = client.execute(tsql)
       tsql = "SET ANSI_WARNINGS ON"
       result = client.execute(tsql)
-      #
-        # lce_barcode = id riga
-        # lce_ornum = cod ordine
-        # codditt = cliente
-        # lce_codart = cod articolo
-        # lce_codcent = cod macchina
-        # lce_descent = nome macchina
-        # lce_desart = descr art6
-        # lce_note = note riga
-        # lce_quant = qtà effettiva
-      #
-      tsql = "SELECT lce_barcode, lce_ornum, codditt, lce_codart, lce_codcent, lce_desart, lce_descent, lce_note, lce_qtaesdav FROM avlav"
+      tsql = "SELECT lce_barcode, lce_oranno, lce_orfase, lce_orriga, lce_orserie, lce_ortipo, lce_ornum, lce_deslavo, codditt, lce_codart, lce_codcent, lce_desart, lce_descent, lce_note, lce_quant FROM avlav"
       # result = ActiveRecord::Base.connection.exec_query(tsql).each ----> per eseguire in locale
       result = client.execute(tsql).each
       ActiveRecord::Base.transaction do
         result.each do |row|
           begin
-            customer_machine = CustomerMachine.find_by(bus240_machine_name: row['lce_codcent'])
-            if customer_machine.nil?
-              customer_machine = CustomerMachine.create!(name: row['lce_descent'], bus240_machine_name: row['lce_codcent'])
+            print_reference = nil
+            cut_reference = nil
+            if row['lce_deslavo'].downcase == "stampa"
+              print_reference = row["lce_barcode"]
+            elsif row['lce_deslavo'].downcase == "taglio"
+              cut_reference = row["lce_barcode"]
             end
             line_item_details = {
-              customer_machine: customer_machine,
-              row_number: row['lce_barcode'],
               customer: row['codditt'],
               order_code: row['lce_ornum'],
+              order_year: row["lce_oranno"],
+              order_phase: row["lce_orfase"],
+              order_line_item: row["lce_orriga"],
+              order_series: row["lce_orserie"],
+              order_type: row["lce_ortipo"],
               article_code: row['lce_codart'],
               article_description: row['lce_desart'],
               notes: row['lce_note'],
-              quantity: row['lce_quant']
+              quantity: row['lce_quant'],
             }
-            line_item = LineItem.find_by(row_number: row['lce_barcode'])
+            line_item = LineItem.find_by(order_year: row["lce_oranno"], order_phase: row["lce_orfase"], order_line_item: row["lce_orriga"], order_series: row["lce_orserie"], order_type: row["lce_ortipo"])
             if line_item.nil?
+              line_item_details[:print_reference] = print_reference
+              line_item_details[:cut_reference] = cut_reference
               line_item = LineItem.create!(line_item_details)
             else
-              line_item.update!(line_item_details)
+              if row['lce_deslavo'].downcase == "stampa"
+                line_item.update!(print_reference: print_reference)
+              elsif row['lce_deslavo'].downcase == "taglio"
+                line_item.update!(cut_reference: cut_reference)
+              end
+              notes = "#{line_item.notes}"
+              new_notes += row['lce_note']
+              line_item.update!(notes: new_notes)
             end
           rescue Exception => e
             GESTIONALE_LOGGER.info(" Order Errore: #{e.message}")
             Log.create!(kind: 'error', action: "Import Ordine", description: e.message)
-          ensure
-            GESTIONALE_LOGGER.info("**** IMPORTAZIONE ORDINI TERMINATA ****")
           end
         end
       end

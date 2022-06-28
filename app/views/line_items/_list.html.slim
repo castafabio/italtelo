@@ -7,9 +7,11 @@
         th = LineItem.human_attribute_name(:order_code)
         th = AggregatedJob.model_name.human
         th = LineItem.human_attribute_name(:row_number)
-        th = LineItem.human_attribute_name(:attached_file)
+        th = LineItem.human_attribute_name(:print_file)
+        th = LineItem.human_attribute_name(:cut_file)
         th = "Inviato il"
-        th = CustomerMachine.model_name.human
+        th = CustomerMachine.human_attribute_name(:print_customer_machine)
+        th = CustomerMachine.human_attribute_name(:cut_customer_machine)
         th = LineItem.human_attribute_name(:customer)
         th = LineItem.human_attribute_name(:article_code)
         th = LineItem.human_attribute_name(:article_description)

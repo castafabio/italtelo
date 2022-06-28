@@ -7,8 +7,8 @@ class CreatePrinters < ActiveRecord::Migration[5.2]
       t.string :file_name
       t.text :ink
       t.datetime :gest_sent, default: nil
-      t.datetime :start_at
-      t.datetime :end_at
+      t.datetime :starts_at
+      t.datetime :ends_at
       t.string :print_time
       t.string :extra_data
       t.timestamps

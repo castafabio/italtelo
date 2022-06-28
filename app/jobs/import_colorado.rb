@@ -63,9 +63,9 @@ class ImportColorado < ApplicationJob
                   job_id: row[2],
                   file_name: file_name,
                   customer_machine_id: customer_machine.id,
-                  start_at: start_at,
+                  starts_at: start_at,
                   print_time: print_time,
-                  end_at: end_at,
+                  ends_at: end_at,
                   copies: row[18],
                   material: row[20],
                   ink: ink

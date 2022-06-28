@@ -6,38 +6,100 @@
         dt.col-sm-4 = AggregatedJob.model_name.human
         dd.col-sm-8 = @aggregated_job.to_s
 
-        dt.col-sm-4 = AggregatedJob.human_attribute_name(:customer_machine)
-        dd.col-sm-8 = @aggregated_job.line_items.first.customer_machine.name
+        dt.col-sm-4 = "Clienti"
+        dd.col-sm-8 = @aggregated_job.line_items.pluck(:customer).uniq.join(', ')
 
-  - if !@aggregated_job.customer_machine.nil?
+        - if @aggregated_job.need_printing
+          dt.col-sm-4 = CustomerMachine.human_attribute_name(:print_customer_machine)
+          dd.col-sm-8 = @aggregated_job.line_items.first.print_customer_machine.name
+
+        - if @aggregated_job.need_cutting
+          dt.col-sm-4 = CustomerMachine.human_attribute_name(:cut_customer_machine)
+          dd.col-sm-8 = @aggregated_job.line_items.first.cut_customer_machine.name
+
+
+  - if @aggregated_job.need_printing
     .card.text-center.bg-light.col-sm-3
-      h5.card-header = AggregatedJob.human_attribute_name(:attached_file)
+      h5.card-header = AggregatedJob.human_attribute_name(:print_file)
       .card-body
-        - if @aggregated_job.attached_file.attached?
-          - if @aggregated_job.number_of_files > 1
-            =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@aggregated_job.attached_file, disposition: 'attachment'))
-          - elsif @aggregated_job.attached_file.representable?
-            = link_to(image_tag(@aggregated_job.attached_file.representation(resize: "150x150>")), rails_blob_path(@aggregated_job.attached_file, disposition: 'attachment'))
-
-        - elsif can?(:upload_files, @aggregated_job)
-          .alert.alert-info = 'Per poter inviare i file in hotfolder caricare qui un file con la plancia'
-          =< link_to [:upload_file, @aggregated_job, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{AggregatedJob.human_attribute_name(:attached_file)}")
-              = fa_icon('upload')
+        - if @aggregated_job.status == 'completed'
+          - if @aggregated_job.print_file.attached?
+            - if @aggregated_job.print_number_of_files > 1
+              =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@aggregated_job.print_file, disposition: 'attachment'))
+            - elsif @aggregated_job.print_file.representable?
+              = link_to(image_tag(@aggregated_job.print_file.representation(resize: "150x150>")), rails_blob_path(@aggregated_job.print_file, disposition: 'attachment'))
+            - else
+              = image_tag('spinner_preview.gif')
         - else
-          .alert.alert-success = 'Sono stati inviati i singoli file dei lavori'
+          - if @aggregated_job.print_file.attached?
+            - if @aggregated_job.print_number_of_files > 1
+              =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@aggregated_job.print_file, disposition: 'attachment'))
+            - elsif @aggregated_job.print_file.representable?
+              = link_to(image_tag(@aggregated_job.print_file.representation(resize: "150x150>")), rails_blob_path(@aggregated_job.print_file, disposition: 'attachment'))
+            - else
+              = image_tag('spinner_preview.gif')
+
+
+          - elsif @aggregated_job.send_at.nil? && can?(:upload_files, @aggregated_job)
+            =< link_to [:upload_file, @aggregated_job, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{AggregatedJob.human_attribute_name(:print_file)}")
+                = fa_icon('upload')
+
+          br
+          br
+
+          - if @aggregated_job.print_file&.attached?
+            - if @aggregated_job.send_at.nil? && can?(:delete_attachment, @aggregated_job)
+              =< link_to [:delete_attachment,  @aggregated_job, kind: 'print'],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
+                = fa_icon('trash')
+                =< t('obj.delete', obj: AggregatedJob.human_attribute_name(:print_file).downcase)
+
+            =< link_to [:send_to_hotfolder, @aggregated_job], class: :'btn btn-sm btn-info', data: { remote: true }
+              =< fa_icon('paper-plane')
+              =< t('obj.send', obj: AggregatedJob.human_attribute_name(:print_file).downcase)
 
         br
         br
+        - if @aggregated_job.send_at.present?
+          p = "Inviato: #{l(@aggregated_job.send_at, format: :long)}"
 
-        - if @aggregated_job.attached_file&.attached?
-          - if can?(:delete_attachment, @aggregated_job)
-            =< link_to [:delete_attachment,  @aggregated_job],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
-              = fa_icon('trash')
-              =< t('obj.delete', obj: AggregatedJob.human_attribute_name(:attached_file).downcase)
+  - if @aggregated_job.need_cutting
+    .card.text-center.bg-light.col-sm-3
+      h5.card-header = AggregatedJob.human_attribute_name(:cut_file)
+      .card-body
+        - if @aggregated_job.status == 'completed'
+          - if @aggregated_job.cut_file.attached?
+            - if @aggregated_job.cut_number_of_files > 1
+              =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@aggregated_job.cut_file, disposition: 'attachment'))
+            - elsif @aggregated_job.cut_file.representable?
+              = link_to(image_tag(@aggregated_job.cut_file.representation(resize: "150x150>")), rails_blob_path(@aggregated_job.cut_file, disposition: 'attachment'))
+            - else
+              = image_tag('spinner_preview.gif')
+        - else
+          - if @aggregated_job.cut_file.attached?
+            - if @aggregated_job.cut_number_of_files > 1
+              =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@aggregated_job.cut_file, disposition: 'attachment'))
+            - elsif @aggregated_job.cut_file.representable?
+              = link_to(image_tag(@aggregated_job.cut_file.representation(resize: "150x150>")), rails_blob_path(@aggregated_job.cut_file, disposition: 'attachment'))
+            - else
+              = image_tag('spinner_preview.gif')
 
-          =< link_to [:send_to_hotfolder, @aggregated_job], class: :'btn btn-sm btn-info', data: { remote: true }
-            =< fa_icon('paper-plane')
-            =< t('obj.send', obj: '')
+
+          - elsif @aggregated_job.send_at.nil? && can?(:upload_files, @aggregated_job)
+            =< link_to [:upload_file, @aggregated_job, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{AggregatedJob.human_attribute_name(:cut_file)}")
+                = fa_icon('upload')
+
+          br
+          br
+
+          - if @aggregated_job.cut_file&.attached?
+            - if @aggregated_job.send_at.nil? && can?(:delete_attachment, @aggregated_job)
+              =< link_to [:delete_attachment,  @aggregated_job, kind: 'cut'],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
+                = fa_icon('trash')
+                =< t('obj.delete', obj: AggregatedJob.human_attribute_name(:cut_file).downcase)
+
+            =< link_to [:send_to_hotfolder, @aggregated_job], class: :'btn btn-sm btn-info', data: { remote: true }
+              =< fa_icon('paper-plane')
+              =< t('obj.send', obj: AggregatedJob.human_attribute_name(:cut_file).downcase)
 
         br
         br

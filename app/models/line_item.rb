@@ -1,50 +1,125 @@
 class LineItem < ApplicationRecord
   scope :unsend, -> { where(send_at: nil) }
 
-  belongs_to :customer_machine
+  # belongs_to :customer_machine, optional: true
+  belongs_to :print_customer_machine, class_name: 'CustomerMachine', optional: true
+  belongs_to :cut_customer_machine, class_name: 'CustomerMachine', foreign_key: "cut_customer_machine_id", optional: true
   belongs_to :aggregated_job, optional: true
 
   has_many :printers, as: :resource, dependent: :destroy
   has_many :cutters, as: :resource, dependent: :destroy
 
-  has_one_attached :attached_file
+  has_one_attached :print_file
+  has_one_attached :cut_file
 
   attr_accessor :send_now
 
-  validates :row_number, presence: true
   validates :article_code, presence: true
   validates :article_description, presence: true
 
   def self.aggregable
     line_item_ids = []
     LineItem.where(aggregated_job_id: nil).each do |line_item|
-      if line_item.customer_machine.present?
+      if line_item.print_customer_machine.present? || line_item.cut_customer_machine.present?
         line_item_ids << line_item.id
       end
     end
     LineItem.where(id: line_item_ids)
   end
 
-  def send_to_hotfolder!
-    raise "Percorso hotfolder per la macchina #{self.customer_machine} non configurato, chiamare l'assistenza." if self.customer_machine.hotfolder_path.nil?
-    raise "Percorso hotfolder per la macchina #{self.customer_machine} non configurato, chiamare l'assistenza." unless self.customer_machine.hotfolder_path.present?
-    hotfolder_path = "#{self.customer_machine.hotfolder_path}"
-    FileUtils.mkdir_p(hotfolder_path)
-    if self.number_of_files > 1
-      Zip::File.open(self.to_file_path) do |zipfile|
-        zipfile.each do |file|
-          File.delete("#{hotfolder_path}/#{file.name}") if File.exist?("#{hotfolder_path}/#{file.name}")
-          zipfile.extract(file, "#{hotfolder_path}/#{file.name}")
-        end
-      end
+  def self.need_printing(line_items)
+    line_items = LineItem.where(id: line_items)
+    ret = []
+    line_items.each do |line_item|
+      ret << line_item.need_printing
+    end
+    if ret.uniq.size == 1
+      ret = true
     else
-      FileUtils.cp self.to_file_path, "#{hotfolder_path}/#{self.to_job_name}"
+      ret = false
+    end
+    ret
+  end
+
+  def self.need_cutting(line_items)
+    line_items = LineItem.where(id: line_items)
+    ret = []
+    line_items.each do |line_item|
+      ret << line_item.need_cutting
+    end
+    if ret.uniq.size == 1
+      ret = true
+    else
+      ret = false
+    end
+    ret
+  end
+
+  def send_to_hotfolder!
+    if self.need_printing
+      raise "Percorso hotfolder per la macchina #{self.print_customer_machine} non configurato, chiamare l'assistenza." unless self.print_customer_machine.hotfolder_path.present?
+      print_path = "#{self.print_customer_machine.hotfolder_path}"
+    end
+    if self.need_cutting
+      raise "Percorso hotfolder per la macchina #{self.cut_customer_machine} non configurato, chiamare l'assistenza." unless self.cut_customer_machine.hotfolder_path.present?
+      cut_path = "#{self.cut_customer_machine.hotfolder_path}"
+    end
+    if self.need_printing && self.print_file.attached?
+      FileUtils.mkdir_p(print_path)
+      if self.print_number_of_files > 1
+        Zip::File.open(self.to_file_path('print')) do |zipfile|
+          zipfile.each do |file|
+            File.delete("#{print_path}/#{file.name}") if File.exist?("#{print_path}/#{file.name}")
+            zipfile.extract(file, "#{print_path}/#{file.name}")
+          end
+        end
+      else
+        FileUtils.cp self.to_file_path('print'), "#{print_path}/#{self.to_job_name('print')}"
+      end
+    end
+    if self.need_cutting && self.cut_file.attached?
+      FileUtils.mkdir_p(cut_path)
+      if self.cut_number_of_files > 1
+        Zip::File.open(self.to_file_path('cut')) do |zipfile|
+          zipfile.each do |file|
+            File.delete("#{cut_path}/#{file.name}") if File.exist?("#{cut_path}/#{file.name}")
+            zipfile.extract(file, "#{cut_path}/#{file.name}")
+          end
+        end
+      else
+        FileUtils.cp self.to_file_path('cut'), "#{print_path}/#{self.to_job_name('cut')}"
+      end
     end
   end
 
-  def to_job_name
-    if self.attached_file.attached?
-      job_name = self.attached_file.blob.filename.to_s
+  def has_customer_machine?
+    ret = []
+    if self.need_printing
+      ret << self.need_printing && self.print_customer_machine.present?
+    end
+    if self.need_cutting
+      ret << self.need_cutting && self.cut_customer_machine.present?
+    end
+    if ret.uniq.size == 1
+      ret = true
+    else
+      ret = false
+    end
+    ret
+  end
+
+  def to_job_name(kind)
+    case kind
+    when 'print'
+      if self.print_file.attached?
+        job_name = self.print_file.blob.filename.to_s
+      end
+    when 'cut'
+      if self.cut_file.attached?
+        job_name = self.cut_file.blob.filename.to_s
+      end
+    else
+      job_name = "#{self.id}#AJ_dummy.pdf"
     end
     job_name
   end
@@ -57,8 +132,16 @@ class LineItem < ApplicationRecord
     self.aggregated_job.nil?
   end
 
-  def to_file_path
-    ActiveStorage::Blob.service.send(:path_for, self.attached_file.key)
+  def to_file_path(kind)
+    if kind == 'print'
+      if self.print_file.attached?
+        ActiveStorage::Blob.service.send(:path_for, self.print_file.key)
+      end
+    else
+      if self.cut_file.attached?
+        ActiveStorage::Blob.service.send(:path_for, self.cut_file.key)
+      end
+    end
   end
 
   def to_switch_name(kind)
@@ -70,7 +153,17 @@ class LineItem < ApplicationRecord
     aggregated_line_item_ids = []
     all_aggregated_jobs = AggregatedJob.unsend.brand_new
     all_aggregated_jobs.each do |aj|
-      aggregated_line_item_ids << aj.id if (self.need_printing && aj.line_items.first.need_printing || self.need_cutting && aj.line_items.first.need_cutting) && (self&.customer_machine&.id == aj.customer_machine_id)
+      # aggregated_line_item_ids << aj.id if (self.need_printing && aj.line_items.first.need_printing && self&.print_customer_machine&.id == aj.print_customer_machine_id || self.need_cutting && aj.line_items.first.need_cutting && self&.cut_customer_machine&.id == aj.cut_customer_machine_id)
+      ret = []
+      if self.need_printing
+        ret << (self.need_printing && aj.need_printing && (self&.print_customer_machine&.id == aj.print_customer_machine_id))
+      end
+      if self.need_cutting
+        ret << (self.need_cutting && aj.need_cutting && (self&.cut_customer_machine&.id == aj.cut_customer_machine_id))
+      end
+      if ret.uniq.size == 1 && ret.uniq.first == true
+        aggregated_line_item_ids << aj.id
+      end
     end
     AggregatedJob.where(id: aggregated_line_item_ids)
   end
@@ -96,8 +189,24 @@ class LineItem < ApplicationRecord
     !self.aggregated_job_id.nil?
   end
 
+  def need_cutting
+    ret = false
+    if self.cut_reference.present?
+      ret = true
+    end
+    ret
+  end
+
+  def need_printing
+    ret = false
+    if self.print_reference.present?
+      ret = true
+    end
+    ret
+  end
+
   def to_s
-    "#{self.order_code} - #{self.row_number}"
+    "#{self.order_year}/#{self.order_code} - #{self.order_line_item}"
   end
 
   def calculate_ink_total
@@ -120,7 +229,7 @@ class LineItem < ApplicationRecord
   def check_aggregated_job
     ActiveRecord::Base.transaction do
       if self.aggregated_job.present?
-        if self.aggregated_job.line_items.pluck(:status).size == 1 && self.aggregated_job.line_items.pluck(:status).uniq.first == 'completed'
+        if self.aggregated_job.line_items.pluck(:status).uniq.size == 1 && self.aggregated_job.line_items.pluck(:status).uniq.first == 'completed'
           self.aggregated_job.update!(status: 'completed')
         end
       end
