@@ -3,7 +3,7 @@ class ImportEpson < ApplicationJob
   sidekiq_options retry: 0, backtrace: 10
 
   def perform
-    CustomerMachine..where(import_job: 'epson').printer_machines.each do |customer_machine|
+    CustomerMachine.where(import_job: 'epson').printer_machines.each do |customer_machine|
       Epson.where('SerialNumber': customer_machine.serial_number, imported: false).each do |epson|
         begin
           name = epson.DocName
