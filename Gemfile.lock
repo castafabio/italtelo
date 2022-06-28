@@ -233,6 +233,7 @@ GEM
     temple (0.8.2)
     thor (1.2.1)
     tilt (2.0.10)
+    tiny_tds (2.1.5)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
     uglifier (4.2.0)
@@ -288,6 +289,7 @@ DEPENDENCIES
   slim-rails (= 3.4.0)
   spring (= 2.1.1)
   spring-watcher-listen (= 2.0.1)
+  tiny_tds
   tzinfo-data
   uglifier (= 4.2.0)
   webpacker (= 5.4.3)
