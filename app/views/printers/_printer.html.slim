@@ -12,6 +12,8 @@ tr
   td = printer.job_id
   td = printer.file_name
   td = printer.ink
+  td = printer.copies
+  td = printer.material
   td = l printer.starts_at, format: :short
   td = number_to_hour_minutes printer.print_time.to_i
   td = l printer.ends_at, format: :short if printer.ends_at.present?
