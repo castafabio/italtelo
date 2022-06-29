@@ -2,7 +2,7 @@
   .modal-content
 
     .modal-header
-      h5.modal-title = t('obj.edit', obj: AggregatedJob.model_name.human.downcase)
+      h5.modal-title = t('obj.insert', obj: AggregatedJob.human_attribute_name(:file_name).downcase)
       button.close type="button" data-dismiss="modal": span &times;
 
     .modal-body == render 'edit_form'

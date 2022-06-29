@@ -199,23 +199,19 @@ class AggregatedJobsController < ApplicationController
 
   def update
     begin
-      @aggregated_job.send_now = true
-      @aggregated_job.update!(update_params)
-      flash[:notice] = t('obj.sent', obj: AggregatedJob.model_name.human.downcase)
+      if params[:file_name].present?
+        puts "update_params[:file_name] ========= " + update_params[:file_name].inspect
+        @aggregated_job.update!(file_name: update_params[:file_name])
+        flash[:notice] = t('obj.updated', obj: AggregatedJob.human_attribute_name(:file_name).downcase)
+      else
+        @aggregated_job.send_now = true
+        @aggregated_job.update!(update_params)
+        flash[:notice] = t('obj.sent', obj: AggregatedJob.model_name.human.downcase)
+      end
       render js: 'location.reload();'
     rescue Exception => e
       flash.now[:alert] = t('obj.not_sent_exception', obj: AggregatedJob.model_name.human.downcase, message: e.message)
       render :edit
-    end
-  end
-
-  def edit
-    @aggregated_job.submit_point = SubmitPoint.find(params[:submit_point_id])
-    if !@aggregated_job.cut_customer_machine_id.nil?
-      cut_machine = CustomerMachine.get_machine_switch_name(@aggregated_job.line_items.first.cut_customer_machine.id)
-    end
-    if !@aggregated_job.print_customer_machine_id.nil?
-      print_machine = CustomerMachine.get_machine_switch_name(@aggregated_job.line_items.first.print_customer_machine.id)
     end
   end
 
@@ -233,7 +229,7 @@ class AggregatedJobsController < ApplicationController
   private
 
   def update_params
-    params.require(:aggregated_job).permit(:customer_machine_id, :send_now, :sending)
+    params.require(:aggregated_job).permit(:customer_machine_id, :send_now, :file_name)
   end
 
   def add_line_items_params

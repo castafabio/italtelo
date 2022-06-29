@@ -41,8 +41,24 @@
 
 
           - elsif @aggregated_job.send_at.nil? && can?(:upload_files, @aggregated_job)
-            =< link_to [:upload_file, @aggregated_job, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{AggregatedJob.human_attribute_name(:print_file)}")
-                = fa_icon('upload')
+            - unless @aggregated_job.print_file.attached?
+              - if @aggregated_job.file_name.present?
+
+                dl.row
+                  dt.col-sm-4 = AggregatedJob.human_attribute_name(:file_name)
+                  dd.col-sm-4 = @aggregated_job.file_name
+                  dd.col-sm-4
+                    =< link_to [:edit, @aggregated_job], class: :'btn btn-sm btn-info', data: { remote: true }, title: t('obj.insert', obj: "#{AggregatedJob.human_attribute_name(:file_name)}")
+                      = fa_icon('edit')
+              - else
+                =< link_to [:upload_file, @aggregated_job, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{AggregatedJob.human_attribute_name(:print_file)}")
+                  = fa_icon('upload')
+                =< link_to [:edit, @aggregated_job], class: :'btn btn-sm btn-info', data: { remote: true }, title: t('obj.insert', obj: "#{AggregatedJob.human_attribute_name(:file_name)}")
+                    = fa_icon('edit')
+
+            br
+            br
+            .alert.alert-info = "Carica il file oppure inserisci il nome dell'aggregato."
 
           br
           br
@@ -87,6 +103,11 @@
           - elsif @aggregated_job.send_at.nil? && can?(:upload_files, @aggregated_job)
             =< link_to [:upload_file, @aggregated_job, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{AggregatedJob.human_attribute_name(:cut_file)}")
                 = fa_icon('upload')
+
+            - if @aggregated_job.need_printing && @aggregated_job.need_cutting
+              br
+              br
+              .alert.alert-info = "Il caricamento del file di taglio non è obbligatorio."
 
           br
           br

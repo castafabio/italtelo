@@ -17,6 +17,10 @@ class ImportEpson < ApplicationJob
             resource_type = "AggregatedJob"
             resource_id = name.split("#AJ_").first
             resource = AggregatedJob.find_by(id: resource_id)
+          elsif AggregatedJob.brand_new.where(file_name: file_name).where("created_at >= :today", today: Date.today - 1.month).size > 0
+            resource_type = "AggregatedJob"
+            resource = AggregatedJob.brand_new.where(file_name: file_name).where("created_at >= :today", today: Date.today - 1.month).last
+            resource_id = resource.id
           else
             resource_type = nil
             resource_id = nil

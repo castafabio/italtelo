@@ -26,6 +26,8 @@ tr
       - if aggregated_job.print_file.attached?
           = link_to rails_blob_path(aggregated_job&.print_file, disposition: 'attachment'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Print_file')}")
             = fa_icon('download')
+      - else
+        p = "#{AggregatedJob.human_attribute_name(:file_name)}: #{aggregated_job.file_name}"
     - else
       - if aggregated_job.need_printing
         - if aggregated_job.print_file.attached?
@@ -46,8 +48,21 @@ tr
 
         - else
           - if aggregated_job.send_at.nil?
-            = link_to [:upload_file, aggregated_job, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Print_file')}")
-              = fa_icon('upload')
+            - if aggregated_job.file_name.present?
+              .float-left style="margin-left: 15%"
+                p = "#{AggregatedJob.human_attribute_name(:file_name)}: #{aggregated_job.file_name}"
+              .float-right style="margin-right: 15%"
+                =< link_to [:edit, aggregated_job], class: :'btn btn-sm btn-info', data: { remote: true }, title: t('obj.insert', obj: "#{AggregatedJob.human_attribute_name(:file_name)}")
+                  = fa_icon('edit')
+              .clearfix
+            - else
+              = link_to [:upload_file, aggregated_job, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Print_file')}")
+                = fa_icon('upload')
+              =< link_to [:edit, aggregated_job], class: :'btn btn-sm btn-info', data: { remote: true }, title: t('obj.insert', obj: "#{AggregatedJob.human_attribute_name(:file_name)}")
+                  = fa_icon('edit')
+
+
+
 
   td.text-center
     - if aggregated_job.status == 'completed'
