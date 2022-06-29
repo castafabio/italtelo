@@ -153,16 +153,16 @@ class LineItemsController < ApplicationController
           end
           case params[:kind]
           when 'print'
-            job_name = "#{@line_item.id}#LI_stampa_zip.zip"
+            job_name = "#{@line_item.id}#LI_zip.zip"
           when 'cut'
-            job_name = "#{@line_item.id}#LI_taglio_zip.zip"
+            job_name = "#{@line_item.id}#LI_zip.zip"
           end
         else
           case params[:kind]
           when 'print'
-            job_name = "#{@line_item.id}#LI_stampa_#{ params[:files].first.original_filename}"
+            job_name = "#{@line_item.id}#LI_#{ params[:files].first.original_filename}"
           when 'cut'
-            job_name = "#{@line_item.id}#LI_taglio_#{ params[:files].first.original_filename}"
+            job_name = "#{@line_item.id}#LI_#{ params[:files].first.original_filename}"
           end
           uploaded_file = "#{tmpdir}/#{job_name}"
           File.open(uploaded_file, 'wb') do |f|

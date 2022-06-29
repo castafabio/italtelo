@@ -21,8 +21,8 @@
           dt.col-sm-3 = AggregatedJob.model_name.human
           dd.col-sm-3 = @line_item.aggregated_job.to_s
 
-  .card.text-center.bg-light.col-sm-3
-    - if @line_item.need_printing
+  - if @line_item.need_printing
+    .card.text-center.bg-light.col-sm-3
       h5.card-header = LineItem.human_attribute_name(:print_file)
       .card-body
         - if @line_item.aggregated_job.nil?
@@ -53,8 +53,8 @@
         - else
           = boolean @line_item.print_file.attached?
 
-  .card.text-center.bg-light.col-sm-3
-    - if @line_item.need_cutting
+  - if @line_item.need_cutting
+    .card.text-center.bg-light.col-sm-3
       h5.card-header = LineItem.human_attribute_name(:cut_file)
       .card-body
         - if @line_item.aggregated_job.nil?
