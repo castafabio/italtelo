@@ -2,11 +2,12 @@ it:
   activerecord:
     attributes:
       aggregated_job:
-        notes: Note di produzione
-        status: Stato
         customer_machine: Macchina
-        print_file: File di stampa
         cut_file: File di taglio
+        file_name: Nome del file
+        notes: Note di produzione
+        print_file: File di stampa
+        status: Stato
       customer_machine:
         name: Nome
         kind: Tipologia

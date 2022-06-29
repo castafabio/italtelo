@@ -4,7 +4,7 @@ class PrintersController < ApplicationController
   before_action :fetch_printer, only: [:resend]
 
   def index
-    @printers = Printer.all.order(created_at: :desc)
+    @printers = Printer.all.order(starts_at: :desc)
     @all_printers = @printers
     @print_machines = CustomerMachine.printer_machines.ordered
     if params[:customer_machine_id].present?
