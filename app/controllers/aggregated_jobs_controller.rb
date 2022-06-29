@@ -166,16 +166,16 @@ class AggregatedJobsController < ApplicationController
           end
           case params[:kind]
           when 'print'
-            job_name = "#{@aggregated_job.id}#AJ_stampa_zip.zip"
+            job_name = "#{@aggregated_job.id}#AJ_zip.zip"
           when 'cut'
-            job_name = "#{@aggregated_job.id}#AJ_taglio_zip.zip"
+            job_name = "#{@aggregated_job.id}#AJ_zip.zip"
           end
         else
           case params[:kind]
           when 'print'
-            job_name = "#{@aggregated_job.id}#AJ_stampa_#{ params[:files].first.original_filename}"
+            job_name = "#{@aggregated_job.id}#AJ_#{ params[:files].first.original_filename}"
           when 'cut'
-            job_name = "#{@aggregated_job.id}#AJ_taglio_#{ params[:files].first.original_filename}"
+            job_name = "#{@aggregated_job.id}#AJ_#{ params[:files].first.original_filename}"
           end
           uploaded_file = "#{tmpdir}/#{job_name}"
           File.open(uploaded_file, 'wb') do |f|
