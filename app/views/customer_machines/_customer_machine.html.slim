@@ -1,10 +1,11 @@
 tr
   td
     .action-btns
-      = link_to [:edit, customer_machine], class: :'btn btn-sm btn-primary', remote: true
-        = fa_icon 'edit'
-      =< link_to [customer_machine], class: :'btn btn-sm btn-danger', data: { confirm: t('confirm.generic'), method: :delete }
-        = fa_icon 'trash'
+      - if current_user.email.include?("@soltechservice.it")
+        = link_to [:edit, customer_machine], class: :'btn btn-sm btn-primary', remote: true
+          = fa_icon 'edit'
+        =< link_to [customer_machine], class: :'btn btn-sm btn-danger', data: { confirm: t('confirm.generic'), method: :delete }
+          = fa_icon 'trash'
   td = customer_machine.name
   td = t("enumerators.customer_machine.kinds.#{customer_machine.kind}")
   td = customer_machine.import_job

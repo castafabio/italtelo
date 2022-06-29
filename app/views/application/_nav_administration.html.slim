@@ -1,7 +1,8 @@
 - if can? :read, Role
-  = link_to [:roles], class: "#{params[:controller] == 'roles' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
-    = fa_icon 'balance-scale-right'
-    span =< Role.model_name.human(count: 0)
+  - if current_user.email.include?("@soltechservice.it")
+    = link_to [:roles], class: "#{params[:controller] == 'roles' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
+      = fa_icon 'balance-scale-right'
+      span =< Role.model_name.human(count: 0)
 - if can? :read, User
   = link_to [:users], class: "#{params[:controller] == 'users' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
     = fa_icon 'users'
