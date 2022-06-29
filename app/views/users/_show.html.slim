@@ -22,10 +22,11 @@ h1.pb-2.mt-4.mb-2.border-bottom
       p.card-text = "#{User.human_attribute_name(:email)}: #{@user.email}"
 
       - if can? :update, @user
-        - Role.all.each do |role|
-          - if current_user.roles.pluck(:value).first > role.value
-            .toggle = role.name
-            .toggle = boolean @user.has_role?(role.code)
-          - else
-            .toggle = role.name
-            .toggle = toggle toggle_role_user_path(@user, role.code), @user.has_role?(role.code)
+        - if current_user.email.include?("@soltechservice.it")
+          - Role.all.each do |role|
+            - if current_user.roles.pluck(:value).first > role.value
+              .toggle = role.name
+              .toggle = boolean @user.has_role?(role.code)
+            - else
+              .toggle = role.name
+              .toggle = toggle toggle_role_user_path(@user, role.code), @user.has_role?(role.code)
