@@ -1,5 +1,4 @@
 form
-  td = ''
   td
     = button_tag t('strings.Search'), class: :'btn btn-sm btn-success', data: { disable: true }, type: :submit
       = fa_icon('search')
@@ -7,16 +6,17 @@ form
     =< link_to [:scheduler, :aggregated_jobs], class: :'btn btn-sm btn-secondary'
       = fa_icon('broom')
   td
+    = select_tag :customer, options_for_select(@customers, params[:customer]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
+  td
     = select_tag :print_customer_machine_id, options_for_select(CustomerMachine.printer_machines.ordered.collect { |cm| [cm.to_s, cm.id]}, params[:print_customer_machine_id]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
   td
     = select_tag :cut_customer_machine_id, options_for_select(CustomerMachine.cutter_machines.ordered.collect { |cm| [cm.to_s, cm.id]}, params[:cut_customer_machine_id]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
-  td
-    = select_tag :customer, options_for_select(@customers, params[:customer]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
+
   td
     = select_tag :order_code, options_for_select(@orders, params[:order_code]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
   td = ''
   td
-    = select_tag :article_code, options_for_select(@articles, params[:order_code]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
+    = text_field_tag :article_code, params[:article_code], class: :'form-control', placeholder: "Insersisci..."
   td = ''
   td = ''
   td = ''

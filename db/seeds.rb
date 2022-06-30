@@ -17,13 +17,34 @@ end
 puts ' Roles imported. '
 
 
+
 puts "Importing Users..."
 # Users
 json = ActiveSupport::JSON.decode(File.read('db/seeds/users.json'))
 json.each do |environment, users|
   next if environment == 'development' && Rails.env != 'development'
   users.each do |user|
-    usr = User.create!(user)
+    if User.where(email: user['email']).size == 0
+      usr = User.create!(user)
+    end
   end
 end
 puts "Users imported. "
+
+
+
+if CustomerMachine.find_by(import_job: 'epson').bus240_machine_reference.nil?
+  CustomerMachine.find_by(import_job: 'epson').update(bus240_machine_reference: 11)
+end
+
+if CustomerMachine.find_by(import_job: 'protek').bus240_machine_reference.nil?
+  CustomerMachine.find_by(import_job: 'protek').update(bus240_machine_reference: 13)
+end
+
+if CustomerMachine.find_by(import_job: 'summa').bus240_machine_reference.nil?
+  CustomerMachine.find_by(import_job: 'summa').update(bus240_machine_reference: 14)
+end
+
+if CustomerMachine.find_by(import_job: 'colorado').bus240_machine_reference.nil?
+  CustomerMachine.find_by(import_job: 'colorado').update(bus240_machine_reference: 15)
+end

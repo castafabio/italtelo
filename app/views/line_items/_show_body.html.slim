@@ -11,11 +11,11 @@
 
         - if @line_item.need_printing
           dt.col-sm-3 = CustomerMachine.human_attribute_name(:print_customer_machine)
-          dd.col-sm-3 = @line_item.print_customer_machine.name
+          dd.col-sm-3 = @line_item&.print_customer_machine&.name
 
         - if @line_item.need_cutting
           dt.col-sm-3 = CustomerMachine.human_attribute_name(:cut_customer_machine)
-          dd.col-sm-3 = @line_item.cut_customer_machine.name
+          dd.col-sm-3 = @line_item&.cut_customer_machine&.name
 
         - if @line_item.aggregated_job.present?
           dt.col-sm-3 = AggregatedJob.model_name.human

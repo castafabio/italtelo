@@ -9,11 +9,13 @@ form
     =< link_to [:line_items, worked: params[:worked]], class: :'btn btn-sm btn-secondary'
       = fa_icon('broom')
   td
-    = select_tag :order_code, options_for_select(@all_line_items.pluck(:order_code).uniq.collect { |a| a}, params[:order_code]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
+    = select_tag :order_code, options_for_select(@all_line_items.pluck(:order_code).uniq.collect { |ali| ali}, params[:order_code]), class: :'form-control selectpicker', data: {'live-search': true, 'none-selected-text': t('strings.Select_one') }, prompt: t('strings.Select_one'), onchange: "this.form.submit();"
   td
     = select_tag :aggregated_jobs, options_for_select([false, true].collect { |bool| [I18n::t("enumerators.common.boolean.#{bool}"), bool] }, params[:aggregated_jobs]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
   td
-    = select_tag :line_item_id, options_for_select(@all_line_items.collect { |li| [li.to_s, li.id]}, params[:line_item_id]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
+    = select_tag :customer, options_for_select(@all_line_items.pluck(:customer).uniq, params[:customer]), class: :'form-control selectpicker', data: {'live-search': true, 'none-selected-text': t('strings.Select_one') }, prompt: t('strings.Select_one'), onchange: "this.form.submit();"
+  td
+    = select_tag :order_line_item, options_for_select(@all_line_items.pluck(:order_line_item).uniq.collect { |oli| oli}, params[:order_line_item]), class: :'form-control selectpicker', data: {'live-search': true, 'none-selected-text': t('strings.Select_one') }, prompt: t('strings.Select_one'), onchange: "this.form.submit();"
 
   td = ""
   td = ""
@@ -23,7 +25,6 @@ form
   td
     = select_tag :cut_customer_machine_id, options_for_select(CustomerMachine.cutter_machines.ordered.collect { |cm| [cm.to_s, cm.id]}, params[:cut_customer_machine_id]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
   td
-    = select_tag :customer, options_for_select(@all_line_items.pluck(:customer).uniq, params[:customer]), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
-  td
+    = text_field_tag :article_code, params[:article_code], class: :'form-control', placeholder: "Insersisci..."
   td
   td

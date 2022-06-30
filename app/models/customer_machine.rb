@@ -7,6 +7,8 @@ class CustomerMachine < ApplicationRecord
   has_many :printers, dependent: :restrict_with_exception
   has_many :print_jobs, class_name: "LineItem", foreign_key: "print_customer_machine_id", dependent: :nullify
   has_many :cut_jobs, class_name: "LineItem", foreign_key: "cut_customer_machine_id", dependent: :nullify
+  has_many :old_print_jobs, class_name: "LineItem", foreign_key: "old_print_customer_machine_id", dependent: :nullify
+  has_many :old_cut_jobs, class_name: "LineItem", foreign_key: "old_cut_customer_machine_id", dependent: :nullify
   has_many :print_aggregated_jobs, class_name: "LineItem", foreign_key: "print_customer_machine_id", dependent: :nullify
   has_many :cut_aggregated_jobs, class_name: "LineItem", foreign_key: "cut_customer_machine_id", dependent: :nullify
 

@@ -42,9 +42,9 @@ class ImportColorado < ApplicationJob
                   resource_type = "AggregatedJob"
                   resource_id = file_name.split('#AJ').first.to_i
                   resource = AggregatedJob.find_by(id: resource_id)
-                elsif AggregatedJob.brand_new.where(file_name: file_name).where("created_at >= :today", today: Date.today - 1.month).size > 0
+                elsif AggregatedJob.brand_new.where("file_name LIKE :file_name", file_name: file_name).where("created_at >= :today", today: Date.today - 1.month).size > 0
                   resource_type = "AggregatedJob"
-                  resource = AggregatedJob.brand_new.where(file_name: file_name).where("created_at >= :today", today: Date.today - 1.month).last
+                  resource = AggregatedJob.brand_new.where("file_name LIKE :file_name", file_name: file_name).where("created_at >= :today", today: Date.today - 1.month).last
                   resource_id = resource.id
                 else
                   resource_type = nil

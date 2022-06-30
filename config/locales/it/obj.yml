@@ -2,6 +2,7 @@ it:
   obj:
     add: "Aggiungi %{obj}"
     added: "Aggiunta %{obj} effettuata con successo!"
+    choose: "Scegli %{obj}"
     created: "Creazione %{obj} effettuata con successo!"
     created_with_exception: "Creazione %{obj} effettuata con eccezioni! %{message}"
     delete: "Elimina %{obj}"

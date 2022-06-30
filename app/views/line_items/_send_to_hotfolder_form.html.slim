@@ -1,0 +1,11 @@
+= form_for [:send_to_hotfolder, @line_item], html: { autocomplete: :off }, data: { method: :patch, remote: true } do |f|
+
+  - if @error
+    p.alert.alert-danger = @error
+
+  .form-group
+    = f.label ItalteloUser.model_name.human(count: 0)
+    = f.select :italtelo_user_id, @italtelo_users.collect { |iu| [iu.to_s, iu.id]}, { prompt: t('strings.Select_one') }, { class: :'form-control' }
+
+  .form-group
+    = button_tag t('actions.save'), class: :'btn btn-sm btn-success btn-block', data: { disable: true }, type: :submit

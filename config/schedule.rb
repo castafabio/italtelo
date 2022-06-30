@@ -18,3 +18,7 @@ end
 every 1.day, at: ['2:00 am', '1:00 pm'] do
   runner "Backup.perform_later"
 end
+
+every 1.day, at: ['2:00 am'] do
+  runner "CheckItalteloUsers.perform_later"
+end

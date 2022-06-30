@@ -1,0 +1,8 @@
+.modal-dialog
+  .modal-content
+
+    .modal-header
+      h5.modal-title = t('obj.choose', obj: ItalteloUser.model_name.human(count: 0)).downcase
+      button.close onclick="javascript:window.location.reload()" type="button" data-dismiss="modal": span &times;
+
+    .modal-body == render partial: 'send_to_hotfolder_form'

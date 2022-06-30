@@ -1,19 +1,27 @@
 class LineItemsController < ApplicationController
   load_and_authorize_resource
 
-  before_action :fetch_line_item, only: [:inline_update, :edit, :upload_file, :delete_attachment, :append_line_item, :send_to_hotfolder, :show]
+  before_action :fetch_line_item, only: [:inline_update, :edit, :upload_file, :delete_attachment, :append_line_item, :send_to_hotfolder, :show, :choose_operator]
 
   skip_before_action :verify_authenticity_token, only: :upload_file
 
   def send_to_hotfolder
-    begin
-      @line_item.send_to_hotfolder!
-      @line_item.update!(send_at: DateTime.now)
-      flash[:notice] = I18n::t('obj.sent', obj: 'file')
-    rescue Exception => e
-      flash[:alert] = I18n::t('obj.not_sent_exception', obj: 'file', message: e.message)
-    ensure
-      render js: 'location.reload();'
+    if request.patch?
+      begin
+        if params["line_item"]["italtelo_user_id"].present?
+          @line_item.send_to_hotfolder!
+          @line_item.update!(send_at: DateTime.now, italtelo_user_id: ItalteloUser.find(params["line_item"]["italtelo_user_id"].to_i).id)
+          flash[:notice] = I18n::t('obj.sent', obj: 'file')
+        else
+          raise "Bisogna selezionare un operatore."
+        end
+      rescue Exception => e
+        flash[:alert] = I18n::t('obj.not_sent_exception', obj: 'file', message: e.message)
+      ensure
+        render js: "location.reload();"
+      end
+    else
+      @italtelo_users = ItalteloUser.all.ordered
     end
   end
 
@@ -39,7 +47,7 @@ class LineItemsController < ApplicationController
       @line_items = LineItem.where(status: 'brand_new')
     end
     @all_line_items = @line_items
-    @line_items = @line_items.where(id: params[:line_item_id]) if params[:line_item_id].present?
+    @line_items = @line_items.where(order_line_item: params[:order_line_item]) if params[:order_line_item].present?
     if params[:aggregated_jobs].present?
       if params[:aggregated_jobs].to_boolean
         @line_items = @line_items.where("line_items.aggregated_job_id IS NOT NULL")
@@ -51,7 +59,8 @@ class LineItemsController < ApplicationController
     @line_items = @line_items.where(order_code: params[:order_code]) if params[:order_code].present?
     @line_items = @line_items.where(cut_customer_machine_id: params[:cut_customer_machine_id].to_i) if params[:cut_customer_machine_id].present?
     @line_items = @line_items.where(print_customer_machine_id: params[:print_customer_machine_id].to_i) if params[:print_customer_machine_id].present?
-    @line_items = @line_items.where('description LIKE :search', search: "%#{params[:search]}%") if params[:search].present?
+    @line_items = @line_items.where('article_code LIKE :article_code', article_code: "%#{params[:article_code]}%") if params[:article_code].present?
+    @line_items = @line_items.paginate(page: params[:page], per_page: params[:per_page])
   end
 
   def toggle_is_active
@@ -67,16 +76,23 @@ class LineItemsController < ApplicationController
 
   def inline_update
     begin
-      # !line item editable
       if @line_item.aggregated_job_id.present?
         render json: { code: 400 }
       else
         if params[:customer_machine].present?
           customer_machine = CustomerMachine.find_by(id: params[:customer_machine].to_i)
           if customer_machine.kind == 'printer'
+            @line_item.update_old_customer_machine!('print')
             @line_item.update!(print_customer_machine_id: customer_machine.id)
+            if @line_item&.old_print_customer_machine&.id == @line_item.print_customer_machine.id
+              @line_item.update!(old_print_customer_machine_id: nil)
+            end
           else
+            @line_item.update_old_customer_machine!('cut')
             @line_item.update!(cut_customer_machine_id: customer_machine.id)
+            if @line_item.old_cut_customer_machine.id == @line_item.cut_customer_machine.id
+              @line_item.update!(old_cut_customer_machine_id: nil)
+            end
           end
         end
         render json: { code: 200 }

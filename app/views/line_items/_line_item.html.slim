@@ -6,6 +6,7 @@ tr style="#{line_item.aggregated_job.present? ? 'background-color: #d2ecf1' : ''
       = simple_format link_to line_item.aggregated_job, [line_item.aggregated_job]
     - else
       = boolean line_item.aggregated_job
+  td = line_item.customer
   td = line_item.to_s
   td.text-center
     - if line_item.aggregated_job.nil?
@@ -24,8 +25,8 @@ tr style="#{line_item.aggregated_job.present? ? 'background-color: #d2ecf1' : ''
           - else
             = link_to [:upload_file, line_item, kind: 'print'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Print_file').downcase}")
               = fa_icon('upload')
-      - else
-         = boolean line_item.print_file.attached?
+        - else
+           = boolean line_item.print_file.attached?
     - elsif line_item.aggregated_job.present? && line_item.aggregated_job.need_printing
       = boolean line_item.print_file.attached?
 
@@ -60,7 +61,7 @@ tr style="#{line_item.aggregated_job.present? ? 'background-color: #d2ecf1' : ''
     - if line_item.editable?
       - if line_item.need_printing
         - if CustomerMachine.printer_machines.ordered.size > 0
-          = select_tag :print_customer_machine_id, options_for_select(CustomerMachine.printer_machines.ordered.collect {|pm| [pm.to_s, pm.id]}, line_item&.print_customer_machine&.id), prompt: t('strings.Select_one'), class: :'inline_select customer_machine form-control', data: { id: line_item.id }
+          = select_tag :print_customer_machine_id, options_for_select(CustomerMachine.printer_machines.ordered.collect {|pm| [pm.to_s, pm.id]}, line_item&.print_customer_machine&.id), class: :'inline_select customer_machine form-control', data: { id: line_item.id }
           p id="#{line_item.id}" = ""
         - else
           .alert.alert-warning = "Nessuna macchina da stampa configurata"
@@ -71,14 +72,13 @@ tr style="#{line_item.aggregated_job.present? ? 'background-color: #d2ecf1' : ''
     - if line_item.editable?
       - if line_item.need_cutting
         - if CustomerMachine.printer_machines.ordered.size > 0
-          = select_tag :cut_customer_machine_id, options_for_select(CustomerMachine.cutter_machines.ordered.collect {|cm| [cm.to_s, cm.id]}, line_item&.cut_customer_machine&.id), prompt: t('strings.Select_one'), class: :'inline_select customer_machine form-control', data: { id: line_item.id }
+          = select_tag :cut_customer_machine_id, options_for_select(CustomerMachine.cutter_machines.ordered.collect {|cm| [cm.to_s, cm.id]}, line_item&.cut_customer_machine&.id), class: :'inline_select customer_machine form-control', data: { id: line_item.id }
           p id="#{line_item.id}" = ""
         - else
           .alert.alert-warning = "Nessuna macchina da taglio configurata"
     - else
       = line_item.cut_customer_machine
 
-  td = line_item.customer
   td = line_item.article_code
   td = line_item.article_description
   td = line_item.quantity

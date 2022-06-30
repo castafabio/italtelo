@@ -5,9 +5,12 @@ class UpdateItalteloTable < ApplicationJob
   def perform(id, type)
     skip = false
     inks = ""
+    old_customer_machine = ""
     if type == 'printer'
       resource = Printer.find_by(id: id)
-      customer_machine = resource.resource.print_customer_machine.name
+      if resource.resource.old_print_customer_machine.present?
+        old_customer_machine += "Macchina impostata: #{resource.resource.old_print_customer_machine.bus240_machine_reference} - #{resource.resource.old_print_customer_machine.name}"
+      end
       printers = resource.resource.printers
       if printers.size > 1
         skip = true
@@ -25,7 +28,9 @@ class UpdateItalteloTable < ApplicationJob
       reference = 'print_reference'
     else
       resource = Cutter.find_by(id: id)
-      customer_machine = resource.resource.cut_customer_machine.name
+      if resource.resource.old_cut_customer_machine.present?
+        old_customer_machine += "Macchina impostata: #{resource.resource.old_cut_customer_machine.bus240_machine_reference} - #{resource.resource.old_cut_customer_machine.name}"
+      end
       cutters = resource.resource.cutters
       if cutters.size > 1
         skip = true
@@ -39,10 +44,10 @@ class UpdateItalteloTable < ApplicationJob
     begin
       if resource.resource.is_a?(AggregatedJob)
         resource.resource.line_items.each do |li|
-          send_to_gest!(resource, li, reference, skip, duration, inks)
+          send_to_gest!(resource, li, reference, skip, duration, inks, resource.customer_machine, old_customer_machine)
         end
       else
-        send_to_gest!(resource, resource.resource, reference, skip, duration, inks)
+        send_to_gest!(resource, resource.resource, reference, skip, duration, inks, resource.customer_machine, old_customer_machine)
       end
     rescue Exception => e
       GESTIONALE_LOGGER.info("errore = #{e.message}")
@@ -53,7 +58,7 @@ class UpdateItalteloTable < ApplicationJob
     end
   end
 
-  def send_to_gest!(resource, line_item, reference, skip, duration, inks)
+  def send_to_gest!(resource, line_item, reference, skip, duration, inks, customer_machine, old_customer_machine)
     client = TinyTds::Client.new(username: ENV['SQL_DB_USER'], password: ENV['SQL_DB_PSW'], host: ENV['SQL_DB_HOST'], port: ENV['SQL_DB_PORT'], database: ENV['SQL_DB'])
     client.execute('SET ANSI_PADDING ON').do
     client.execute('SET ANSI_NULLS ON').do
@@ -66,10 +71,9 @@ class UpdateItalteloTable < ApplicationJob
     # result = client.execute(tsql)
 
     if skip
-      #MACCHINA
-      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_stato = 'C', lce_stop = #{resource.ends_at}, lce_tempese = #{duration}, lce_ultagg = #{DateTime.now}, lce_ink = #{inks} WHERE id = #{line_item.send(reference)}"
+      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_flevas = 'S', lce_stop = #{resource.ends_at}, lce_tempese = #{duration}, lce_ultagg = #{DateTime.now}, lce_ink = #{inks}, lce_note = #{old_customer_machine}, lce_codcent = #{customer_machine.bus240_machine_reference}, lce_descent = #{customer_machine.name}, lce_codcope = #{line_item.italtelo_user.code}, lce_descope = #{line_item.italtelo_user.description} WHERE id = #{line_item.send(reference)}"
     else
-      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_start = #{resource.starts_at}, lce_stato = 'C', lce_stop = #{resource.ends_at}, lce_tempese = #{duration}, lce_ultagg = #{DateTime.now}, lce_ink = #{inks} WHERE id = #{line_item.send(reference)}"
+      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_start = #{resource.starts_at}, lce_stato = 'C', lce_stop = #{resource.ends_at}, lce_tempese = #{duration}, lce_ultagg = #{DateTime.now}, lce_ink = #{inks}, lce_note = #{old_customer_machine}, lce_codcent = #{customer_machine.bus240_machine_reference}, lce_descent = #{customer_machine.name} WHERE id = #{line_item.send(reference)}"
     end
     GESTIONALE_LOGGER.info("tsql == #{tsql}")
     client.execute(tsql).each

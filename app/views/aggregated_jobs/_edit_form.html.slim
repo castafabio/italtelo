@@ -3,6 +3,7 @@
   = hidden_field_tag :file_name, true
 
   .form-group
+    .alert.alert-info = "Se sono più file, separare i nomi tramite ';' (punto e virgola)."
     = f.label :file_name
     = f.text_field :file_name, class: :'form-control'
 

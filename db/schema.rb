@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_06_29_070545) do
+ActiveRecord::Schema.define(version: 2022_06_30_091424) do
 
   create_table "active_storage_attachments", charset: "utf8mb3", force: :cascade do |t|
     t.string "name", null: false
@@ -73,6 +73,7 @@ ActiveRecord::Schema.define(version: 2022_06_29_070545) do
     t.string "import_job"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "bus240_machine_reference"
   end
 
   create_table "cutters", charset: "utf8mb3", force: :cascade do |t|
@@ -106,6 +107,13 @@ ActiveRecord::Schema.define(version: 2022_06_29_070545) do
     t.boolean "imported", default: false
   end
 
+  create_table "italtelo_users", charset: "utf8mb3", force: :cascade do |t|
+    t.integer "code"
+    t.text "description"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "line_items", charset: "utf8mb3", force: :cascade do |t|
     t.integer "customer_machine_id"
     t.integer "aggregated_job_id"
@@ -128,9 +136,15 @@ ActiveRecord::Schema.define(version: 2022_06_29_070545) do
     t.datetime "send_at"
     t.bigint "print_customer_machine_id"
     t.bigint "cut_customer_machine_id"
+    t.bigint "old_print_customer_machine_id"
+    t.bigint "old_cut_customer_machine_id"
+    t.bigint "italtelo_user_id"
     t.index ["aggregated_job_id"], name: "index_line_items_on_aggregated_job_id"
     t.index ["customer_machine_id"], name: "index_line_items_on_customer_machine_id"
     t.index ["cut_customer_machine_id"], name: "index_line_items_on_cut_customer_machine_id"
+    t.index ["italtelo_user_id"], name: "index_line_items_on_italtelo_user_id"
+    t.index ["old_cut_customer_machine_id"], name: "index_line_items_on_old_cut_customer_machine_id"
+    t.index ["old_print_customer_machine_id"], name: "index_line_items_on_old_print_customer_machine_id"
     t.index ["print_customer_machine_id"], name: "index_line_items_on_print_customer_machine_id"
   end
 
@@ -156,7 +170,7 @@ ActiveRecord::Schema.define(version: 2022_06_29_070545) do
     t.string "extra_data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "copies", default: 0
+    t.integer "copies", default: 1
     t.string "material", default: ""
     t.index ["customer_machine_id"], name: "index_printers_on_customer_machine_id"
     t.index ["resource_type", "resource_id"], name: "index_printers_on_resource"
@@ -197,5 +211,7 @@ ActiveRecord::Schema.define(version: 2022_06_29_070545) do
   add_foreign_key "aggregated_jobs", "customer_machines", column: "cut_customer_machine_id"
   add_foreign_key "aggregated_jobs", "customer_machines", column: "print_customer_machine_id"
   add_foreign_key "line_items", "customer_machines", column: "cut_customer_machine_id"
+  add_foreign_key "line_items", "customer_machines", column: "old_cut_customer_machine_id"
+  add_foreign_key "line_items", "customer_machines", column: "old_print_customer_machine_id"
   add_foreign_key "line_items", "customer_machines", column: "print_customer_machine_id"
 end

@@ -4,9 +4,9 @@ tr
       .action-btns
         - if printer.resource.present?
           - if printer.is_line_item?
-            = link_to "Riga ordine: #{LineItem.find_by(id: printer.resource_id).id}", [:line_items, line_item_id: LineItem.find_by(id: printer.resource_id).id]
+            = link_to "Riga ordine: #{LineItem.find_by(id: printer.resource_id).id}", [LineItem.find_by(id: printer.resource_id)]
           - elsif printer.is_aggregated_job?
-            =< link_to "Aggregato: #{AggregatedJob.find_by(id: printer.resource_id)}", [:aggregated_jobs, code: AggregatedJob.find_by(id: printer.resource_id).code]
+            =< link_to "Aggregato: #{AggregatedJob.find_by(id: printer.resource_id)}", [AggregatedJob.find_by(id: printer.resource_id)]
 
   td = printer.customer_machine
   td = printer.job_id

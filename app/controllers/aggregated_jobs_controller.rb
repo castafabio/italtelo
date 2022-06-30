@@ -4,14 +4,25 @@ class AggregatedJobsController < ApplicationController
   skip_before_action :verify_authenticity_token, only: :upload_file
 
   def send_to_hotfolder
-    begin
-      @aggregated_job.send_to_hotfolder!
-      @aggregated_job.update!(send_at: DateTime.now)
-      flash[:notice] = I18n::t('obj.sent', obj: 'file')
-    rescue Exception => e
-      flash[:alert] = I18n::t('obj.not_sent_exception', obj: 'file', message: e.message)
-    ensure
-      render js: 'location.reload();'
+    if request.patch?
+      begin
+        if params["italtelo_user_id"].present?
+          @aggregated_job.send_to_hotfolder!
+          @aggregated_job.update!(send_at: DateTime.now)
+          @aggregated_job.line_items.each do |line_item|
+            line_item.update!(italtelo_user_id: ItalteloUser.find(params["italtelo_user_id"].to_i).id)
+          end
+          flash[:notice] = I18n::t('obj.sent', obj: 'file')
+        else
+          raise "Bisogna selezionare un operatore."
+        end
+      rescue Exception => e
+        flash[:alert] = I18n::t('obj.not_sent_exception', obj: 'file', message: e.message)
+      ensure
+        render js: "location.reload();"
+      end
+    else
+      @italtelo_users = ItalteloUser.all.ordered
     end
   end
 
@@ -25,8 +36,20 @@ class AggregatedJobsController < ApplicationController
           @aggregated_job.update!(cut_customer_machine_id: customer_machine.id)
         end
         @aggregated_job.line_items.each do |line_item|
-          line_item.update!(print_customer_machine_id: @aggregated_job.print_customer_machine.id) if @aggregated_job.need_printing
-          line_item.update!(cut_customer_machine_id: @aggregated_job.cut_customer_machine.id) if @aggregated_job.need_cutting
+          if @aggregated_job.need_printing
+            line_item.update_old_customer_machine!('print')
+            line_item.update!(print_customer_machine_id: @aggregated_job.print_customer_machine.id)
+            if line_item.old_print_customer_machine.id == line_item.print_customer_machine.id
+              line_item.update!(old_print_customer_machine_id: nil)
+            end
+          end
+          if @aggregated_job.need_cutting
+            line_item.update_old_customer_machine!('cut')
+            line_item.update!(cut_customer_machine_id: @aggregated_job.cut_customer_machine.id)
+            if line_item.old_cut_customer_machine.id == line_item.cut_customer_machine.id
+              line_item.update!(old_cut_customer_machine_id: nil)
+            end
+          end
         end
       end
       render json: { code: 200 }
@@ -116,7 +139,7 @@ class AggregatedJobsController < ApplicationController
     @line_items = @line_items.where(order_code: params[:order_code]) if params[:order_code].present?
     @line_items = @line_items.where(print_customer_machine_id: params[:print_customer_machine_id]) if params[:print_customer_machine_id].present?
     @line_items = @line_items.where(cut_customer_machine_id: params[:cut_customer_machine_id]) if params[:cut_customer_machine_id].present?
-    @line_items = @line_items.where(article_code: params[:article_code]) if params[:article_code].present?
+    @line_items = @line_items.where('article_code LIKE :article_code', article_code: "%#{params[:article_code]}%") if params[:article_code].present?
   end
 
   def add_line_items
@@ -200,7 +223,6 @@ class AggregatedJobsController < ApplicationController
   def update
     begin
       if params[:file_name].present?
-        puts "update_params[:file_name] ========= " + update_params[:file_name].inspect
         @aggregated_job.update!(file_name: update_params[:file_name])
         flash[:notice] = t('obj.updated', obj: AggregatedJob.human_attribute_name(:file_name).downcase)
       else

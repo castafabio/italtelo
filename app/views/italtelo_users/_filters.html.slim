@@ -1,0 +1,11 @@
+form
+  td
+    = button_tag t('strings.Search'), class: :'btn btn-sm btn-success', data: { disable: true }, type: :submit
+      = fa_icon('search')
+
+    =< link_to [:italtelo_users], class: :'btn btn-sm btn-secondary'
+      = fa_icon('broom')
+  td
+    = select_tag :code, options_for_select(@all_italtelo_users.pluck(:code).collect { |iu| iu}), class: :'form-control', prompt: t('strings.Select_one'), onchange: "this.form.submit();"
+  td
+    = text_field_tag :description, params[:description], class: :'form-control', placeholder: "Insersisci..."
