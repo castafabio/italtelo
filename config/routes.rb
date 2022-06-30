@@ -16,7 +16,7 @@ Rails.application.routes.draw do
     end
     member do
       delete :delete_attachment
-      match :send_to_hotfolder, via: [:get, :post]
+      match :send_to_hotfolder, via: [:get, :patch]
       match :upload_file, via: [:get, :post]
       match :add_line_items, via: [:get, :patch]
       patch :inline_update
@@ -32,14 +32,17 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :italtelo_users, only: :index
+
   resources :line_items do
     member do
       delete :delete_attachment
+      match :choose_operator, via: [:get, :patch]
       match :upload_file, via: [:get, :post]
       match :append_line_item, via: [:get, :patch]
       patch :deaggregate
       patch :inline_update
-      match :send_to_hotfolder, via: [:get, :post]
+      match :send_to_hotfolder, via: [:get, :patch]
     end
   end
 

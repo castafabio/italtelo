@@ -3,8 +3,11 @@ class LineItem < ApplicationRecord
 
   # belongs_to :customer_machine, optional: true
   belongs_to :print_customer_machine, class_name: 'CustomerMachine', optional: true
-  belongs_to :cut_customer_machine, class_name: 'CustomerMachine', foreign_key: "cut_customer_machine_id", optional: true
+  belongs_to :cut_customer_machine, class_name: 'CustomerMachine', optional: true
+  belongs_to :old_print_customer_machine, class_name: 'CustomerMachine', optional: true
+  belongs_to :old_cut_customer_machine, class_name: 'CustomerMachine', optional: true
   belongs_to :aggregated_job, optional: true
+  belongs_to :italtelo_user, optional: true
 
   has_many :printers, as: :resource, dependent: :destroy
   has_many :cutters, as: :resource, dependent: :destroy
@@ -19,10 +22,8 @@ class LineItem < ApplicationRecord
 
   def self.aggregable
     line_item_ids = []
-    LineItem.where(aggregated_job_id: nil).each do |line_item|
-      if line_item.print_customer_machine.present? || line_item.cut_customer_machine.present?
-        line_item_ids << line_item.id
-      end
+    LineItem.where(aggregated_job_id: nil).where("line_items.print_customer_machine_id IS NOT NULL OR line_items.cut_customer_machine_id IS NOT NULL").each do |line_item|
+      line_item_ids << line_item.id
     end
     LineItem.where(id: line_item_ids)
   end
@@ -53,6 +54,18 @@ class LineItem < ApplicationRecord
       ret = false
     end
     ret
+  end
+
+  def update_old_customer_machine!(kind)
+    if kind == 'print'
+      if self.print_customer_machine.present?
+        self.update!(old_print_customer_machine_id: self.print_customer_machine.id) if self.old_print_customer_machine_id.nil?
+      end
+    else
+      if self.cut_customer_machine.present?
+        self.update!(old_cut_customer_machine_id: self.cut_customer_machine.id) if self.old_cut_customer_machine_id.nil?
+      end
+    end
   end
 
   def send_to_hotfolder!
@@ -151,9 +164,8 @@ class LineItem < ApplicationRecord
 
   def appendable_aggregate_line_item_list
     aggregated_line_item_ids = []
-    all_aggregated_jobs = AggregatedJob.unsend.brand_new
+    all_aggregated_jobs = AggregatedJob.unsend.brand_new.joins(:line_items).where("line_items.order_code LIKE :order_code", order_code: self.order_code)
     all_aggregated_jobs.each do |aj|
-      # aggregated_line_item_ids << aj.id if (self.need_printing && aj.line_items.first.need_printing && self&.print_customer_machine&.id == aj.print_customer_machine_id || self.need_cutting && aj.line_items.first.need_cutting && self&.cut_customer_machine&.id == aj.cut_customer_machine_id)
       ret = []
       if self.need_printing
         ret << (self.need_printing && aj.need_printing && (self&.print_customer_machine&.id == aj.print_customer_machine_id))
@@ -161,6 +173,7 @@ class LineItem < ApplicationRecord
       if self.need_cutting
         ret << (self.need_cutting && aj.need_cutting && (self&.cut_customer_machine&.id == aj.cut_customer_machine_id))
       end
+      ret << (self.order_code == aj.line_items.first.order_code)
       if ret.uniq.size == 1 && ret.uniq.first == true
         aggregated_line_item_ids << aj.id
       end
@@ -206,7 +219,7 @@ class LineItem < ApplicationRecord
   end
 
   def to_s
-    "#{self.order_year}/#{self.order_code} - #{self.order_line_item}"
+    "#{self.order_code} - #{self.order_line_item}"
   end
 
   def calculate_ink_total

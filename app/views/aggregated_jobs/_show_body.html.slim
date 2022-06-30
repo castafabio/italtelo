@@ -131,7 +131,7 @@
 .card.bg-light
   h5.card-header = LineItem.model_name.human(count: 0)
   .card-body
-    == render partial: 'line_items/list', locals: { line_item: @aggregated_job.line_items, collection: @aggregated_job.line_items }
+    == render partial: 'line_items/list', locals: { line_item: @aggregated_job.line_items, collection: @aggregated_job.line_items.paginate(page: params[:page], per_page: params[:per_page]) }
 
 .card-group
   - if @aggregated_job.printers.size > 0

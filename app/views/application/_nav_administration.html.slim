@@ -7,6 +7,10 @@
   = link_to [:users], class: "#{params[:controller] == 'users' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
     = fa_icon 'users'
     span =< User.model_name.human(count: 0)
+- if can? :read, ItalteloUser
+  = link_to [:italtelo_users], class: "#{params[:controller] == 'italtelo_users' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
+    = fa_icon 'people-carry'
+    span =< ItalteloUser.model_name.human(count: 0)
 - if can? :read, CustomerMachine
   = link_to [:customer_machines], class: "#{params[:controller] == 'customer_machines' ? 'dropdown-item active' : 'dropdown-item'}", data: {spinner: true}
     = fa_icon 'hdd'

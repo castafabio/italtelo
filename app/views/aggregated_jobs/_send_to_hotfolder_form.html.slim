@@ -1,0 +1,12 @@
+= form_for [:send_to_hotfolder, @aggregated_job], html: { autocomplete: :off }, data: { method: :patch, remote: true } do |f|
+
+  - if @error
+    p.alert.alert-danger = @error
+
+  .form-group
+    = f.label ItalteloUser.model_name.human(count: 0)
+    = select_tag :italtelo_user_id, options_for_select(@italtelo_users.collect {|iu| [iu.to_s, iu.id]}), prompt: t('strings.Select_one'), class: :'form-control selectpicker', data: {'live-search': true, 'none-selected-text': t('strings.Select_one') }, prompt: t('strings.Select_one')
+
+
+  .form-group
+    = button_tag t('actions.save'), class: :'btn btn-sm btn-success btn-block', data: { disable: true }, type: :submit

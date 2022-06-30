@@ -1,9 +1,8 @@
 tr
   td = check_box_tag 'check_line_item', line_item.id, false, class: 'check_line_item', :style => "width: 30px; height: 30px; margin: 7px"
-  td
+  td = line_item.customer
   td = line_item.print_customer_machine if line_item.need_printing
   td = line_item.cut_customer_machine if line_item.need_cutting
-  td = line_item.customer
   td = line_item.order_code
   td = line_item.to_s
   td = line_item.article_code

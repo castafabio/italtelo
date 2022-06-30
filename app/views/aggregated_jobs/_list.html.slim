@@ -5,12 +5,12 @@
     thead
       tr
         th = t('strings.Actions')
+        th = LineItem.human_attribute_name(:customer)
         th = AggregatedJob.model_name.human
         th = CustomerMachine.human_attribute_name(:print_customer_machine)
         th = CustomerMachine.human_attribute_name(:cut_customer_machine)
         th = AggregatedJob.human_attribute_name('print_file')
         th = AggregatedJob.human_attribute_name('cut_file')
-        th = LineItem.human_attribute_name(:customer)
 
     tfoot
       tr

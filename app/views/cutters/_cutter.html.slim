@@ -4,9 +4,9 @@ tr
       .action-btns
         - if cutter.resource.present?
           - if cutter.is_line_item?
-            = link_to "Riga ordine: #{LineItem.find_by(id: cutter.resource_id).id}", [:line_items, line_item_id: LineItem.find_by(id: cutter.resource_id).id]
+            = link_to "Riga ordine: #{LineItem.find_by(id: cutter.resource_id).id}", [LineItem.find_by(id: cutter.resource_id)]
           - elsif cutter.is_aggregated_job?
-            =< link_to "Aggregato: #{AggregatedJob.find_by(id: cutter.resource_id)}", [:aggregated_jobs, code: AggregatedJob.find_by(id: cutter.resource_id).code]
+            =< link_to "Aggregato: #{AggregatedJob.find_by(id: cutter.resource_id)}", [AggregatedJob.find_by(id: cutter.resource_id)]
   td = cutter.customer_machine
   td = cutter.file_name
   td = l(cutter.starts_at, format: :short)

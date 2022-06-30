@@ -1,6 +1,6 @@
 .table-responsive
 
-  table#roles.table.table-bordered.table-sm.table-hover.table-striped
+  table#users.table.table-bordered.table-sm.table-hover.table-striped
 
     thead
       tr
@@ -11,9 +11,8 @@
       tr
         == content_for :extra_thead
         th = t('strings.Actions')
-        th = Role.human_attribute_name(:code)
-        th = Role.human_attribute_name(:name)
-        th = Role.human_attribute_name(:value)
+        th = ItalteloUser.human_attribute_name(:code)
+        th = ItalteloUser.human_attribute_name(:description)
 
     tfoot
       tr
@@ -22,7 +21,8 @@
           .float-right == render 'table_entries'
 
     tbody
+      == render partial: 'filters'
       - if collection.length > 0
         == render collection
       - else
-        tr: td.colspan.info = t('obj.empty_list', obj: Role.model_name.human(count: 0).downcase)
+        tr: td.alert.alert-warning.colspan.info = t('obj.empty_list', obj: ItalteloUser.model_name.human(count: 0).downcase)

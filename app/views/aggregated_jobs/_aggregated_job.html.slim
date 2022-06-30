@@ -1,6 +1,7 @@
 tr
   td
     == render partial: 'aggregated_jobs/actions', locals: { aggregated_job: aggregated_job }
+  td = aggregated_job.line_items.first.customer
   td = aggregated_job.to_s
   td
     - if aggregated_job.status == 'brand_new'
@@ -89,5 +90,3 @@ tr
           - if aggregated_job.send_at.nil?
             = link_to [:upload_file, aggregated_job, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Print_file')}")
               = fa_icon('upload')
-
-  td = aggregated_job.line_items.first.customer

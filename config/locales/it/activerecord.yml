@@ -9,22 +9,26 @@ it:
         print_file: File di stampa
         status: Stato
       customer_machine:
-        name: Nome
-        kind: Tipologia
-        path: Percorso
-        ip_address: Indirizzo IP
-        serial_number: Serial number
-        psw: Password
         api_key: Chiave API
-        hotfolder_path: Percorso Hotfolder
-        is_mounted: Collegato
-        print_customer_machine: Macchina da stampa
+        bus240_machine_reference: ID riferimento BUS240
         cut_customer_machine: Macchina da taglio
+        hotfolder_path: Percorso Hotfolder
+        ip_address: Indirizzo IP
+        is_mounted: Collegato
+        kind: Tipologia
+        name: Nome
+        path: Percorso
+        print_customer_machine: Macchina da stampa
+        psw: Password
+        serial_number: Serial number
       cutter:
         file_name: Nome file
         cut_time: Tempo di taglio
         starts_at: Data inizio
         ends_at: Data fine
+      italtelo_user:
+        code: Codice
+        description: Descrizione
       line_item:
         row_number: N. riga
         subjects: Soggetti
@@ -106,6 +110,9 @@ it:
       cutter:
         one: "Dati Taglierina"
         other: "Dati Taglierine"
+      italtelo_user:
+        one: Operatore Italtelo
+        other: Operatori Italtelo
       line_item:
         one: Riga ordine
         other: Righe ordine
@@ -128,5 +135,5 @@ it:
         one: "Campo switch"
         other: "Campi switch"
       user:
-        one: "Operatore"
-        other: "Operatori"
+        one: "Utente"
+        other: "Utenti"
