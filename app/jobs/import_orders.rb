@@ -46,14 +46,18 @@ class ImportOrders < ApplicationJob
               notes: row['lce_note'],
               quantity: row['lce_quant'],
             }
+            GESTIONALE_LOGGER.info(" details == #{line_item_details}")
             line_item = LineItem.find_by(order_year: row["lce_oranno"], order_line_item: row["lce_orriga"], order_series: row["lce_orserie"], order_type: row["lce_ortipo"], order_code: row['lce_ornum'])
+            GESTIONALE_LOGGER.info(" line_item == #{line_item}")
             if line_item.nil?
+              GESTIONALE_LOGGER.info(" line_item è nil")
               line_item_details[:print_reference] = print_reference
               line_item_details[:print_customer_machine_id] = print_customer_machine
               line_item_details[:cut_reference] = cut_reference
               line_item_details[:cut_customer_machine_id] = cut_customer_machine
               line_item = LineItem.create!(line_item_details)
             else
+              GESTIONALE_LOGGER.info(" line_item è present quindi aggiorno")
               if row['lce_deslavo'].downcase == "stampa"
                 line_item.update!(print_reference: print_reference, print_customer_machine_id: print_customer_machine)
               elsif row['lce_deslavo'].downcase == "taglio"
@@ -63,6 +67,8 @@ class ImportOrders < ApplicationJob
               new_notes += row['lce_note']
               line_item.update!(notes: new_notes)
             end
+            GESTIONALE_LOGGER.info(" lce_barcode == #{row["lce_barcode"]}")
+            GESTIONALE_LOGGER.info(" italtelo ids == #{italtelo_row_ids}")
             italtelo_row_ids << "#{row["lce_barcode"]}"
           rescue Exception => e
             GESTIONALE_LOGGER.info(" Import order: #{e.message}")
@@ -79,6 +85,7 @@ class ImportOrders < ApplicationJob
         result = client.execute(tsql)
         tsql = "SET ANSI_WARNINGS ON"
         result = client.execute(tsql)
+        GESTIONALE_LOGGER.info(" FINALE italtelo ids == #{italtelo_row_ids}")
         tsql = "UPDATE avlav SET lce_import = 1 WHERE lce_barcode IN (#{italtelo_row_ids.join(', ')})"
         client.execute(tsql).each
       rescue Exception => e
