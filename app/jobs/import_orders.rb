@@ -12,7 +12,7 @@ class ImportOrders < ApplicationJob
       result = client.execute(tsql)
       tsql = "SET ANSI_WARNINGS ON"
       result = client.execute(tsql)
-      tsql = "SELECT lce_barcode, lce_oranno, lce_orfase, lce_orriga, lce_orserie, lce_ortipo, lce_ornum, lce_deslavo, lce_conto, lce_ragsoc, lce_codart, lce_codcent, lce_desart, lce_note, lce_quant FROM avlav WHERE lce_import = 0"
+      tsql = "SELECT lce_barcode, lce_oranno, lce_orfase, lce_orriga, lce_orserie, lce_ortipo, lce_ornum, lce_deslavo, lce_conto, lce_ragsoc, lce_codart, lce_codcent, lce_desart, lce_note, lce_quant FROM avlav WHERE lce_import = 0 AND lce_codcent != 10 AND lce_codcent != 40"
       # result = ActiveRecord::Base.connection.exec_query(tsql).each ----> per eseguire in locale
       result = client.execute(tsql).each
       ActiveRecord::Base.transaction do
@@ -26,13 +26,9 @@ class ImportOrders < ApplicationJob
             if row['lce_deslavo'].downcase == "stampa"
               print_reference = row["lce_barcode"]
               print_customer_machine = CustomerMachine.find_by(bus240_machine_reference: row["lce_codcent"]).id
-              GESTIONALE_LOGGER.info(" query print macchina: #{CustomerMachine.find_by(bus240_machine_reference: row["lce_codcent"])}")
-              GESTIONALE_LOGGER.info(" print customer machine: #{print_customer_machine}")
             elsif row['lce_deslavo'].downcase == "taglio"
               cut_reference = row["lce_barcode"]
               cut_customer_machine = CustomerMachine.find_by(bus240_machine_reference: row["lce_codcent"]).id
-              GESTIONALE_LOGGER.info(" query cut macchina: #{CustomerMachine.find_by(bus240_machine_reference: row["lce_codcent"])}")
-              GESTIONALE_LOGGER.info(" cut customer machine: #{cut_customer_machine}")
             end
             line_item_details = {
               customer: "#{row['lce_conto']} - #{row["lce_ragsoc"]}",
@@ -50,29 +46,18 @@ class ImportOrders < ApplicationJob
             GESTIONALE_LOGGER.info(" details == #{line_item_details}")
             line_item = LineItem.find_by(order_year: row["lce_oranno"], order_line_item: row["lce_orriga"], order_series: row["lce_orserie"], order_type: row["lce_ortipo"], order_code: row['lce_ornum'])
             if line_item.nil?
-              GESTIONALE_LOGGER.info(" line_item è nil")
               line_item_details[:print_reference] = print_reference
               line_item_details[:print_customer_machine_id] = print_customer_machine
               line_item_details[:cut_reference] = cut_reference
               line_item_details[:cut_customer_machine_id] = cut_customer_machine
               line_item = LineItem.create!(line_item_details)
             else
-              GESTIONALE_LOGGER.info(" line_item è present quindi aggiorno")
-              GESTIONALE_LOGGER.info(" line_item == #{line_item.inspect}")
               if row['lce_deslavo'].downcase == "stampa"
-                GESTIONALE_LOGGER.info(" aggiorno con stampa")
-                GESTIONALE_LOGGER.info(" print_reference == #{print_reference}")
-                GESTIONALE_LOGGER.info(" print_customer_machine == #{print_customer_machine}")
                 line_item.update!(print_reference: print_reference, print_customer_machine_id: print_customer_machine)
               elsif row['lce_deslavo'].downcase == "taglio"
-                GESTIONALE_LOGGER.info(" aggiorno con taglio")
-                GESTIONALE_LOGGER.info(" print_reference == #{cut_reference}")
-                GESTIONALE_LOGGER.info(" print_customer_machine == #{cut_customer_machine}")
                 line_item.update!(cut_reference: cut_reference, cut_customer_machine_id: cut_customer_machine)
               end
             end
-            GESTIONALE_LOGGER.info(" lce_barcode == #{row["lce_barcode"]}")
-            GESTIONALE_LOGGER.info(" italtelo ids == #{italtelo_row_ids}")
             italtelo_row_ids << "#{row["lce_barcode"]}"
           rescue Exception => e
             GESTIONALE_LOGGER.info(" Import order: #{e.message}")
@@ -89,8 +74,8 @@ class ImportOrders < ApplicationJob
         result = client.execute(tsql)
         tsql = "SET ANSI_WARNINGS ON"
         result = client.execute(tsql)
-        GESTIONALE_LOGGER.info(" FINALE italtelo ids == #{italtelo_row_ids}")
-        tsql = "UPDATE avlav SET lce_import = 1 WHERE lce_barcode IN (#{italtelo_row_ids.join(', ')})"
+        GESTIONALE_LOGGER.info(" italtelo ids == #{italtelo_row_ids}")
+        tsql = "UPDATE avlav SET lce_import = 1 WHERE lce_barcode IN (#{italtelo_row_ids.map {|iri| "'#{iri}'"}.join(', ')})"
         client.execute(tsql).each
       rescue Exception => e
         GESTIONALE_LOGGER.info("errore aggiornamento campo importato = #{e.message}")
