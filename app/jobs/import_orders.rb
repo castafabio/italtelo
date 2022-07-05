@@ -48,7 +48,6 @@ class ImportOrders < ApplicationJob
             }
             GESTIONALE_LOGGER.info(" details == #{line_item_details}")
             line_item = LineItem.find_by(order_year: row["lce_oranno"], order_line_item: row["lce_orriga"], order_series: row["lce_orserie"], order_type: row["lce_ortipo"], order_code: row['lce_ornum'])
-            GESTIONALE_LOGGER.info(" line_item == #{line_item}")
             if line_item.nil?
               GESTIONALE_LOGGER.info(" line_item è nil")
               line_item_details[:print_reference] = print_reference
@@ -58,14 +57,18 @@ class ImportOrders < ApplicationJob
               line_item = LineItem.create!(line_item_details)
             else
               GESTIONALE_LOGGER.info(" line_item è present quindi aggiorno")
+              GESTIONALE_LOGGER.info(" line_item == #{line_item.inspect}")
               if row['lce_deslavo'].downcase == "stampa"
+                GESTIONALE_LOGGER.info(" aggiorno con stampa")
+                GESTIONALE_LOGGER.info(" print_reference == #{print_reference}")
+                GESTIONALE_LOGGER.info(" print_customer_machine == #{print_customer_machine}")
                 line_item.update!(print_reference: print_reference, print_customer_machine_id: print_customer_machine)
               elsif row['lce_deslavo'].downcase == "taglio"
+                GESTIONALE_LOGGER.info(" aggiorno con taglio")
+                GESTIONALE_LOGGER.info(" print_reference == #{cut_reference}")
+                GESTIONALE_LOGGER.info(" print_customer_machine == #{cut_customer_machine}")
                 line_item.update!(cut_reference: cut_reference, cut_customer_machine_id: cut_customer_machine)
               end
-              notes = "#{line_item.notes}"
-              new_notes += row['lce_note']
-              line_item.update!(notes: new_notes)
             end
             GESTIONALE_LOGGER.info(" lce_barcode == #{row["lce_barcode"]}")
             GESTIONALE_LOGGER.info(" italtelo ids == #{italtelo_row_ids}")
