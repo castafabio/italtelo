@@ -18,6 +18,7 @@ class ImportOrders < ApplicationJob
       ActiveRecord::Base.transaction do
         result.each do |row|
           begin
+            GESTIONALE_LOGGER.info(" row ===  #{row.inspect}")
             print_reference = nil
             print_customer_machine = nil
             cut_reference = nil
