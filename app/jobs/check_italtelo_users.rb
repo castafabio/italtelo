@@ -4,6 +4,7 @@ class CheckItalteloUsers < ApplicationJob
 
   def perform(id, type)
     begin
+      GESTIONALE_LOGGER.info("Inizio import utenti")
       client = TinyTds::Client.new(username: ENV['SQL_DB_USER'], password: ENV['SQL_DB_PSW'], host: ENV['SQL_DB_HOST'], port: ENV['SQL_DB_PORT'], database: ENV['SQL_DB'])
       tsql = "SET ANSI_NULLS ON"
       result = client.execute(tsql)
@@ -19,7 +20,7 @@ class CheckItalteloUsers < ApplicationJob
           if ItalteloUser.find_by(code: code).present?
             ItalteloUser.find_by(code: code).update!(description: description)
           else
-            ItalteloUser.find_by(code: code).create!(code: code, description: description)
+            ItalteloUser.create!(code: code, description: description)
           end
         end
       end
