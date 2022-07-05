@@ -2,7 +2,7 @@ class CheckItalteloUsers < ApplicationJob
   queue_as :italtelo
   sidekiq_options retry: 1, backtrace: 10
 
-  def perform(id, type)
+  def perform
     begin
       GESTIONALE_LOGGER.info("Inizio import utenti")
       client = TinyTds::Client.new(username: ENV['SQL_DB_USER'], password: ENV['SQL_DB_PSW'], host: ENV['SQL_DB_HOST'], port: ENV['SQL_DB_PORT'], database: ENV['SQL_DB'])
