@@ -25,9 +25,13 @@ class ImportOrders < ApplicationJob
             if row['lce_deslavo'].downcase == "stampa"
               print_reference = row["lce_barcode"]
               print_customer_machine = CustomerMachine.find_by(bus240_machine_reference: row["lce_codcent"]).id
+              GESTIONALE_LOGGER.info(" query print macchina: #{CustomerMachine.find_by(bus240_machine_reference: row["lce_codcent"])}")
+              GESTIONALE_LOGGER.info(" print customer machine: #{print_customer_machine}")
             elsif row['lce_deslavo'].downcase == "taglio"
               cut_reference = row["lce_barcode"]
               cut_customer_machine = CustomerMachine.find_by(bus240_machine_reference: row["lce_codcent"]).id
+              GESTIONALE_LOGGER.info(" query cut macchina: #{CustomerMachine.find_by(bus240_machine_reference: row["lce_codcent"])}")
+              GESTIONALE_LOGGER.info(" cut customer machine: #{cut_customer_machine}")
             end
             line_item_details = {
               customer: "#{row['lce_conto']} - #{row["lce_ragsoc"]}",
@@ -47,13 +51,13 @@ class ImportOrders < ApplicationJob
               line_item_details[:print_reference] = print_reference
               line_item_details[:print_customer_machine_id] = print_customer_machine
               line_item_details[:cut_reference] = cut_reference
-              line_item_details[:cut_customer_machine] = print_customer_machine
+              line_item_details[:cut_customer_machine_id] = cut_customer_machine
               line_item = LineItem.create!(line_item_details)
             else
               if row['lce_deslavo'].downcase == "stampa"
-                line_item.update!(print_reference: print_reference, print_customer_machine: print_customer_machine)
+                line_item.update!(print_reference: print_reference, print_customer_machine_id: print_customer_machine)
               elsif row['lce_deslavo'].downcase == "taglio"
-                line_item.update!(cut_reference: cut_reference, cut_customer_machine: cut_customer_machine)
+                line_item.update!(cut_reference: cut_reference, cut_customer_machine_id: cut_customer_machine)
               end
               notes = "#{line_item.notes}"
               new_notes += row['lce_note']
