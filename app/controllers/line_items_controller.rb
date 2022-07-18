@@ -7,15 +7,14 @@ class LineItemsController < ApplicationController
 
   def send_to_hotfolder
     if request.patch?
-      if params["line_item"]["italtelo_user_id"].present?
-        @line_item.send_to_hotfolder!
-        @line_item.update!(send_at: DateTime.now, italtelo_user_id: ItalteloUser.find(params["line_item"]["italtelo_user_id"].to_i).id)
-        flash[:notice] = I18n::t('obj.sent', obj: 'file')
-      end
       begin
-        # else
-        #   raise "Bisogna selezionare un operatore."
-        # end
+        if params["line_item"]["italtelo_user_id"].present?
+          @line_item.send_to_hotfolder!
+          @line_item.update!(send_at: DateTime.now, italtelo_user_id: ItalteloUser.find(params["line_item"]["italtelo_user_id"].to_i).id)
+          flash[:notice] = I18n::t('obj.sent', obj: 'file')
+        else
+          raise "Bisogna selezionare un operatore."
+        end
       rescue Exception => e
         flash[:alert] = I18n::t('obj.not_sent_exception', obj: 'file', message: e.message)
       ensure
