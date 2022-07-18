@@ -100,7 +100,7 @@ class LineItem < ApplicationRecord
           end
         end
       else
-        FileUtils.cp self.to_file_path('cut'), "#{print_path}/#{self.to_job_name('cut')}"
+        FileUtils.cp self.to_file_path('cut'), "#{cut_path}/#{self.to_job_name('cut')}"
       end
     end
   end
@@ -152,6 +152,7 @@ class LineItem < ApplicationRecord
       end
     else
       if self.cut_file.attached?
+        puts ' blob ======== ' + ActiveStorage::Blob.service.send(:path_for, self.cut_file.key).inspect
         ActiveStorage::Blob.service.send(:path_for, self.cut_file.key)
       end
     end
