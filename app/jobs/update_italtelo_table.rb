@@ -34,7 +34,7 @@ class UpdateItalteloTable < ApplicationJob
       cutters = resource.resource.cutters
       if cutters.size > 1
         skip = true
-        durations = cutters.pluck(:cut_time).map(&:to_i).sum
+        duration = cutters.pluck(:cut_time).map(&:to_i).sum
       else
         duration = resource.cut_time.to_i
       end
@@ -78,7 +78,8 @@ class UpdateItalteloTable < ApplicationJob
     end
     GESTIONALE_LOGGER.info("tsql == #{tsql}")
     client.execute(tsql).do
-    line_item.update!(status: 'completed', gest_sent: DateTime.now) if line_item.status == 'brand_new'
+    resource.update!(gest_sent: DateTime.now)
+    line_item.update!(status: 'completed') if line_item.status == 'brand_new'
     line_item.check_aggregated_job
   end
 end
