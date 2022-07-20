@@ -6,10 +6,14 @@ class ImportProtek < ApplicationJob
     start = Time.now
     CustomerMachine.where(import_job: 'protek').cutter_machines.each do |customer_machine|
       if customer_machine.present? && customer_machine.is_mounted?
+        CUTTER_LOGGER.info "connessa e present"
         db = SQLite3::Database.open "#{customer_machine.path}/cnlogger_exported.sqlite"
+        CUTTER_LOGGER.info "db connesso"
         query = "select * from v_LAVORAZIONI_LISTA_AGGREGATA where TERMINATO = 1 "
+        CUTTER_LOGGER.info "query = #{query}"
         last_cutter = customer_machine.cutters.last
         query += " AND DATA_LAST > '#{last_cutter.ends_at}'" if last_cutter.present?
+        CUTTER_LOGGER.info "dopo query = #{query}"
         db.execute(query) do |row|
           begin
             CUTTER_LOGGER.info "row = #{row.inspect}"
