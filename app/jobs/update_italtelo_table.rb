@@ -16,7 +16,7 @@ class UpdateItalteloTable < ApplicationJob
       printers = resource.resource.printers
       if printers.size > 1
         skip = true
-        duration = printers.pluck(:print_time).&to_i.sum
+        duration = printers.pluck(:print_time).map(&:to_i).sum
       else
         duration = resource.print_time.to_i
       end
@@ -37,7 +37,7 @@ class UpdateItalteloTable < ApplicationJob
       cutters = resource.resource.cutters
       if cutters.size > 1
         skip = true
-        durations = cutters.pluck(:cut_time).&to_i.sum
+        durations = cutters.pluck(:cut_time).map(&:to_i).sum
       else
         duration = resource.cut_time.to_i
       end
