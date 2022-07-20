@@ -22,11 +22,11 @@ class ImportProtek < ApplicationJob
                 job_name = row[9]
                 if job_name.include?("#LI_")
                   resource_type = "LineItem"
-                  resource_id = job_name.split("#LI_").first
+                  resource_id = job_name.split("#LI_").first.split("\\").last
                   resource = LineItem.find_by(id: resource_id)
                 elsif job_name.include?("#AJ_")
                   resource_type = "AggregatedJob"
-                  resource_id = job_name.split("#AJ_").first
+                  resource_id = job_name.split("#AJ_").first.split("\\").last
                   resource = AggregatedJob.find_by(id: resource_id)
                 else
                   resource_type = nil
