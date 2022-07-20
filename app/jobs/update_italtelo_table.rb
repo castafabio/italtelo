@@ -3,10 +3,12 @@ class UpdateItalteloTable < ApplicationJob
   sidekiq_options retry: 1, backtrace: 10
 
   def perform(id, type)
+    GESTIONALE_LOGGER.info "eeeeentro UpdateItalteloTable"
     skip = false
     inks = ""
     old_customer_machine = ""
     if type == 'printer'
+      GESTIONALE_LOGGER.info "printerrrrrrrr"
       resource = Printer.find_by(id: id)
       if resource.resource.old_print_customer_machine.present?
         old_customer_machine += "Macchina impostata: #{resource.resource.old_print_customer_machine.bus240_machine_reference} - #{resource.resource.old_print_customer_machine.name}"
@@ -27,6 +29,7 @@ class UpdateItalteloTable < ApplicationJob
       end
       reference = 'print_reference'
     else
+      GESTIONALE_LOGGER.info "cutterrrrrrrrrrrrr"
       resource = Cutter.find_by(id: id)
       if resource.resource.old_cut_customer_machine.present?
         old_customer_machine += "Macchina impostata: #{resource.resource.old_cut_customer_machine.bus240_machine_reference} - #{resource.resource.old_cut_customer_machine.name}"
@@ -75,9 +78,9 @@ class UpdateItalteloTable < ApplicationJob
     # result = client.execute(tsql)
 
     if skip
-      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_flevas = 'S', lce_stop = '#{resource.ends_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_tempese = #{duration}, lce_ultagg = '#{DateTime.now}', lce_ink = '#{inks}', lce_note = '#{old_customer_machine}', lce_codcent = '#{customer_machine.bus240_machine_reference}', lce_descent = '#{customer_machine.name}', lce_codcope = '#{line_item.italtelo_user.code}', lce_descope = '#{line_item.italtelo_user.description}' WHERE lce_barcode = '#{line_item.send(reference)}'"
+      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_flevas = 'S', lce_stop = '#{resource.ends_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_tempese = #{duration}, lce_ultagg = '#{DateTime.now}', lce_ink = '#{inks}', lce_note = '#{old_customer_machine}', lce_codcent = '#{customer_machine.bus240_machine_reference}', lce_descent = '#{customer_machine.name}', lce_codcope = '#{line_item.italtelo_user.code}', lce_descope = '#{line_item.italtelo_user.description}' WHERE lce_barcode = #{line_item.send(reference)}"
     else
-      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_start = '#{resource.starts_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_stato = 'C', lce_stop = '#{resource.ends_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_tempese = #{duration}, lce_ultagg = '#{DateTime.now}', lce_ink = '#{inks}', lce_note = '#{old_customer_machine}', lce_codcent = '#{customer_machine.bus240_machine_reference}', lce_descent = '#{customer_machine.name}' WHERE lce_barcode = '#{line_item.send(reference)}'"
+      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_start = '#{resource.starts_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_stato = 'C', lce_stop = '#{resource.ends_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_tempese = #{duration}, lce_ultagg = '#{DateTime.now}', lce_ink = '#{inks}', lce_note = '#{old_customer_machine}', lce_codcent = '#{customer_machine.bus240_machine_reference}', lce_descent = '#{customer_machine.name}' WHERE lce_barcode = #{line_item.send(reference)}"
     end
     GESTIONALE_LOGGER.info("tsql == #{tsql}")
     client.execute(tsql).each
