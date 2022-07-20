@@ -44,11 +44,11 @@ class ImportEpson < ApplicationJob
           if printer.nil?
             printer = Printer.create!(details)
             epson.update!(imported: true)
-            Log.create!(kind: 'success', action: "Import #{customer_machine}", description: "Caricati dati di stampa per #{name}")
+            Log.create!(kind: 'success', action: "Import #{customer_machine.name}", description: "Caricati dati di stampa per #{name}")
           end
         rescue Exception => e
-          PRINTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
-          log_details = {kind: 'error', action: "Import #{customer_machine}", description: e.message}
+          PRINTER_LOGGER.info "Errore importazione dati #{customer_machine.name}: #{e.message}"
+          log_details = {kind: 'error', action: "Import #{customer_machine.name}", description: e.message}
           if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
             Log.create!(log_details)
           end
