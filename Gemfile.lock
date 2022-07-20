@@ -228,6 +228,7 @@ GEM
       actionpack (>= 5.2)
       activesupport (>= 5.2)
       sprockets (>= 3.0.0)
+    sqlite3 (1.4.2)
     temple (0.8.2)
     thor (1.2.1)
     tilt (2.0.10)
@@ -287,6 +288,7 @@ DEPENDENCIES
   slim-rails (= 3.4.0)
   spring (= 2.1.1)
   spring-watcher-listen (= 2.0.1)
+  sqlite3 (= 1.4.2)
   tiny_tds (= 2.1.5)
   tzinfo-data
   uglifier (= 4.2.0)
