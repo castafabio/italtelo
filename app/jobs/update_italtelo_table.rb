@@ -41,12 +41,16 @@ class UpdateItalteloTable < ApplicationJob
       reference = 'cut_reference'
     end
 
+    GESTIONALE_LOGGER.info "prima di beginnnnn"
     begin
+      GESTIONALE_LOGGER.info "resource == #{resource.inspect}"
       if resource.resource.is_a?(AggregatedJob)
+        GESTIONALE_LOGGER.info "iffff"
         resource.resource.line_items.each do |li|
           send_to_gest!(resource, li, reference, skip, duration, inks, resource.customer_machine, old_customer_machine)
         end
       else
+        GESTIONALE_LOGGER.info "elseeee"
         send_to_gest!(resource, resource.resource, reference, skip, duration, inks, resource.customer_machine, old_customer_machine)
       end
     rescue Exception => e
@@ -71,9 +75,9 @@ class UpdateItalteloTable < ApplicationJob
     # result = client.execute(tsql)
 
     if skip
-      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_flevas = 'S', lce_stop = '#{resource.ends_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_tempese = #{duration}, lce_ultagg = '#{DateTime.now}', lce_ink = '#{inks}', lce_note = '#{old_customer_machine}', lce_codcent = '#{customer_machine.bus240_machine_reference}', lce_descent = '#{customer_machine.name}', lce_codcope = '#{line_item.italtelo_user.code}', lce_descope = '#{line_item.italtelo_user.description}' WHERE lce_barcode = #{line_item.send(reference)}"
+      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_flevas = 'S', lce_stop = '#{resource.ends_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_tempese = #{duration}, lce_ultagg = '#{DateTime.now}', lce_ink = '#{inks}', lce_note = '#{old_customer_machine}', lce_codcent = '#{customer_machine.bus240_machine_reference}', lce_descent = '#{customer_machine.name}', lce_codcope = '#{line_item.italtelo_user.code}', lce_descope = '#{line_item.italtelo_user.description}' WHERE lce_barcode = '#{line_item.send(reference)}'"
     else
-      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_start = '#{resource.starts_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_stato = 'C', lce_stop = '#{resource.ends_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_tempese = #{duration}, lce_ultagg = '#{DateTime.now}', lce_ink = '#{inks}', lce_note = '#{old_customer_machine}', lce_codcent = '#{customer_machine.bus240_machine_reference}', lce_descent = '#{customer_machine.name}' WHERE lce_barcode = #{line_item.send(reference)}"
+      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_start = '#{resource.starts_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_stato = 'C', lce_stop = '#{resource.ends_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_tempese = #{duration}, lce_ultagg = '#{DateTime.now}', lce_ink = '#{inks}', lce_note = '#{old_customer_machine}', lce_codcent = '#{customer_machine.bus240_machine_reference}', lce_descent = '#{customer_machine.name}' WHERE lce_barcode = '#{line_item.send(reference)}'"
     end
     GESTIONALE_LOGGER.info("tsql == #{tsql}")
     client.execute(tsql).each
