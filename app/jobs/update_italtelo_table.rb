@@ -78,7 +78,7 @@ class UpdateItalteloTable < ApplicationJob
     end
     GESTIONALE_LOGGER.info("tsql == #{tsql}")
     client.execute(tsql).do
-    line_item.update!(status: 'completed') if line_item.status == 'brand_new'
+    line_item.update!(status: 'completed', gest_sent: DateTime.now) if line_item.status == 'brand_new'
     line_item.check_aggregated_job
   end
 end
