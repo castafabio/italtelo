@@ -8,6 +8,7 @@ class UpdateItalteloTable < ApplicationJob
     old_customer_machine = ""
     if type == 'printer'
       resource = Printer.find_by(id: id)
+      GESTIONALE_LOGGER.info "resource = #{resource.inspect}"
       if resource.resource.old_print_customer_machine.present?
         old_customer_machine += "Macchina impostata: #{resource.resource.old_print_customer_machine.bus240_machine_reference} - #{resource.resource.old_print_customer_machine.name}"
       end
