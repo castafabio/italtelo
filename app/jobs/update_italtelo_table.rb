@@ -78,9 +78,9 @@ class UpdateItalteloTable < ApplicationJob
     # result = client.execute(tsql)
 
     if skip
-      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_flevas = 'S', lce_stop = '#{resource.ends_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_tempese = #{duration}, lce_ultagg = '#{DateTime.now}', lce_ink = '#{inks}', lce_note = '#{old_customer_machine}', lce_codcent = '#{customer_machine.bus240_machine_reference}', lce_descent = '#{customer_machine.name}', lce_codcope = '#{line_item.italtelo_user.code}', lce_descope = '#{line_item.italtelo_user.description}' WHERE lce_barcode = #{line_item.send(reference)}"
+      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_flevas = 'S', lce_stop = #{resource.ends_at}, lce_tempese = #{duration}, lce_ultagg = #{DateTime.now}, lce_ink = '#{inks}', lce_note = '#{old_customer_machine}', lce_codcent = '#{customer_machine.bus240_machine_reference}', lce_descent = '#{customer_machine.name}', lce_codcope = '#{line_item.italtelo_user.code}', lce_descope = '#{line_item.italtelo_user.description}' WHERE lce_barcode = #{line_item.send(reference)}"
     else
-      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_start = '#{resource.starts_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_stato = 'C', lce_stop = '#{resource.ends_at.strftime('%Y-%m-%dT%H:%M:%S%:z')}', lce_tempese = #{duration}, lce_ultagg = '#{DateTime.now}', lce_ink = '#{inks}', lce_note = '#{old_customer_machine}', lce_codcent = '#{customer_machine.bus240_machine_reference}', lce_descent = '#{customer_machine.name}' WHERE lce_barcode = #{line_item.send(reference)}"
+      tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_start = #{resource.starts_at}, lce_stato = 'C', lce_stop = #{resource.ends_at}, lce_tempese = #{duration}, lce_ultagg = #{DateTime.now}, lce_ink = '#{inks}', lce_note = '#{old_customer_machine}', lce_codcent = '#{customer_machine.bus240_machine_reference}', lce_descent = '#{customer_machine.name}' WHERE lce_barcode = #{line_item.send(reference)}"
     end
     GESTIONALE_LOGGER.info("tsql == #{tsql}")
     client.execute(tsql).each
