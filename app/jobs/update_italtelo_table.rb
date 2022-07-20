@@ -28,25 +28,34 @@ class UpdateItalteloTable < ApplicationJob
       reference = 'print_reference'
     else
       resource = Cutter.find_by(id: id)
+      GESTIONALE_LOGGER.info "resource = #{resource.inspect}"
       if resource.resource.old_cut_customer_machine.present?
+        GESTIONALE_LOGGER.info "old customer machine"
         old_customer_machine += "Macchina impostata: #{resource.resource.old_cut_customer_machine.bus240_machine_reference} - #{resource.resource.old_cut_customer_machine.name}"
       end
       cutters = resource.resource.cutters
+      GESTIONALE_LOGGER.info "cutters == #{cutters.inspect}"
       if cutters.size > 1
+        GESTIONALE_LOGGER.info " >>>>>> 1"
         skip = true
         duration = cutters.pluck(:cut_time).map(&:to_i).sum
+        GESTIONALE_LOGGER.info "duration === #{duration}"
       else
+        GESTIONALE_LOGGER.info "elseeee"
         duration = resource.cut_time.to_i
       end
       reference = 'cut_reference'
     end
 
     begin
+      GESTIONALE_LOGGER.info "begiiiin"
       if resource.resource.is_a?(AggregatedJob)
+        GESTIONALE_LOGGER.info " aggregatooooo"
         resource.resource.line_items.each do |li|
           send_to_gest!(resource, li, reference, skip, duration, inks, resource.customer_machine, old_customer_machine)
         end
       else
+        GESTIONALE_LOGGER.info " line itemmmmmm"
         send_to_gest!(resource, resource.resource, reference, skip, duration, inks, resource.customer_machine, old_customer_machine)
       end
       GESTIONALE_LOGGER.info("aggiornamento completato per #{resource}")
