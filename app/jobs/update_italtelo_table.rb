@@ -80,6 +80,8 @@ class UpdateItalteloTable < ApplicationJob
     # result = client.execute(tsql)
     # tsql = "SET ANSI_WARNINGS ON"
     # result = client.execute(tsql)
+    
+    duration = duration.strftime("%H,%M%S")
 
     if skip
       tsql = "UPDATE avlav SET lce_qtaes = #{line_item.quantity}, lce_flevas = 'S', lce_stop = '#{resource.ends_at.strftime("%Y-%m-%d %H:%M:%S")}', lce_tempese = #{duration}, lce_ultagg = '#{DateTime.now.strftime("%Y-%m-%d %H:%M:%S")}', lce_ink = '#{inks}', lce_note = '#{old_customer_machine}', lce_codcent = '#{customer_machine.bus240_machine_reference}', lce_descent = '#{customer_machine.name}', lce_codcope = '#{line_item.italtelo_user.code}', lce_descope = '#{line_item.italtelo_user.description}' WHERE lce_barcode = '#{line_item.send(reference)}'"
