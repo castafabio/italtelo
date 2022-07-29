@@ -83,7 +83,7 @@ class UpdateItalteloTable < ApplicationJob
 
     GESTIONALE_LOGGER.info("duration normale == #{duration}")
     duration = [duration / 3600, duration / 60 % 60, duration % 60].map{|t| t.to_s.rjust(2,'0')}.join(':')
-    duration = Time.parse(duration).strftime("%H,%M%S")
+    duration = Time.parse(duration).strftime("%H.%M%S")
     GESTIONALE_LOGGER.info("duration.strfitme == #{duration}")
 
     if skip
