@@ -3,14 +3,20 @@ class UpdateItalteloTable < ApplicationJob
   sidekiq_options retry: 1, backtrace: 10
 
   def perform(id, type)
+    puts ' performmmmmmmmmmmmmm'
     skip = false
     inks = ""
     old_customer_machine = ""
     if type == 'printer'
       resource = Printer.find_by(id: id)
-      GESTIONALE_LOGGER.info "resource = #{resource.inspect}"
-      if resource.resource.old_print_customer_machine.present?
-        old_customer_machine += "Macchina impostata: #{resource.resource.old_print_customer_machine.bus240_machine_reference} - #{resource.resource.old_print_customer_machine.name}"
+      if resource.resource.is_a?(AggregatedJob)
+        if resource.resource.line_items.first.old_print_customer_machine.present?
+          old_customer_machine += "Macchina impostata: #{resource.resource.line_items.first.old_print_customer_machine.bus240_machine_reference} - #{resource.resource.line_items.first.old_print_customer_machine.name}"
+        end
+      else
+        if resource.resource.old_print_customer_machine.present?
+          old_customer_machine += "Macchina impostata: #{resource.resource.old_print_customer_machine.bus240_machine_reference} - #{resource.resource.old_print_customer_machine.name}"
+        end
       end
       printers = resource.resource.printers
       GESTIONALE_LOGGER.info "printers == #{printers.inspect}"
@@ -20,33 +26,32 @@ class UpdateItalteloTable < ApplicationJob
       else
         duration = resource.print_time.to_i
       end
-      GESTIONALE_LOGGER.info "duration == #{duration.inspect}"
       printer_ink_total = resource.resource.calculate_ink_total
       if resource.resource.is_a?(AggregatedJob)
         printer_ink_total.map { |k, v| printer_ink_total[k] = v / resource.resource.line_items.size }
       end
-      GESTIONALE_LOGGER.info "printer_ink_total == #{printer_ink_total.inspect}"
       printer_ink_total.each do |name, value|
         inks += "#{name}: #{value}; "
       end
-      GESTIONALE_LOGGER.info "inks == #{inks.inspect}"
       reference = 'print_reference'
     else
       resource = Cutter.find_by(id: id)
       GESTIONALE_LOGGER.info "resource = #{resource.inspect}"
-      if resource.resource.old_cut_customer_machine.present?
-        GESTIONALE_LOGGER.info "old customer machine"
-        old_customer_machine += "Macchina impostata: #{resource.resource.old_cut_customer_machine.bus240_machine_reference} - #{resource.resource.old_cut_customer_machine.name}"
+      if resource.resource.is_a?(AggregatedJob)
+        if resource.resource.line_items.first.old_cut_customer_machine.present?
+          old_customer_machine += "Macchina impostata: #{resource.resource.line_items.first.old_cut_customer_machine.bus240_machine_reference} - #{resource.resource.line_items.first.old_cut_customer_machine.name}"
+        end
+      else
+        if resource.resource.old_cut_customer_machine.present?
+          old_customer_machine += "Macchina impostata: #{resource.resource.old_cut_customer_machine.bus240_machine_reference} - #{resource.resource.old_cut_customer_machine.name}"
+        end
       end
       cutters = resource.resource.cutters
       GESTIONALE_LOGGER.info "cutters == #{cutters.inspect}"
       if cutters.size > 1
-        GESTIONALE_LOGGER.info " >>>>>> 1"
         skip = true
         duration = cutters.pluck(:cut_time).map(&:to_i).sum
-        GESTIONALE_LOGGER.info "duration === #{duration}"
       else
-        GESTIONALE_LOGGER.info "elseeee"
         duration = resource.cut_time.to_i
       end
       reference = 'cut_reference'
