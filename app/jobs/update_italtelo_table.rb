@@ -13,19 +13,23 @@ class UpdateItalteloTable < ApplicationJob
         old_customer_machine += "Macchina impostata: #{resource.resource.old_print_customer_machine.bus240_machine_reference} - #{resource.resource.old_print_customer_machine.name}"
       end
       printers = resource.resource.printers
+      GESTIONALE_LOGGER.info "printers == #{printers.inspect}"
       if printers.size > 1
         skip = true
         duration = printers.pluck(:print_time).map(&:to_i).sum
       else
         duration = resource.print_time.to_i
       end
+      GESTIONALE_LOGGER.info "duration == #{duration.inspect}"
       printer_ink_total = resource.resource.calculate_ink_total
       if resource.resource.is_a?(AggregatedJob)
         printer_ink_total.map { |k, v| printer_ink_total[k] = v / resource.resource.line_items.size }
       end
+      GESTIONALE_LOGGER.info "printer_ink_total == #{printer_ink_total.inspect}"
       printer_ink_total.each do |name, value|
         inks += "#{name}: #{value}; "
       end
+      GESTIONALE_LOGGER.info "inks == #{inks.inspect}"
       reference = 'print_reference'
     else
       resource = Cutter.find_by(id: id)
