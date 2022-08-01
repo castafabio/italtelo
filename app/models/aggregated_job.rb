@@ -27,7 +27,6 @@ class AggregatedJob < ApplicationRecord
       raise "E' presente almeno un lavoro che è già stato aggregato. Verifica e riprova." if line_items.where.not(aggregated_job_id: nil).size > 0
       raise "I lavori selezionati hanno fasi di lavoro diverse. Verifica e riprova." if !line_items.need_printing(line_items.ids) || !line_items.need_cutting(line_items.ids)
       raise "I lavori selezionati hanno macchine assegnate diverse tra loro. Verifica e riprova." if line_items.pluck(:print_customer_machine_id).uniq.size > 1 || line_items.pluck(:cut_customer_machine_id).uniq.size > 1
-      raise "I lavori selezionati fanno parte di ordini differenti tra loro. Verifica e riprova." if line_items.pluck(:order_code).uniq.size > 1
       aggregated_job = AggregatedJob.create!(print_customer_machine_id: line_items.first&.print_customer_machine&.id, cut_customer_machine_id: line_items.first&.cut_customer_machine&.id)
       line_items.each do |line_item|
         line_item.print_file.purge if line_item.print_file.present?
@@ -138,23 +137,8 @@ class AggregatedJob < ApplicationRecord
 
   def appendable_line_item_list
     line_item_ids = []
-    line_item_to_exclude = []
-    all_line_items = LineItem.unsend.where(aggregated_job_id: nil, order_code: self.line_items.first.order_code)
-    all_line_items.each do |line_item|
-      ret = []
-      ret << (self.line_items.first.need_printing == line_item.need_printing)
-      ret << (self.line_items.first.print_customer_machine_id == line_item&.print_customer_machine&.id)
-      ret << (self.line_items.first.need_cutting == line_item.need_cutting)
-      ret << (self.line_items.first.cut_customer_machine_id == line_item&.cut_customer_machine&.id)
-      ret << (self.line_items.first.order_code == line_item.order_code)
-      if ret.uniq.size == 1 && ret == true
-        line_item_ids << line_item
-      end
-      if ret.uniq.size > 1
-        line_item_to_exclude << line_item
-      end
-      all_line_items = all_line_items.where.not(id: line_item_to_exclude)
-    end
+    line_item = self.line_items.first
+    all_line_items = LineItem.unsend.where(aggregated_job_id: nil, print_customer_machine_id: line_item&.print_customer_machine&.id, cut_customer_machine_id: line_item&.cut_customer_machine&.id)
     all_line_items.each do |line_item|
       if self.need_printing
         line_item_ids << line_item if (self.print_customer_machine_id == line_item&.print_customer_machine&.id)
@@ -169,7 +153,6 @@ class AggregatedJob < ApplicationRecord
   def add_line_items!(line_item_list)
     print_machine = self.line_items.pluck(:print_customer_machine_id)
     cut_machine = self.line_items.pluck(:cut_customer_machine_id)
-    order_code = self.line_items.pluck(:order_code)
     line_items = LineItem.where(id: line_item_list)
     line_items.each do |line_item|
       raise "I lavori selezionati hanno lavorazioni diverse. Verifica e riprova." if !self.line_items.need_printing(self.line_items)
@@ -182,8 +165,6 @@ class AggregatedJob < ApplicationRecord
         cut_machine << line_item.cut_customer_machine_id
         raise "I lavori selezionati hanno macchine da taglio diverse. Verifica e riprova." if cut_machine.uniq.size > 1
       end
-      order_code << line_item.order_code
-      raise "I lavori selezionati fanno parte di ordini differenti tra loro. Verifica e riprova." if order_code.uniq.size > 1
       line_item.print_file.purge if line_item.print_file.attached?
       line_item.cut_file.purge if line_item.cut_file.attached?
       line_item.update_column(:aggregated_job_id, self.id)
