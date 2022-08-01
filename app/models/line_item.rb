@@ -152,7 +152,6 @@ class LineItem < ApplicationRecord
       end
     else
       if self.cut_file.attached?
-        puts ' blob ======== ' + ActiveStorage::Blob.service.send(:path_for, self.cut_file.key).inspect
         ActiveStorage::Blob.service.send(:path_for, self.cut_file.key)
       end
     end
