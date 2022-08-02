@@ -11,15 +11,15 @@ class ImportProtek < ApplicationJob
           db = SQLite3::Database.open "#{customer_machine.path}/cnlogger_exported.sqlite"
           CUTTER_LOGGER.info "db connesso"
           query = "select * from v_LAVORAZIONI_LISTA_AGGREGATA where TERMINATO = 1 "
-          CUTTER_LOGGER.info "query = #{query}"
           last_cutter = customer_machine.cutters.last
           query += " AND DATA_LAST > '#{last_cutter.ends_at}'" if last_cutter.present?
-          CUTTER_LOGGER.info "dopo query = #{query}"
           db.execute(query) do |row|
             begin
-              CUTTER_LOGGER.info "row = #{row.inspect}"
               Cutter.transaction do
+                CUTTER_LOGGER.info "Orario = #{DateTime.now}"
+                CUTTER_LOGGER.info "last_cutter = #{last_cutter.inspect}"
                 job_name = row[9]
+                CUTTER_LOGGER.info "job_name = #{job_name.inspect}"
                 if job_name.include?("#LI_")
                   resource_type = "LineItem"
                   resource_id = job_name.split("#LI_").first.split("\\").last
@@ -33,7 +33,6 @@ class ImportProtek < ApplicationJob
                   resource_id = nil
                   resource = nil
                 end
-                CUTTER_LOGGER.info "resource #{resource.inspect}"
                 details = {
                   resource_type: resource_type,
                   resource_id: resource_id,
@@ -44,6 +43,7 @@ class ImportProtek < ApplicationJob
                   ends_at: row[15]
                 }
                 CUTTER_LOGGER.info "details = #{details.inspect}"
+                CUTTER_LOGGER.info "Cutter.find_by(details) = #{Cutter.find_by(details).inspect}"
                 cutter = Cutter.find_by(details)
                 if cutter.nil?
                   cutter = Cutter.create!(details)
