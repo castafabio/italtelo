@@ -18,7 +18,7 @@ class PrintersController < ApplicationController
   end
 
   def resend
-    UpdateItalteloTable.perform_later(@printer.id, 'printer')
+    UpdateItalteloTable.perform_later(@printer.id, 'printer') if @printer.resource.present?
     flash[:notice] = I18n::t('obj.updated', obj: Printer.model_name.human.downcase)
     redirect_to [:printers]
   end

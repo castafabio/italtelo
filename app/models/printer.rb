@@ -22,8 +22,6 @@ class Printer < ApplicationRecord
   private
 
   def send_to_gest
-    unless self.resource.nil?
-      UpdateItalteloTable.perform_later(self.id, 'printer')
-    end
+    UpdateItalteloTable.perform_later(self.id, 'printer') if self.resource.present?
   end
 end

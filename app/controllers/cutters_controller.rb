@@ -18,7 +18,7 @@ class CuttersController < ApplicationController
   end
 
   def resend
-    UpdateItalteloTable.perform_later(@cutter.id, 'cutter')
+    UpdateItalteloTable.perform_later(@cutter.id, 'cutter') if @cutter.resource.present?
     flash[:notice] = I18n::t('obj.updated', obj: Cutter.model_name.human.downcase)
     redirect_to [:cutters]
   end
