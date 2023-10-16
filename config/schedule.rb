@@ -6,8 +6,12 @@ end
 every 5.minute do
   runner "ImportColorado.perform_later"
   runner "ImportEpson.perform_later"
+  runner "ImportFlora.perform_later"
   runner "ImportProtek.perform_later"
   runner "ImportSumma.perform_later"
+  runner "ImportVutekH5.perform_later"
+  runner "ImportVutekUbuntu.perform_later"
+  runner "ImportVutekWindows.perform_later"
 end
 
 

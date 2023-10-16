@@ -58,17 +58,19 @@ class UpdateItalteloTable < ApplicationJob
     end
 
     begin
-      GESTIONALE_LOGGER.info "begiiiin"
-      if resource.resource.is_a?(AggregatedJob)
-        GESTIONALE_LOGGER.info " aggregatooooo"
-        resource.resource.line_items.each do |li|
-          send_to_gest!(resource, li, reference, skip, duration, inks, resource.customer_machine, old_customer_machine)
+      if resource.customer_machine.bus240_machine_reference.present?
+        GESTIONALE_LOGGER.info "begiiiin"
+        if resource.resource.is_a?(AggregatedJob)
+          GESTIONALE_LOGGER.info " aggregatooooo"
+          resource.resource.line_items.each do |li|
+            send_to_gest!(resource, li, reference, skip, duration, inks, resource.customer_machine, old_customer_machine)
+          end
+        else
+          GESTIONALE_LOGGER.info " line itemmmmmm"
+          send_to_gest!(resource, resource.resource, reference, skip, duration, inks, resource.customer_machine, old_customer_machine)
         end
-      else
-        GESTIONALE_LOGGER.info " line itemmmmmm"
-        send_to_gest!(resource, resource.resource, reference, skip, duration, inks, resource.customer_machine, old_customer_machine)
+        GESTIONALE_LOGGER.info("aggiornamento completato per #{resource}")
       end
-      GESTIONALE_LOGGER.info("aggiornamento completato per #{resource}")
     rescue Exception => e
       GESTIONALE_LOGGER.info("errore = #{e.message}")
       log_details = { kind: 'error', action: "Scrittura su tabella #{resource}", description: "#{e.message}" }
