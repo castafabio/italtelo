@@ -9,21 +9,21 @@ class ImportFlora < ApplicationJob
         csv = "#{customer_machine.path}/#{Date.today.strftime("%Y-%m-%d")}.csv"
         if File.exist?(csv)
           last_printer = customer_machine.printers.last
-          PRINTER_LOGGER.info("last_printer = #{last_printer&.start_at}")
+          #PRINTER_LOGGER.info("last_printer = #{last_printer&.start_at}")
           jump = false
           details = {}
           print_mode = ""
           CSV.foreach(csv, headers: false, col_sep: ",", skip_blanks: true) do |row|
             begin
               if row[1] == '[Prompt:3]'
-                PRINTER_LOGGER.info "prompt 3"
+                #PRINTER_LOGGER.info "prompt 3"
                 start_at = Time.strptime("#{Date.today} #{row[0]}", '%Y-%m-%d %H:%M:%S') rescue nil
                 if start_at.nil? || (start_at.present? && last_printer.present? && start_at <= last_printer.start_at)
                   jump = true
                 else
                   print_mode = row[2].split('PrintMode:').last
                   job_name = row[2].split(' Width:').first.split('Print File: ').last.strip
-                  PRINTER_LOGGER.info "job_name = #{job_name}"
+                  #PRINTER_LOGGER.info "job_name = #{job_name}"
                   if job_name.include?("#LI_")
                     resource_type = "LineItem"
                     resource_id = job_name.split("#LI_").first
@@ -37,7 +37,7 @@ class ImportFlora < ApplicationJob
                     resource_id = nil
                     resource = nil
                   end
-                  PRINTER_LOGGER.info "resource = #{resource.inspect}"
+                  #PRINTER_LOGGER.info "resource = #{resource.inspect}"
                   details = {
                     resource_type: resource_type,
                     resource_id: resource_id,
@@ -52,10 +52,10 @@ class ImportFlora < ApplicationJob
                 height = row[0].split('H:').last.split(' ').first
                 details[:extra_data] = "Base: #{width}, Altezza: #{height}, Modalità di stampa: #{print_mode}"
               elsif !jump && row[1] == '[Prompt:11]'
-                PRINTER_LOGGER.info "prompt 11"
+                #PRINTER_LOGGER.info "prompt 11"
                 end_at = Time.strptime("#{Date.today} #{row[0]}", '%Y-%m-%d %H:%M:%S') rescue nil
                 details[:print_time] = end_at - details[:start_at]
-                PRINTER_LOGGER.info "details = #{details}"
+                #PRINTER_LOGGER.info "details = #{details}"
                 printer = Printer.find_by(details)
                 if printer.nil?
                   printer = Printer.create!(details)
@@ -63,7 +63,7 @@ class ImportFlora < ApplicationJob
                 end
               end
             rescue Exception => e
-              PRINTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
+              #PRINTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
               log_details = {kind: 'error', action: "Import #{customer_machine}", description: e.message}
               if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
                 Log.create!(log_details)

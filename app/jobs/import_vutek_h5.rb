@@ -13,14 +13,14 @@ class ImportVutekH5 < ApplicationJob
         begin
           if File.exist?(time_csv) && File.exist?(ink_csv)
             last_printer = customer_machine.printers.order(job_id: :desc).first
-            PRINTER_LOGGER.info("last_printer = #{last_printer&.job_id}")
+            #PRINTER_LOGGER.info("last_printer = #{last_printer&.job_id}")
             CSV.foreach(time_csv, headers: true, col_sep: ",", skip_blanks: true, converters: :numeric) do |row|
               begin
                 if row[4] == "Completed"
                   next if row[1] <= Time.now.beginning_of_day.to_i
                   break if last_printer.present? && row[0] <= last_printer.job_id.to_i
                   job_name = row[2]
-                  PRINTER_LOGGER.info "job_name = #{job_name}"
+                  #PRINTER_LOGGER.info "job_name = #{job_name}"
                   if job_name.include?("#LI_")
                     resource_type = "LineItem"
                     resource_id = job_name.split("#LI_").first
@@ -47,7 +47,7 @@ class ImportVutekH5 < ApplicationJob
                     material: nil,
                     extra_data: row[4]
                   }
-                  PRINTER_LOGGER.info "details = #{details}"
+                  #PRINTER_LOGGER.info "details = #{details}"
                   ink_format =/:\d+.\d*/
                   csv_ink = CSV.foreach(ink_csv, col_sep: ",", skip_blanks: true, converters: :numeric)
                   csv_ink.drop(1).each do |ink_row|
@@ -61,7 +61,7 @@ class ImportVutekH5 < ApplicationJob
                       details[:ink] = ink
                     end
                   end
-                  PRINTER_LOGGER.info "details = #{details}"
+                  #PRINTER_LOGGER.info "details = #{details}"
                   printer = Printer.find_by(details)
                   if printer.nil?
                     printer = Printer.create!(details)
@@ -69,7 +69,7 @@ class ImportVutekH5 < ApplicationJob
                   end
                 end
               rescue Exception => e
-                PRINTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
+                #PRINTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
                 log_details = {kind: 'error', action: "Import #{customer_machine}", description: e.message}
                 if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
                   Log.create!(log_details)
@@ -80,7 +80,7 @@ class ImportVutekH5 < ApplicationJob
             raise "File CSV non trovato"
           end
         rescue Exception => e
-          PRINTER_LOGGER.info("errore = #{e.message}")
+          #PRINTER_LOGGER.info("errore = #{e.message}")
           log_details = { kind: 'error', action: "Import H5", description: "#{e.message}" }
           if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
             Log.create!(log_details)

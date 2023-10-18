@@ -12,14 +12,14 @@ class ImportVutekUbuntu < ApplicationJob
         begin
           if File.exist?(csv)
             last_printer = customer_machine.printers.order(job_id: :desc).first
-            PRINTER_LOGGER.info("last_printer = #{last_printer&.start_at}")
+            #PRINTER_LOGGER.info("last_printer = #{last_printer&.start_at}")
             CSV.foreach(csv, headers: true, col_sep: ",", skip_blanks: true, converters: :numeric) do |row|
               begin
-                PRINTER_LOGGER.info "row['uid'] #{row['uid']}"
+                #PRINTER_LOGGER.info "row['uid'] #{row['uid']}"
                 break if last_printer.present? && row['uid'] <= last_printer.job_id.to_i
                 next if convert_to_time(row['PrintStart']).nil? || convert_to_time(row['PrintStart']) <= Time.now.beginning_of_day
                 job_name = row['Name']
-                PRINTER_LOGGER.info("job_name = #{job_name}")
+                #PRINTER_LOGGER.info("job_name = #{job_name}")
                 if job_name.include?("#LI_")
                   resource_type = "LineItem"
                   resource_id = job_name.split("#LI_").first
@@ -55,14 +55,14 @@ class ImportVutekUbuntu < ApplicationJob
                   ink: ink,
                   job_id: row['uid']
                 }
-                PRINTER_LOGGER.info "details = #{details}"
+                #PRINTER_LOGGER.info "details = #{details}"
                 printer = Printer.find_by(details)
                 if printer.nil?
                   printer = Printer.create!(details)
                   Log.create!(kind: 'success', action: "Import #{customer_machine}", description: "Caricati dati di stampa per #{job_name}")
                 end
               rescue Exception => e
-                PRINTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
+                #PRINTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
                 log_details = {kind: 'error', action: "Import #{customer_machine}", description: e.message}
                 if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
                   Log.create!(log_details)
@@ -73,7 +73,7 @@ class ImportVutekUbuntu < ApplicationJob
             raise "File CSV non trovato"
           end
         rescue Exception => e
-          PRINTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
+          #PRINTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
           log_details = {kind: 'error', action: "Import #{customer_machine}", description: e.message}
           if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
             Log.create!(log_details)

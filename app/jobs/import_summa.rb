@@ -16,7 +16,7 @@ class ImportSumma < ApplicationJob
               ends_at = convert_to_time(row['End time'] + " " + row['Date'])
               next if last_cutter.present? && last_cutter.starts_at > starts_at
               job_name = row['Job name']
-              CUTTER_LOGGER.info "job_name = #{job_name}"
+              #CUTTER_LOGGER.info "job_name = #{job_name}"
               if job_name.include?("#LI_")
                 resource_type = "LineItem"
                 resource_id = job_name.split("#LI_").first
@@ -44,14 +44,14 @@ class ImportSumma < ApplicationJob
                 starts_at: starts_at,
                 ends_at: ends_at
               }
-              CUTTER_LOGGER.info "details = #{details}"
+              #CUTTER_LOGGER.info "details = #{details}"
               cutter = Cutter.find_by(details)
               if cutter.nil?
                 cutter = Cutter.create!(details)
                 Log.create!(kind: 'success', action: "Import #{customer_machine}", description: "Caricati dati di taglio per riga ordine #{cutter.resource}")
               end
             rescue Exception => e
-              CUTTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
+              #CUTTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
               log_details = {kind: 'error', action: "Import #{customer_machine}", description: e.message}
               if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
                 Log.create!(log_details)

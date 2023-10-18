@@ -18,7 +18,7 @@ class ImportVutekWindows < ApplicationJob
           begin
             if File.exist?(file)
               last_printer = customer_machine.printers.last
-              PRINTER_LOGGER.info("last_printer = #{last_printer&.start_at}")
+              #PRINTER_LOGGER.info("last_printer = #{last_printer&.start_at}")
               if file.split('.').last == 'csv'
                 value = ","
               elsif file.split('.').last == 'log'
@@ -84,14 +84,14 @@ class ImportVutekWindows < ApplicationJob
                     extra_data: status,
                     ink: ink
                   }
-                  PRINTER_LOGGER.info "details = #{details}"
+                  #PRINTER_LOGGER.info "details = #{details}"
                   printer = Printer.find_by(details)
                   if printer.nil?
                     printer = Printer.create!(details)
                     Log.create!(kind: 'success', action: "Import #{customer_machine}", description: "Caricati dati di stampa per #{job_name}")
                   end
                 rescue Exception => e
-                  PRINTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
+                  #PRINTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
                   log_details = {kind: 'error', action: "Import #{customer_machine}", description: e.message}
                   if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
                     Log.create!(log_details)
@@ -102,7 +102,7 @@ class ImportVutekWindows < ApplicationJob
               raise "File CSV non trovato"
             end
           rescue Exception => e
-            PRINTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
+            #PRINTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
             log_details = {kind: 'error', action: "Import #{customer_machine}", description: e.message}
             if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
               Log.create!(log_details)
