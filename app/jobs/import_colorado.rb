@@ -31,8 +31,8 @@ class ImportColorado < ApplicationJob
             last_printer = customer_machine.printers.order(job_id: :desc).first
             CSV.foreach(csv, headers: true, col_sep: ";", skip_blanks: true, encoding: 'windows-1252:utf-8', converters: :numeric) do |row|
               begin
-                next if row[14] == 'Deleted'
-                next if last_printer.present? && row[2] <= last_printer.job_id.to_i
+                next if row['result'] == 'Deleted'
+                next if last_printer.present? && row['jobid'] <= last_printer.job_id.to_i && start_at <= last_printer.start_at
                 file_name = row[4]
                 if file_name.include?('#LI')
                   resource_type = "LineItem"
