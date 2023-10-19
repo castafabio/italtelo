@@ -16,14 +16,16 @@ class ImportColorado < ApplicationJob
           # faraday.response :logger, #PRINTER_LOGGER, bodies: true
           faraday.adapter Faraday.default_adapter
         end
-        res = conn.get("/accounting/#{customer_machine.serial_number}#{Date.today.strftime("%Y%m%d")}.acl") do |req|
+        # res = conn.get("/accounting/#{customer_machine.serial_number}#{Date.today.strftime("%Y%m%d")}.acl") do |req|
+        res = conn.get("/accounting/#{customer_machine.serial_number}*.acl") do |req|
           req.headers['charset'] = 'UTF-8'
         end
         #PRINTER_LOGGER.debug "res = #{res.inspect}"
         now = Time.now.to_i
         dest_path = File.join(Rails.root, 'tmp/csv')
         FileUtils.mkdir_p dest_path
-        csv = "#{dest_path}/#{now}.csv"
+        # csv = "#{dest_path}/#{now}.csv"
+        csv = "#{dest_path}/*.csv"
         f = File.open(csv, 'wb') { |fp| fp.write(res.body) }
         sleep 5
         begin
@@ -33,7 +35,7 @@ class ImportColorado < ApplicationJob
               begin
                 start_at = CustomerMachine.convert_to_time("#{row['startdate']} #{row['starttime']}")
                 next if row['result'] == 'Deleted'
-                next if last_printer.present? && row['jobid'] <= last_printer.job_id.to_i && start_at <= last_printer.start_at
+                # next if last_printer.present? && row['jobid'] <= last_printer.job_id.to_i && start_at <= last_printer.start_at
                 headers = row.headers
                 ink = ""
                 headers.each do |header|
