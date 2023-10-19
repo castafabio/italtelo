@@ -42,32 +42,20 @@ class ImportColorado < ApplicationJob
                   end
                 end
                 file_name = row['jobname']
-                if file_name.include?('#LI')
+                if file_name.include?("#LI_")
                   resource_type = "LineItem"
-                  resource_id = file_name.split('#LI').first.to_i
+                  resource_id = file_name.split("#LI_").first
                   resource = LineItem.find_by(id: resource_id)
-                elsif file_name.include?('#AJ')
+                elsif file_name.include?("#AJ_")
                   resource_type = "AggregatedJob"
-                  resource_id = file_name.split('#AJ').first.to_i
+                  resource_id = file_name.split("#AJ_").first
                   resource = AggregatedJob.find_by(id: resource_id)
-                elsif AggregatedJob.brand_new.where("file_name LIKE :file_name", file_name: file_name).where("created_at >= :today", today: Date.today - 1.month).size > 0
-                  resource_type = "AggregatedJob"
-                  resource = AggregatedJob.brand_new.where("file_name LIKE :file_name", file_name: file_name).where("created_at >= :today", today: Date.today - 1.month).last
-                  resource_id = resource.id
                 else
                   resource_type = nil
                   resource_id = nil
                   resource = nil
                 end
-                headers = row.headers
-                ink = ""
-                headers.each do |header|
-                  if header.include?('inkcolor')
-                    ink += "#{header.gsub('inkcolor', '')}: #{row[header].to_f / 1000.0};"
-                  end
-                end
                 print_time = CustomerMachine.hour_to_seconds(row[8]) + CustomerMachine.hour_to_seconds(row[9])
-                end_at =  start_at + print_time
                 details = {
                   resource_id: resource_id,
                   resource_type: resource_type,
