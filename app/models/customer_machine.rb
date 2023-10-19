@@ -29,6 +29,14 @@ class CustomerMachine < ApplicationRecord
     print_time
   end
 
+  def self.convert_to_time(date)
+    begin
+      Time.zone.parse(date)
+    rescue ArgumentError
+      nil
+    end
+  end
+
   def self.to_id(machine_switch_name)
     CustomerMachine.find_by(machine_switch_name: machine_switch_name).id
   end
