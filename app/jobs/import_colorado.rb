@@ -25,9 +25,10 @@ class ImportColorado < ApplicationJob
         # f = File.open(csv, 'wb') { |fp| fp.write(res.body) }
         # sleep 5
         files = "/srv/vhosts/soltechws/production/public/Colorado/*.CSV"
-        files.each do |csv|
+        Dir.glob(files).each do |csv|
           begin
             if File.exist?(csv)
+              start_at = CustomerMachine.convert_to_time("#{row['startdate']} #{row['starttime']}")
               last_printer = customer_machine.printers.order(job_id: :desc).first
               CSV.foreach(csv, headers: true, col_sep: ";", skip_blanks: true, encoding: 'windows-1252:utf-8', converters: :numeric) do |row|
                 begin
