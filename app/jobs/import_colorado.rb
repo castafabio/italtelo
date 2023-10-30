@@ -29,7 +29,6 @@ class ImportColorado < ApplicationJob
           GESTIONALE_LOGGER.info(" csv ===  #{csv.inspect}")
           begin
             if File.exist?(csv)
-              start_at = CustomerMachine.convert_to_time("#{row['startdate']} #{row['starttime']}")
               last_printer = customer_machine.printers.order(job_id: :desc).first
               CSV.foreach(csv, headers: true, col_sep: ";", skip_blanks: true, encoding: 'windows-1252:utf-8', converters: :numeric) do |row|
                 begin
