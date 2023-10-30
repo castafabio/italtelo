@@ -18,7 +18,7 @@ class ImportFlora < ApplicationJob
               if row[1] == '[Prompt:3]'
                 #PRINTER_LOGGER.info "prompt 3"
                 start_at = Time.strptime("#{Date.today} #{row[0]}", '%Y-%m-%d %H:%M:%S') rescue nil
-                if start_at.nil? || (start_at.present? && last_printer.present? && start_at <= last_printer.start_at)
+                if start_at.nil? || (start_at.present? && last_printer.present? && start_at <= last_printer.starts_at)
                   jump = true
                 else
                   print_mode = row[2].split('PrintMode:').last
@@ -43,7 +43,7 @@ class ImportFlora < ApplicationJob
                     resource_id: resource_id,
                     file_name: job_name,
                     customer_machine_id: customer_machine.id,
-                    start_at: start_at
+                    starts_at: start_at
                   }
                   jump = false
                 end

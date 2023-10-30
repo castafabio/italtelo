@@ -31,7 +31,7 @@ class ImportColorado < ApplicationJob
             begin
               start_at = CustomerMachine.convert_to_time("#{row['startdate']} #{row['starttime']}")
               next if row['result'] == 'Deleted'
-              next if last_printer.present? && row['jobid'] <= last_printer.job_id.to_i && start_at <= last_printer.start_at
+              next if last_printer.present? && row['jobid'] <= last_printer.job_id.to_i && start_at <= last_printer.starts_at
               headers = row.headers
               ink = ""
               headers.each do |header|

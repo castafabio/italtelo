@@ -29,7 +29,7 @@ class ImportVutekWindows < ApplicationJob
                   # se è un file .log prendo certi headers, altrimenti prendo quelli del .csv
                   if kind == 'log'
                     next if convert_to_time(row["Start Time"]) <= Time.now.beginning_of_day
-                    next if last_printer.present? && convert_to_time(row["Start Time"]) <= last_printer.start_at
+                    next if last_printer.present? && convert_to_time(row["Start Time"]) <= last_printer.starts_at
                     job_name = row["Job Name"]
                     print_time = CustomerMachine.hour_to_seconds(row["Print Time (h:m:s)"])
                     start_at = convert_to_time(row["Start Time"])
@@ -77,7 +77,7 @@ class ImportVutekWindows < ApplicationJob
                     file_name: job_name,
                     customer_machine_id: customer_machine.id,
                     job_id: job_id,
-                    start_at: start_at,
+                    starts_at: start_at,
                     print_time: print_time,
                     copies: copies,
                     material: material,
