@@ -7,8 +7,7 @@ class ImportFlora < ApplicationJob
     start = Time.now
     CustomerMachine.where(import_job: 'flora').each do |customer_machine|
       if customer_machine.present? && customer_machine.is_mounted?
-        # csv = "#{customer_machine.path}/#{Date.today.strftime("%Y-%m-%d")}.csv"
-        csv = "/home/soltech/Scrivania/test_flora.csv"
+        csv = "#{customer_machine.path}/#{Date.today.strftime("%Y-%m-%d")}.csv"
         if File.exist?(csv)
           last_printer = customer_machine.printers.last
           #PRINTER_LOGGER.info("last_printer = #{last_printer&.start_at}")
