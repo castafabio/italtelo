@@ -65,7 +65,6 @@ class ImportVutekH5 < ApplicationJob
                   printer = Printer.find_by(details)
                   if printer.nil?
                     printer = Printer.create!(details)
-                    Log.create!(kind: 'success', action: "Import H5", description: "Caricati dati di stampa per #{job_name}")
                   end
                 end
               rescue Exception => e

@@ -17,9 +17,9 @@ class ImportEpson < ApplicationJob
             resource_type = "AggregatedJob"
             resource_id = name.split("#AJ_").first
             resource = AggregatedJob.find_by(id: resource_id)
-          elsif AggregatedJob.brand_new.where("file_name LIKE :file_name", file_name: file_name).where("created_at >= :today", today: Date.today - 1.month).size > 0
+          elsif AggregatedJob.brand_new.where("file_name LIKE :file_name", file_name: name).where("created_at >= :today", today: Date.today - 1.month).size > 0
             resource_type = "AggregatedJob"
-            resource = AggregatedJob.brand_new.where("file_name LIKE :file_name", file_name: file_name).where("created_at >= :today", today: Date.today - 1.month).last
+            resource = AggregatedJob.brand_new.where("file_name LIKE :file_name", file_name: name).where("created_at >= :today", today: Date.today - 1.month).last
             resource_id = resource.id
           else
             resource_type = nil
@@ -31,8 +31,8 @@ class ImportEpson < ApplicationJob
             resource_type:  resource_type,
             resource_id:    resource_id,
             file_name:      name,
-            starts_at:       epson.PrintStartTime,
-            ends_at:         epson.PrintEndTime,
+            starts_at:      epson.PrintStartTime,
+            ends_at:        epson.PrintEndTime,
             print_time:     epson.PrintEndTime - epson.PrintStartTime,
             copies:         epson.PageNumber,
             job_id:         epson.JobId,
@@ -44,7 +44,6 @@ class ImportEpson < ApplicationJob
           if printer.nil?
             printer = Printer.create!(details)
             epson.update!(imported: true)
-            Log.create!(kind: 'success', action: "Import #{customer_machine.name}", description: "Caricati dati di stampa per #{name}")
           end
         rescue Exception => e
           #PRINTER_LOGGER.info "Errore importazione dati #{customer_machine.name}: #{e.message}"

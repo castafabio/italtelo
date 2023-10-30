@@ -47,7 +47,6 @@ class ImportProtek < ApplicationJob
                 cutter = Cutter.find_by(details)
                 if cutter.nil?
                   cutter = Cutter.create!(details)
-                  Log.create!(kind: 'success', action: "Import #{customer_machine}", description: "Caricati dati di taglio per riga ordine #{cutter.resource}")
                 end
               end
             rescue Exception => e

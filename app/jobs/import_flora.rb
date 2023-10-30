@@ -59,7 +59,6 @@ class ImportFlora < ApplicationJob
                 printer = Printer.find_by(details)
                 if printer.nil?
                   printer = Printer.create!(details)
-                  Log.create!(kind: 'success', action: "Import #{customer_machine}", description: "Caricati dati di stampa per riga ordine #{printer.resource}")
                 end
               end
             rescue Exception => e
