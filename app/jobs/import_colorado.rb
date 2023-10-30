@@ -26,6 +26,7 @@ class ImportColorado < ApplicationJob
         # sleep 5
         files = "/srv/vhosts/soltechws/production/public/Colorado/*.CSV"
         Dir.glob(files).each do |csv|
+          GESTIONALE_LOGGER.info(" csv ===  #{csv.inspect}")
           begin
             if File.exist?(csv)
               start_at = CustomerMachine.convert_to_time("#{row['startdate']} #{row['starttime']}")
@@ -34,7 +35,7 @@ class ImportColorado < ApplicationJob
                 begin
                   start_at = CustomerMachine.convert_to_time("#{row['startdate']} #{row['starttime']}")
                   next if row['result'] == 'Deleted'
-                  next if last_printer.present? && row['jobid'] <= last_printer.job_id.to_i && start_at <= last_printer.start_at
+                  # next if last_printer.present? && row['jobid'] <= last_printer.job_id.to_i && start_at <= last_printer.start_at
                   headers = row.headers
                   ink = ""
                   headers.each do |header|
