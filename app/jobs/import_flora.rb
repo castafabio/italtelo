@@ -3,10 +3,12 @@ class ImportFlora < ApplicationJob
   sidekiq_options retry: 1, backtrace: 10
 
   def perform
+    require 'csv'
     start = Time.now
     CustomerMachine.where(import_job: 'flora').each do |customer_machine|
       if customer_machine.present? && customer_machine.is_mounted?
-        csv = "#{customer_machine.path}/#{Date.today.strftime("%Y-%m-%d")}.csv"
+        # csv = "#{customer_machine.path}/#{Date.today.strftime("%Y-%m-%d")}.csv"
+        csv = "/home/soltech/Scrivania/test_flora.csv"
         if File.exist?(csv)
           last_printer = customer_machine.printers.last
           #PRINTER_LOGGER.info("last_printer = #{last_printer&.start_at}")
@@ -54,7 +56,7 @@ class ImportFlora < ApplicationJob
               elsif !jump && row[1] == '[Prompt:11]'
                 #PRINTER_LOGGER.info "prompt 11"
                 end_at = Time.strptime("#{Date.today} #{row[0]}", '%Y-%m-%d %H:%M:%S') rescue nil
-                details[:print_time] = end_at - details[:start_at]
+                details[:print_time] = end_at - details[:starts_at]
                 #PRINTER_LOGGER.info "details = #{details}"
                 printer = Printer.find_by(details)
                 if printer.nil?
