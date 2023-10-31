@@ -40,7 +40,7 @@ class ImportVutekH5 < ApplicationJob
                     resource_id: resource_id,
                     file_name: job_name,
                     customer_machine_id: customer_machine.id,
-                    start_at: DateTime.strptime(row[1].to_s,'%s'),
+                    starts_at: DateTime.strptime(row[1].to_s,'%s'),
                     print_time: print_time,
                     job_id: row[0],
                     copies: nil,

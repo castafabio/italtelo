@@ -48,7 +48,7 @@ class ImportVutekUbuntu < ApplicationJob
                   resource_id: resource_id,
                   file_name: job_name,
                   customer_machine_id: customer_machine.id,
-                  start_at: convert_to_time(row['PrintStart']),
+                  starts_at: convert_to_time(row['PrintStart']),
                   print_time: convert_to_time(row['PrintFinish']) - convert_to_time(row['PrintStart']),
                   copies: nil,
                   material: nil,
