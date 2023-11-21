@@ -19,7 +19,7 @@ tr style="#{line_item.aggregated_job.present? ? 'background-color: #d2ecf1' : ''
             - if line_item.send_at.nil?
               =< link_to [:delete_attachment, line_item, kind: 'print'], class: :'btn btn-sm btn-danger', method: :delete, title: t('obj.delete', obj: LineItem.human_attribute_name(:print_file).downcase), data: { confirm: t('confirm.delete_file'), spinner: true }
                 = fa_icon('trash')
-              =< link_to [:send_to_hotfolder, line_item, kind: 'print'], class: :'btn btn-sm btn-warning', data: { remote: true }, title: t('obj.send', obj: LineItem.human_attribute_name(:print_file).downcase)
+              =< link_to [:send_to_hotfolder, line_item, kind: 'print', is_efkal: false], class: :'btn btn-sm btn-warning', data: { remote: true }, title: t('obj.send', obj: LineItem.human_attribute_name(:print_file).downcase)
                 = fa_icon('paper-plane')
 
           - else
@@ -34,19 +34,24 @@ tr style="#{line_item.aggregated_job.present? ? 'background-color: #d2ecf1' : ''
     - if line_item.aggregated_job.nil?
       - if line_item.need_cutting
         - if line_item.cut_customer_machine.present?
-          - if line_item.cut_file.attached?
-            = link_to rails_blob_path(line_item&.cut_file, disposition: 'attachment', kind: 'cut'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Cut_file').downcase}")
-              = fa_icon('download')
-
+          - if line_item.is_efkal?
             - if line_item.send_at.nil?
-              =< link_to [:delete_attachment, line_item, kind: 'cut'], class: :'btn btn-sm btn-danger', method: :delete, title: t('obj.delete', obj: LineItem.human_attribute_name(:cut_file).downcase), data: { confirm: t('confirm.delete_file'), spinner: true }
-                = fa_icon('trash')
-              =< link_to [:send_to_hotfolder, line_item, kind: 'cut'], class: :'btn btn-sm btn-warning', data: { remote: true }, title: t('obj.send', obj: LineItem.human_attribute_name(:cut_file).downcase)
+              =< link_to [:send_to_hotfolder, line_item, kind: 'cut', is_efkal: true], class: :'btn btn-sm btn-success', data: { remote: true }, title: t('obj.send', obj: LineItem.human_attribute_name(:cut_file).downcase)
                 = fa_icon('paper-plane')
-
           - else
-            = link_to [:upload_file, line_item, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Cut_file').downcase}")
-              = fa_icon('upload')
+            - if line_item.cut_file.attached?
+              = link_to rails_blob_path(line_item&.cut_file, disposition: 'attachment', kind: 'cut'), class: :'btn btn-sm btn-info', title: t('obj.download', obj: "#{t('strings.Cut_file').downcase}")
+                = fa_icon('download')
+
+              - if line_item.send_at.nil?
+                =< link_to [:delete_attachment, line_item, kind: 'cut'], class: :'btn btn-sm btn-danger', method: :delete, title: t('obj.delete', obj: LineItem.human_attribute_name(:cut_file).downcase), data: { confirm: t('confirm.delete_file'), spinner: true }
+                  = fa_icon('trash')
+                =< link_to [:send_to_hotfolder, line_item, kind: 'cut', is_efkal: false], class: :'btn btn-sm btn-warning', data: { remote: true }, title: t('obj.send', obj: LineItem.human_attribute_name(:cut_file).downcase)
+                  = fa_icon('paper-plane')
+
+            - else
+              = link_to [:upload_file, line_item, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{t('strings.Cut_file').downcase}")
+                = fa_icon('upload')
         - else
           = boolean line_item.cut_file.attached?
     - elsif line_item.aggregated_job.present? && line_item.aggregated_job.need_cutting

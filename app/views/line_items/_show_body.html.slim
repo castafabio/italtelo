@@ -42,7 +42,7 @@
                 = fa_icon('trash')
                 =< t('obj.delete', obj: LineItem.human_attribute_name(:print_file).downcase)
 
-            =< link_to [:send_to_hotfolder, @line_item], class: :'btn btn-sm btn-info', data: { remote: true }
+            =< link_to [:send_to_hotfolder, @line_item, is_efkal: false], class: :'btn btn-sm btn-info', data: { remote: true }
               =< fa_icon('paper-plane')
               =< t('obj.send', obj: "#{LineItem.human_attribute_name(:print_file).downcase}")
 
@@ -58,28 +58,34 @@
       h5.card-header = LineItem.human_attribute_name(:cut_file)
       .card-body
         - if @line_item.aggregated_job.nil?
-          - if @line_item.cut_file.attached?
-            - if @line_item.cut_number_of_files > 1
-              =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@line_item.cut_file, disposition: 'attachment'))
-            - elsif @line_item.cut_file.representable?
-              =< link_to(image_tag(@line_item.cut_file.representation(resize: "150x150>")), rails_blob_path(@line_item.cut_file, disposition: 'attachment'))
-            - else
-              = image_tag('spinner_preview.gif')
-            br
-            br
+          - if @line_item.is_efkal?
+            - if @line_item.send_at.nil?
+              =< link_to [:send_to_hotfolder, @line_item, is_efkal: true], class: :'btn btn-sm btn-info', data: { remote: true }
+                =< fa_icon('paper-plane')
+                =< t('obj.send', obj: "#{LineItem.human_attribute_name(:cut_file).downcase}")
+          - else
+            - if @line_item.cut_file.attached?
+              - if @line_item.cut_number_of_files > 1
+                =< link_to(image_tag(image_url("zip.png")), rails_blob_path(@line_item.cut_file, disposition: 'attachment'))
+              - elsif @line_item.cut_file.representable?
+                =< link_to(image_tag(@line_item.cut_file.representation(resize: "150x150>")), rails_blob_path(@line_item.cut_file, disposition: 'attachment'))
+              - else
+                = image_tag('spinner_preview.gif')
+              br
+              br
 
-            - if can?(:delete_attachment, @line_item)
-              =< link_to [:delete_attachment,  @line_item, kind: 'cut'],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
-                = fa_icon('trash')
-                =< t('obj.delete', obj: LineItem.human_attribute_name(:cut_file).downcase)
+              - if can?(:delete_attachment, @line_item)
+                =< link_to [:delete_attachment,  @line_item, kind: 'cut'],  class: :'btn btn-sm btn-danger', method: :delete, data: { confirm: t('confirm.delete_file') }
+                  = fa_icon('trash')
+                  =< t('obj.delete', obj: LineItem.human_attribute_name(:cut_file).downcase)
 
-            =< link_to [:send_to_hotfolder, @line_item], class: :'btn btn-sm btn-info', data: { remote: true }
-              =< fa_icon('paper-plane')
-              =< t('obj.send', obj: "#{LineItem.human_attribute_name(:cut_file).downcase}")
+              =< link_to [:send_to_hotfolder, @line_item, is_efkal: false], class: :'btn btn-sm btn-info', data: { remote: true }
+                =< fa_icon('paper-plane')
+                =< t('obj.send', obj: "#{LineItem.human_attribute_name(:cut_file).downcase}")
 
-          - elsif can?(:upload_files, @line_item)
-            =< link_to [:upload_file, @line_item, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{LineItem.human_attribute_name(:cut_file)}")
-                = fa_icon('upload')
+            - elsif can?(:upload_files, @line_item)
+              =< link_to [:upload_file, @line_item, kind: 'cut'], class: :'upload_file btn btn-sm btn-warning', data: { remote: true }, title: t('obj.upload', obj: "#{LineItem.human_attribute_name(:cut_file)}")
+                  = fa_icon('upload')
 
         - else
           = boolean @line_item.cut_file.attached?

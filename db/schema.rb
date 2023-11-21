@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_06_30_091424) do
+ActiveRecord::Schema.define(version: 2023_11_21_100909) do
 
   create_table "active_storage_attachments", charset: "utf8mb3", force: :cascade do |t|
     t.string "name", null: false
@@ -139,6 +139,8 @@ ActiveRecord::Schema.define(version: 2022_06_30_091424) do
     t.bigint "old_print_customer_machine_id"
     t.bigint "old_cut_customer_machine_id"
     t.bigint "italtelo_user_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.index ["aggregated_job_id"], name: "index_line_items_on_aggregated_job_id"
     t.index ["customer_machine_id"], name: "index_line_items_on_customer_machine_id"
     t.index ["cut_customer_machine_id"], name: "index_line_items_on_cut_customer_machine_id"

@@ -28,7 +28,18 @@ class ImportEfkal < ApplicationJob
           starts_at = row['utime']
           ends_at = start_at + duration.seconds
           extra_data = "Tempo totale cucitura: #{row['sewing_time_ms'].to_i/1000}s, Numero di punti: #{row['total_stitches']}, Stops: #{row['stops']}"
+          if LineItem.where.not(send_at: nil).where(cut_customer_machine_id: CustomerMachine.efkal.id).where("status NOT LIKE 'completed'").size > 0
+            resource_type = "LineItem"
+            resource_id = LineItem.where.not(send_at: nil).where(cut_customer_machine_id: CustomerMachine.efkal.id).where("status NOT LIKE 'completed'").first&.id
+            resource = LineItem.find_by(id: resource_id)
+          else
+            resource_type = nil
+            resource_id = nil
+            resource = nil
+          end
           details = {
+            resource_id: resource_id,
+            resource_type: resource_type,
             customer_machine_id: customer_machine.id,
             file_name: 'ND',
             starts_at: start_at,
@@ -38,7 +49,7 @@ class ImportEfkal < ApplicationJob
           printer = Cutter.find_by(details)
           if printer.nil?
             printer = Cutter.create!(details)
-            Log.create!(kind: 'success', action: "Import #{customer_machine}", description: "Caricati dati di stampa per #{job_name}")
+            Log.create!(kind: 'success', action: "Import #{customer_machine}", description: "Caricati dati di stampa per #{start_at}")
           end
         rescue Exception => e
           log_details = { kind: 'error', action: "Import #{customer_machine}", description: "#{e.message}" }
@@ -48,5 +59,9 @@ class ImportEfkal < ApplicationJob
         end
       end
     end
+  end
+
+  def to_resource(model)
+    model.constantize
   end
 end

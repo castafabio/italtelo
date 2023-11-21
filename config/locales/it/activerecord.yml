@@ -51,6 +51,7 @@ it:
         order_line_item: Riga riferimento ordine
         order_series: Serie riferimento ordine
         order_type: Tipo riferimento ordine
+        created_at: Data di importazione
       log:
         action: "Azione"
         description: "Descrizione"

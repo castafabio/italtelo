@@ -17,7 +17,7 @@ tr
     - if aggregated_job.status == 'brand_new'
       - if aggregated_job.editable?
         - if aggregated_job.need_cutting
-          = select_tag :cut_customer_machine_id, options_for_select(CustomerMachine.cutter_machines.collect {|p| [p.to_s, p.id]}, aggregated_job&.cut_customer_machine&.id), prompt: t('strings.Select_one'), class: :'inline_select customer_machine form-control', data: { id: aggregated_job.id, aggregated_job: true }
+          = select_tag :cut_customer_machine_id, options_for_select(CustomerMachine.cutter_machines.where.not(id: CustomerMachine.efkal.id).collect {|p| [p.to_s, p.id]}, aggregated_job&.cut_customer_machine&.id), prompt: t('strings.Select_one'), class: :'inline_select customer_machine form-control', data: { id: aggregated_job.id, aggregated_job: true }
       - else
         = aggregated_job&.cut_customer_machine
     - else

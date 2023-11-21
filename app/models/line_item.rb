@@ -21,11 +21,7 @@ class LineItem < ApplicationRecord
   validates :article_description, presence: true
 
   def self.aggregable
-    line_item_ids = []
-    LineItem.where(aggregated_job_id: nil).where("line_items.print_customer_machine_id IS NOT NULL OR line_items.cut_customer_machine_id IS NOT NULL").each do |line_item|
-      line_item_ids << line_item.id
-    end
-    LineItem.where(id: line_item_ids)
+    LineItem.where(aggregated_job_id: nil).where("line_items.print_customer_machine_id IS NOT NULL OR line_items.cut_customer_machine_id IS NOT NULL")
   end
 
   def self.need_printing(line_items)
@@ -56,6 +52,10 @@ class LineItem < ApplicationRecord
     ret
   end
 
+  def is_efkal?
+    self.cut_customer_machine.import_job == "efkal"
+  end
+
   def update_old_customer_machine!(kind)
     if kind == 'print'
       if self.print_customer_machine.present?
@@ -69,38 +69,40 @@ class LineItem < ApplicationRecord
   end
 
   def send_to_hotfolder!
-    if self.need_printing
-      raise "Percorso hotfolder per la macchina #{self.print_customer_machine} non configurato, chiamare l'assistenza." unless self.print_customer_machine.hotfolder_path.present?
-      print_path = "#{self.print_customer_machine.hotfolder_path}"
-    end
-    if self.need_cutting
-      raise "Percorso hotfolder per la macchina #{self.cut_customer_machine} non configurato, chiamare l'assistenza." unless self.cut_customer_machine.hotfolder_path.present?
-      cut_path = "#{self.cut_customer_machine.hotfolder_path}"
-    end
-    if self.need_printing && self.print_file.attached?
-      FileUtils.mkdir_p(print_path)
-      if self.print_number_of_files > 1
-        Zip::File.open(self.to_file_path('print')) do |zipfile|
-          zipfile.each do |file|
-            File.delete("#{print_path}/#{file.name}") if File.exist?("#{print_path}/#{file.name}")
-            zipfile.extract(file, "#{print_path}/#{file.name}")
-          end
-        end
-      else
-        FileUtils.cp self.to_file_path('print'), "#{print_path}/#{self.to_job_name('print')}"
+    if !self.is_efkal?
+      if self.need_printing
+        raise "Percorso hotfolder per la macchina #{self.print_customer_machine} non configurato, chiamare l'assistenza." unless self.print_customer_machine.hotfolder_path.present?
+        print_path = "#{self.print_customer_machine.hotfolder_path}"
       end
-    end
-    if self.need_cutting && self.cut_file.attached?
-      FileUtils.mkdir_p(cut_path)
-      if self.cut_number_of_files > 1
-        Zip::File.open(self.to_file_path('cut')) do |zipfile|
-          zipfile.each do |file|
-            File.delete("#{cut_path}/#{file.name}") if File.exist?("#{cut_path}/#{file.name}")
-            zipfile.extract(file, "#{cut_path}/#{file.name}")
+      if self.need_cutting
+        raise "Percorso hotfolder per la macchina #{self.cut_customer_machine} non configurato, chiamare l'assistenza." unless self.cut_customer_machine.hotfolder_path.present?
+        cut_path = "#{self.cut_customer_machine.hotfolder_path}"
+      end
+      if self.need_printing && self.print_file.attached?
+        FileUtils.mkdir_p(print_path)
+        if self.print_number_of_files > 1
+          Zip::File.open(self.to_file_path('print')) do |zipfile|
+            zipfile.each do |file|
+              File.delete("#{print_path}/#{file.name}") if File.exist?("#{print_path}/#{file.name}")
+              zipfile.extract(file, "#{print_path}/#{file.name}")
+            end
           end
+        else
+          FileUtils.cp self.to_file_path('print'), "#{print_path}/#{self.to_job_name('print')}"
         end
-      else
-        FileUtils.cp self.to_file_path('cut'), "#{cut_path}/#{self.to_job_name('cut')}"
+      end
+      if self.need_cutting && self.cut_file.attached?
+        FileUtils.mkdir_p(cut_path)
+        if self.cut_number_of_files > 1
+          Zip::File.open(self.to_file_path('cut')) do |zipfile|
+            zipfile.each do |file|
+              File.delete("#{cut_path}/#{file.name}") if File.exist?("#{cut_path}/#{file.name}")
+              zipfile.extract(file, "#{cut_path}/#{file.name}")
+            end
+          end
+        else
+          FileUtils.cp self.to_file_path('cut'), "#{cut_path}/#{self.to_job_name('cut')}"
+        end
       end
     end
   end

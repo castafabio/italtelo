@@ -21,3 +21,9 @@ form
   td = ''
   td = ''
   td = ''
+  td
+    .row
+      .col-sm-5
+        = text_field_tag :from, params[:from], class: :'form-control fake_date_field', placeholder: "Da: gg/mm/aaaa"
+      .col-sm-5
+        = text_field_tag :to, params[:to], class: :'form-control fake_date_field', placeholder: "A: gg/mm/aaaa"

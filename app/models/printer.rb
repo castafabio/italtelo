@@ -4,6 +4,8 @@ class Printer < ApplicationRecord
 
   after_commit :send_to_gest, on: :create
 
+  before_validation :tidy_data
+
   validates :resource_id, presence: true, if: Proc.new {|p| p.resource_type.present? }
   validates :resource_type, inclusion: { in: PRINTER_MODELS }, if: Proc.new {|p| p.resource_id.present? }
   validates :customer_machine_id, inclusion: { in: Proc.new { CustomerMachine.ids } }
@@ -20,6 +22,12 @@ class Printer < ApplicationRecord
   end
 
   private
+
+  def tidy_data
+    if self.ends_at.nil?
+      self.ends_at = self.starts_at + self.print_time.to_i
+    end
+  end
 
   def send_to_gest
     UpdateItalteloTable.perform_later(self.id, 'printer') if self.resource.present?

@@ -8,6 +8,13 @@ body {
   background-color: black;
 }
 
+#spinner.modal {
+  background: rgba( 255, 255, 255, .8 )
+            url('../images/spinner.gif')
+            50% 50%
+            no-repeat;
+}
+
 #header {
   font-size: 20px;
   h1 {

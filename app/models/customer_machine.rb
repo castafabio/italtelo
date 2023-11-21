@@ -15,6 +15,10 @@ class CustomerMachine < ApplicationRecord
 
   validates :name, presence: true, uniqueness: true
 
+  def self.efkal
+    CustomerMachine.find_by(import_job: 'efkal')
+  end
+
   def self.hour_to_seconds(time)
     print_time = 0
     time.split(':').each_with_index do |time, index|

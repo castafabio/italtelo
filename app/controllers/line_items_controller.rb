@@ -6,22 +6,33 @@ class LineItemsController < ApplicationController
   skip_before_action :verify_authenticity_token, only: :upload_file
 
   def send_to_hotfolder
-    if request.patch?
-      begin
-        if params["line_item"]["italtelo_user_id"].present?
-          @line_item.send_to_hotfolder!
-          @line_item.update!(send_at: DateTime.now, italtelo_user_id: ItalteloUser.find(params["line_item"]["italtelo_user_id"].to_i).id)
-          flash[:notice] = I18n::t('obj.sent', obj: 'file')
-        else
-          raise "Bisogna selezionare un operatore."
+    begin
+      if @line_item.is_efkal? && params[:is_efkal] == 'true'
+        efkal_line_items = LineItem.where.not(send_at: nil).where(cut_customer_machine_id: CustomerMachine.efkal.id).where("status NOT LIKE 'completed'")
+         if efkal_line_items.size > 0
+          raise "Sono presenti delle righe ordine aventi come macchina #{CustomerMachine.efkal.to_s}, bisogna prima concludere la riga #{efkal_line_items.first.to_s}"
         end
-      rescue Exception => e
-        flash[:alert] = I18n::t('obj.not_sent_exception', obj: 'file', message: e.message)
-      ensure
-        render js: "location.reload();"
       end
-    else
-      @italtelo_users = ItalteloUser.all.ordered
+      if request.patch?
+        begin
+          if params["line_item"]["italtelo_user_id"].present?
+            @line_item.send_to_hotfolder!
+            @line_item.update!(send_at: DateTime.now, italtelo_user_id: ItalteloUser.find(params["line_item"]["italtelo_user_id"].to_i).id)
+            flash[:notice] = I18n::t('obj.sent', obj: 'file')
+          else
+            raise "Bisogna selezionare un operatore."
+          end
+        rescue Exception => e
+          flash[:alert] = I18n::t('obj.not_sent_exception', obj: 'file', message: e.message)
+        ensure
+          render js: "location.reload();"
+        end
+      else
+        @italtelo_users = ItalteloUser.all.ordered
+      end
+    rescue Exception => e
+      flash[:alert] = I18n::t('obj.not_sent_exception', obj: 'file', message: e.message)
+      render js: 'location.reload();'
     end
   end
 

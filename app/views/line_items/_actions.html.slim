@@ -8,24 +8,35 @@ button.btn.btn-sm.btn-info.dropdown-toggle type="button" data-toggle="dropdown"
   - if can? :aggregate, LineItem
     - if line_item.need_printing && line_item.need_cutting
       - if line_item.print_customer_machine && line_item.aggregated_job.nil? && line_item.print_file.attached?
-        =< link_to [:send_to_hotfolder, line_item], class: :'dropdown-item', data: { remote: true }
+        =< link_to [:send_to_hotfolder, line_item, is_efkal: false], class: :'dropdown-item', data: { remote: true }
           = fa_icon('paper-plane')
           =< t('strings.Send_to_hotfolder')
     - elsif line_item.need_printing
       - if line_item.print_customer_machine && line_item.aggregated_job.nil? && line_item.print_file.attached?
-        =< link_to [:send_to_hotfolder, line_item, kind: 'print'], class: :'dropdown-item', data: { remote: true }
+        =< link_to [:send_to_hotfolder, line_item, kind: 'print', is_efkal: false], class: :'dropdown-item', data: { remote: true }
           = fa_icon('paper-plane')
           =< t('strings.Send_to_hotfolder')
     - elsif line_item.need_cutting
-      - if line_item.cut_customer_machine && line_item.aggregated_job.nil? && line_item.cut_file.attached?
-        =< link_to [:send_to_hotfolder, line_item, kind: 'cut'], class: :'dropdown-item', data: { remote: true }
-          = fa_icon('paper-plane')
-          =< t('strings.Send_to_hotfolder')
+      - if line_item.cut_customer_machine && line_item.aggregated_job.nil?
+        - if line_item.is_efkal?
+          =< link_to [:send_to_hotfolder, line_item, kind: 'cut', is_efkal: true], class: :'dropdown-item', data: { remote: true }
+            = fa_icon('paper-plane')
+            =< t('strings.Send_to_hotfolder')
+        - else
+          - if line_item.cut_file.attached?
+            =< link_to [:send_to_hotfolder, line_item, kind: 'cut', is_efkal: false], class: :'dropdown-item', data: { remote: true }
+              = fa_icon('paper-plane')
+              =< t('strings.Send_to_hotfolder')
     - unless line_item.is_aggregated?
       - if line_item.send_at.nil?
-        =< link_to [:append_line_item, line_item], class: :'dropdown-item', remote: true
-          = fa_icon('link')
-          =< t('strings.Aggregate')
+        - show = true
+        - if line_item.cut_customer_machine.present? && line_item.is_efkal?
+          - show = false
+        - if show
+          =< link_to [:append_line_item, line_item], class: :'dropdown-item', remote: true
+            = fa_icon('link')
+            =< t('strings.Aggregate')
+
     - else
       =< link_to [line_item.aggregated_job], class: :'dropdown-item', data: {spinner: true}
         = fa_icon('search-plus')

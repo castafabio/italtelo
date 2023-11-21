@@ -130,6 +130,7 @@ class AggregatedJobsController < ApplicationController
   end
 
   def scheduler
+    params[:from] ||= (Date.today - 3.months).to_s
     @line_items = LineItem.unsend.aggregable
     @orders = @line_items.pluck(:order_code).uniq
     @customers = @line_items.pluck(:customer).uniq
@@ -139,6 +140,8 @@ class AggregatedJobsController < ApplicationController
     @line_items = @line_items.where(order_code: params[:order_code]) if params[:order_code].present?
     @line_items = @line_items.where(print_customer_machine_id: params[:print_customer_machine_id]) if params[:print_customer_machine_id].present?
     @line_items = @line_items.where(cut_customer_machine_id: params[:cut_customer_machine_id]) if params[:cut_customer_machine_id].present?
+    @line_items = @line_items.where("created_at >= ?", DateTime.parse(params[:from]).beginning_of_day) if params[:from].present?
+    @line_items = @line_items.where("created_at <= ?", DateTime.parse(params[:to]).beginning_of_day) if params[:to].present?
     @line_items = @line_items.where('article_code LIKE :article_code', article_code: "%#{params[:article_code]}%") if params[:article_code].present?
   end
 

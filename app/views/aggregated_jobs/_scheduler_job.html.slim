@@ -10,3 +10,4 @@ tr
   td = boolean line_item.print_file.attached? if line_item.need_printing
   td = boolean line_item.cut_file.attached? if line_item.need_cutting
   td = line_item.quantity
+  td = line_item.created_at.strftime("%d/%m/%Y")

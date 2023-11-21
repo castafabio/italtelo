@@ -283,9 +283,6 @@ window.tooltip = function() {
 }
 
 window.spinner = function() {
-  $(window).on("load",function(){
-    $("#spinner").hide();
-  });
   $('[data-spinner="true"]').on('click',function(){
     $("#spinner").show();
   });

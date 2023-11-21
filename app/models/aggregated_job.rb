@@ -138,7 +138,7 @@ class AggregatedJob < ApplicationRecord
   def appendable_line_item_list
     line_item_ids = []
     line_item = self.line_items.first
-    all_line_items = LineItem.unsend.where(aggregated_job_id: nil, print_customer_machine_id: line_item&.print_customer_machine&.id, cut_customer_machine_id: line_item&.cut_customer_machine&.id)
+    all_line_items = LineItem.unsend.where(aggregated_job_id: nil, print_customer_machine_id: line_item&.print_customer_machine&.id, cut_customer_machine_id: line_item&.cut_customer_machine&.id).where.not(cut_customer_machine_id: CustomerMachine.efkal.id)
     all_line_items.each do |line_item|
       if self.need_printing
         line_item_ids << line_item if (self.print_customer_machine_id == line_item&.print_customer_machine&.id)

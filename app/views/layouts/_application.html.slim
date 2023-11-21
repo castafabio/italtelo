@@ -9,6 +9,8 @@ html lang="#{I18n::locale}"
     #modal.modal.fade data-backdrop="static" data-keyboard="false"
 
     #spinner.modal
+      .text-center style="margin-top: 40%; background-color: #fcc133"
+        h3 = "L'apertura della schedulazione potrebbe richiedere qualche minuto."
 
     - if user_signed_in?
       #header.header
