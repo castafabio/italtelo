@@ -53,7 +53,7 @@ class LineItem < ApplicationRecord
   end
 
   def is_efkal?
-    self.cut_customer_machine.import_job == "efkal"
+    self.need_cutting && self.cut_customer_machine.import_job == "efkal"
   end
 
   def update_old_customer_machine!(kind)
