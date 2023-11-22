@@ -7,7 +7,7 @@ class LineItemsController < ApplicationController
 
   def send_to_hotfolder
     begin
-      if @line_item.is_efkal? && params[:is_efkal] == 'true'
+      if @line_item.need_cutting && @line_item.is_efkal? && params[:is_efkal] == 'true'
         efkal_line_items = LineItem.where.not(send_at: nil).where(cut_customer_machine_id: CustomerMachine.efkal.id).where("status NOT LIKE 'completed'")
          if efkal_line_items.size > 0
           raise "Sono presenti delle righe ordine aventi come macchina #{CustomerMachine.efkal.to_s}, bisogna prima concludere la riga #{efkal_line_items.first.to_s}"
