@@ -5,6 +5,7 @@ end
 
 every 5.minute do
   runner "ImportColorado.perform_later"
+  runner "ImportEfkal.perform_later"
   runner "ImportEpson.perform_later"
   runner "ImportFlora.perform_later"
   runner "ImportProtek.perform_later"

@@ -26,7 +26,7 @@ class ImportOrders < ApplicationJob
             if row['lce_deslavo'].downcase == "stampa"
               print_reference = row["lce_barcode"]
               print_customer_machine = CustomerMachine.find_by(bus240_machine_reference: row["lce_codcent"]).id
-            elsif row['lce_deslavo'].downcase == "taglio"
+            elsif ["taglio", "cucitura"].include?(row['lce_deslavo'].downcase)
               cut_reference = row["lce_barcode"]
               cut_customer_machine = CustomerMachine.find_by(bus240_machine_reference: row["lce_codcent"]).id
             end
