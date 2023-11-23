@@ -23,7 +23,7 @@ class ImportEfkal < ApplicationJob
       results = client.query(query)
       results.each do |row|
         begin
-          duration = row['stop_time'] + row['running_time']
+          duration = row['running_time']
           starts_at = row['utime']
           ends_at = starts_at + duration.seconds
           extra_data = "Tempo totale cucitura: #{row['sewing_time_ms'].to_i/1000}s, Numero di punti: #{row['total_stitches']}, Stops: #{row['stops']}"
