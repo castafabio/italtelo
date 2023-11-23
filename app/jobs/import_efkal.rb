@@ -20,15 +20,12 @@ class ImportEfkal < ApplicationJob
         INNER JOIN i4_production.sewinginfolog AS SL ON MS.MachineGUID = SL.MachineGUID
         WHERE SL.UpdateTime > timestamp(current_date);
       SQL
-      CUTTER_LOGGER.info("query == #{query.inspect}")
       results = client.query(query)
       results.each do |row|
-        CUTTER_LOGGER.info("row == #{row.inspect}")
         begin
           duration = row['stop_time'] + row['running_time']
           starts_at = row['utime']
-          ends_at = start_at + duration.seconds
-          CUTTER_LOGGER.info("ends_at == #{ends_at.inspect}")
+          ends_at = starts_at + duration.seconds
           extra_data = "Tempo totale cucitura: #{row['sewing_time_ms'].to_i/1000}s, Numero di punti: #{row['total_stitches']}, Stops: #{row['stops']}"
           if LineItem.where.not(send_at: nil).where(cut_customer_machine_id: CustomerMachine.efkal.id).where("status NOT LIKE 'completed'").size > 0
             resource_type = "LineItem"
@@ -44,20 +41,16 @@ class ImportEfkal < ApplicationJob
             resource_type: resource_type,
             customer_machine_id: customer_machine.id,
             file_name: 'ND',
-            starts_at: start_at,
+            starts_at: starts_at,
             cut_time: duration,
             ends_at: ends_at,
           }
-          CUTTER_LOGGER.info("details == #{details.inspect}")
           printer = Cutter.find_by(details)
-          CUTTER_LOGGER.info("printer == #{printer.inspect}")
           if printer.nil?
-            CUTTER_LOGGER.info("creoooo")
             printer = Cutter.create!(details)
             Log.create!(kind: 'success', action: "Import #{customer_machine}", description: "Caricati dati di stampa per #{start_at}")
           end
         rescue Exception => e
-          CUTTER_LOGGER.info("erroreeee")
           log_details = { kind: 'error', action: "Import #{customer_machine}", description: "#{e.message}" }
           if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
             Log.create!(log_details)
