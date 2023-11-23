@@ -36,13 +36,16 @@ class ImportEfkal < ApplicationJob
             resource_id = nil
             resource = nil
           end
+          CUTTER_LOGGER.info("duration == " + duration.inspect)
+          CUTTER_LOGGER.info("starts_at == " + starts_at.inspect)
+          CUTTER_LOGGER.info("ends_at == " + ends_at.inspect)
           details = {
             resource_id: resource_id,
             resource_type: resource_type,
             customer_machine_id: customer_machine.id,
             file_name: 'ND',
             starts_at: starts_at,
-            cut_time: duration,
+            cut_time: (duration.to_i / 1000).round,
             ends_at: ends_at,
           }
           printer = Cutter.find_by(details)
