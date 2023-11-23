@@ -4,7 +4,7 @@ class ImportEfkal < ApplicationJob
 
   def perform
     CustomerMachine.where(import_job: 'efkal').cutter_machines.each do |customer_machine|
-      return unless customer_machine.present? && customer_machine.is_mounted?
+      return unless customer_machine.present?
       client = Mysql2::Client.new(host: customer_machine.ip_address, username: customer_machine.username, password: customer_machine.psw, port: 3306, database: "statistic")
       query = <<-SQL
         SELECT
@@ -20,12 +20,15 @@ class ImportEfkal < ApplicationJob
         INNER JOIN i4_production.sewinginfolog AS SL ON MS.MachineGUID = SL.MachineGUID
         WHERE SL.utime > timestamp(current_date);
       SQL
+      CUTTER_LOGGER.info("query == #{query.inspect}")
       results = client.query(query)
       results.each do |row|
+        CUTTER_LOGGER.info("row == #{row.inspect}")
         begin
           duration = row['stop_time'] + row['running_time']
           starts_at = row['utime']
           ends_at = start_at + duration.seconds
+          CUTTER_LOGGER.info("ends_at == #{ends_at.inspect}")
           extra_data = "Tempo totale cucitura: #{row['sewing_time_ms'].to_i/1000}s, Numero di punti: #{row['total_stitches']}, Stops: #{row['stops']}"
           if LineItem.where.not(send_at: nil).where(cut_customer_machine_id: CustomerMachine.efkal.id).where("status NOT LIKE 'completed'").size > 0
             resource_type = "LineItem"
@@ -45,12 +48,16 @@ class ImportEfkal < ApplicationJob
             cut_time: duration,
             ends_at: ends_at,
           }
+          CUTTER_LOGGER.info("details == #{details.inspect}")
           printer = Cutter.find_by(details)
+          CUTTER_LOGGER.info("printer == #{printer.inspect}")
           if printer.nil?
+            CUTTER_LOGGER.info("creoooo")
             printer = Cutter.create!(details)
             Log.create!(kind: 'success', action: "Import #{customer_machine}", description: "Caricati dati di stampa per #{start_at}")
           end
         rescue Exception => e
+          CUTTER_LOGGER.info("erroreeee")
           log_details = { kind: 'error', action: "Import #{customer_machine}", description: "#{e.message}" }
           if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
             Log.create!(log_details)
@@ -58,9 +65,5 @@ class ImportEfkal < ApplicationJob
         end
       end
     end
-  end
-
-  def to_resource(model)
-    model.constantize
   end
 end
