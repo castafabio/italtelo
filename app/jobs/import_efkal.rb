@@ -18,7 +18,7 @@ class ImportEfkal < ApplicationJob
           SL.Stops AS stops
         FROM i4_production.machinestatus AS MS
         INNER JOIN i4_production.sewinginfolog AS SL ON MS.MachineGUID = SL.MachineGUID
-        WHERE SL.utime > timestamp(current_date);
+        WHERE SL.UpdateTime > timestamp(current_date);
       SQL
       CUTTER_LOGGER.info("query == #{query.inspect}")
       results = client.query(query)
