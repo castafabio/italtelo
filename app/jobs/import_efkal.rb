@@ -5,7 +5,7 @@ class ImportEfkal < ApplicationJob
   def perform
     CustomerMachine.where(import_job: 'efkal').cutter_machines.each do |customer_machine|
       return unless customer_machine.present?
-      client = Mysql2::Client.new(host: customer_machine.ip_address, username: customer_machine.username, password: customer_machine.psw, port: 3306, database: "statistic")
+      client = Mysql2::Client.new(host: customer_machine.ip_address, username: customer_machine.username, password: customer_machine.psw, port: 3306, database: "i4_production")
       query = <<-SQL
         SELECT
           MS.Pieces as pieces,
