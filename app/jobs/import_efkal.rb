@@ -23,7 +23,7 @@ class ImportEfkal < ApplicationJob
       results = client.query(query)
       results.each do |row|
         begin
-          duration = row['running_time']
+          duration = (row['running_time'].to_i / 1000).round
           starts_at = row['utime']
           ends_at = starts_at + duration.seconds
           extra_data = "Tempo totale cucitura: #{row['sewing_time_ms'].to_i/1000}s, Numero di punti: #{row['total_stitches']}, Stops: #{row['stops']}"
@@ -36,16 +36,13 @@ class ImportEfkal < ApplicationJob
             resource_id = nil
             resource = nil
           end
-          CUTTER_LOGGER.info("duration == " + duration.inspect)
-          CUTTER_LOGGER.info("starts_at == " + starts_at.inspect)
-          CUTTER_LOGGER.info("ends_at == " + ends_at.inspect)
           details = {
             resource_id: resource_id,
             resource_type: resource_type,
             customer_machine_id: customer_machine.id,
             file_name: 'ND',
             starts_at: DateTime.parse(starts_at.to_s),
-            cut_time: (duration.to_i / 1000).round,
+            cut_time: duration,
             ends_at: DateTime.parse(ends_at.to_s),
           }
           printer = Cutter.find_by(details)
