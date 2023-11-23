@@ -47,19 +47,15 @@ class ImportEfkal < ApplicationJob
           }
           printer = Cutter.find_by(details)
           if printer.nil?
-            CUTTER_LOGGER.info("creooo")
             printer = Cutter.create!(details)
-            CUTTER_LOGGER.info("creato")
-            Log.create!(kind: 'success', action: "Import #{customer_machine}", description: "Caricati dati di stampa per #{start_at}")
+            Log.create!(kind: 'success', action: "Import #{customer_machine}", description: "Caricati dati di stampa per #{starts_at}")
           end
         rescue Exception => e
-          CUTTER_LOGGER.info("erroreeeee == #{e.message.inspect}")
           log_details = { kind: 'error', action: "Import #{customer_machine}", description: "#{e.message}" }
           if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
             Log.create!(log_details)
           end
         end
-        CUTTER_LOGGER.info("***********************")
       end
     end
   end

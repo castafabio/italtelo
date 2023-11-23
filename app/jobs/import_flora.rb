@@ -64,7 +64,7 @@ class ImportFlora < ApplicationJob
               end
             rescue Exception => e
               #PRINTER_LOGGER.info "Errore importazione dati #{customer_machine}: #{e.message}"
-              log_details = {kind: 'error', action: "Import #{customer_machine}", description: e.message}
+              log_details = { kind: 'error', action: "Import #{customer_machine}", description: "#{e.message}" }
               if Log.where(log_details).where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day).size == 0
                 Log.create!(log_details)
               end
