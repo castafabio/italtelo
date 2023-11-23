@@ -44,9 +44,9 @@ class ImportEfkal < ApplicationJob
             resource_type: resource_type,
             customer_machine_id: customer_machine.id,
             file_name: 'ND',
-            starts_at: DateTime.parse(starts_at),
+            starts_at: DateTime.parse(starts_at.to_s),
             cut_time: (duration.to_i / 1000).round,
-            ends_at: DateTime.parse(ends_at),
+            ends_at: DateTime.parse(ends_at.to_s),
           }
           printer = Cutter.find_by(details)
           if printer.nil?
