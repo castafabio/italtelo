@@ -5,7 +5,6 @@ class ImportEfkal < ApplicationJob
   def perform
     CustomerMachine.where(import_job: 'efkal').cutter_machines.each do |customer_machine|
       return unless customer_machine.present? && customer_machine.is_mounted?
-      machine_serial_number = customer_machine.serial_number
       client = Mysql2::Client.new(host: customer_machine.ip_address, username: customer_machine.username, password: customer_machine.psw, port: 3306, database: "statistic")
       query = <<-SQL
         SELECT
@@ -19,7 +18,7 @@ class ImportEfkal < ApplicationJob
           SL.Stops AS stops
         FROM i4_production.machinestatus AS MS
         INNER JOIN i4_production.sewinginfolog AS SL ON MS.MachineGUID = SL.MachineGUID
-        WHERE MS.SerialNo = #{machine_serial_number} AND SL.utime > #{Date.today.beginning_of_day}
+        WHERE SL.utime > timestamp(current_date);
       SQL
       results = client.query(query)
       results.each do |row|
