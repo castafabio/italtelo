@@ -12,12 +12,17 @@ class ImportSumma < ApplicationJob
           details = {}
           CSV.foreach(csv, headers: true, col_sep: ";", skip_blanks: true) do |row|
             begin
-              starts_at = convert_to_time(row['Start time'] + " " + row['Date'])
-              ends_at = convert_to_time(row['End time'] + " " + row['Date'])
-              CUTTER_LOGGER.info "starts_at = #{starts_at.inspect}"
+              parsed_date = convert_to_time(row['Date'])
+              if parsed_date.nil?
+                split = row['Date'].split("/")
+                date = split[1] + "/" + split[0] + "/" + split[2]
+              else
+                date = row['Date']
+              end
+              starts_at = convert_to_time(row['Start time'] + " " + date)
+              ends_at = convert_to_time(row['End time'] + " " + date)
               next if last_cutter.present? && last_cutter.starts_at > starts_at
               job_name = row['Job name']
-              CUTTER_LOGGER.info "job_name = #{job_name}"
               if job_name.include?("#LI_")
                 resource_type = "LineItem"
                 resource_id = job_name.split("#LI_").first
@@ -45,7 +50,6 @@ class ImportSumma < ApplicationJob
                 starts_at: starts_at,
                 ends_at: ends_at
               }
-              CUTTER_LOGGER.info "details = #{details}"
               cutter = Cutter.find_by(details)
               if cutter.nil?
                 cutter = Cutter.create!(details)
