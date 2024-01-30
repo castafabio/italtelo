@@ -2,7 +2,6 @@ every 2.minute do
   runner "ImportOrders.perform_later"
 end
 
-
 every 5.minute do
   runner "ImportColorado.perform_later"
   runner "ImportEfkal.perform_later"
@@ -26,4 +25,5 @@ end
 
 every 1.day, at: ['2:00 am'] do
   runner "CheckItalteloUsers.perform_later"
+  runner "CleanUp.perform_later"
 end
